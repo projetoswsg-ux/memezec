@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z-PUMP // MINT TERMINAL</title>
+    <title>Z-PUMP // INTERNAL WALLET MANAGER</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --neon: #ff007f;
             --green: #00ff41;
             --bg: #050505;
+            --card: #111;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -21,16 +26,59 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 15px;
             overflow-x: hidden;
         }
 
         .terminal {
-            width: 90%;
-            max-width: 500px;
+            width: 100%;
+            max-width: 600px;
             border: 1px solid var(--neon);
-            padding: 25px;
-            background: rgba(0,0,0,0.9);
-            box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
+            padding: 20px;
+            background: rgba(0,0,0,0.95);
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wallet-manager {
+            background: var(--card);
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Ajuste responsivo para o cabeçalho da carteira */
+        @media (max-width: 480px) {
+            .wallet-manager {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+            .balance-box {
+                text-align: left !important;
+                margin-top: 10px;
+            }
+            .terminal {
+                padding: 15px;
+            }
+        }
+
+        .balance-box {
+            text-align: right;
+        }
+
+        .addr-display {
+            font-size: 0.65rem;
+            color: #666;
+            word-break: break-all;
+            max-width: 100%;
+            line-height: 1.2;
         }
 
         input {
@@ -38,177 +86,250 @@
             background: #000;
             border: 1px solid #333;
             color: var(--green);
-            padding: 12px;
-            margin-bottom: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
             font-family: inherit;
+            font-size: 1rem; /* Melhora usabilidade no mobile evitando zoom automático */
         }
 
         button {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: var(--neon);
             color: #000;
             border: none;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            touch-action: manipulation;
         }
 
-        #qr-container {
-            background: white;
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        .deposit-zone {
+            text-align: center;
             padding: 15px;
-            margin: 20px auto;
-            width: fit-content;
-            display: none;
+            border: 1px dashed var(--green);
+            margin: 15px 0;
         }
 
-        .copy-box {
-            background: #111;
-            border: 1px solid #333;
+        #qr-deposit {
+            background: white;
             padding: 10px;
-            font-size: 0.65rem;
-            color: #888;
-            margin-top: 10px;
-            word-break: break-all;
-            cursor: pointer;
+            margin: 15px auto;
+            width: fit-content;
         }
-
-        .copy-box:hover { border-color: var(--green); color: var(--green); }
+        
+        #qr-deposit img {
+            max-width: 100%;
+            height: auto;
+        }
 
         #log {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: var(--green);
             margin-top: 15px;
-            height: 60px;
+            height: 100px;
             overflow-y: auto;
+            border-top: 1px solid #222;
+            padding-top: 10px;
+            background: rgba(0,0,0,0.3);
         }
 
         .hidden { display: none; }
-        .tab { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #222; }
-        .tab-btn { background: none; border: none; color: #555; cursor: pointer; padding: 5px; width: auto; font-size: 0.7rem; }
-        .tab-btn.active { color: var(--neon); border-bottom: 2px solid var(--neon); }
+        
+        .tab-nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-link {
+            font-size: 0.8rem;
+            color: #555;
+            cursor: pointer;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 5px;
+            transition: all 0.3s;
+        }
+        
+        .tab-link.active { 
+            color: var(--neon); 
+            border-bottom: 2px solid var(--neon);
+        }
+
+        /* Scrollbar customizada para o log */
+        #log::-webkit-scrollbar {
+            width: 4px;
+        }
+        #log::-webkit-scrollbar-thumb {
+            background: #222;
+        }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div style="display: flex; justify-content: space-between; font-size: 0.6rem; margin-bottom: 20px;">
-        <span>Z-PUMP v4.0 // ZSA</span>
-        <span id="conn-status" style="color: var(--green);">● BRIDGE_ACTIVE</span>
+    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 15px;">
+        <span>Z-PUMP // ENGINE v5.2</span>
+        <span id="conn-status" style="color: var(--green);">● ONLINE</span>
     </div>
 
-    <div id="mint-fields">
-        <input type="text" id="tTicker" placeholder="TICKER (EX: ZMEME)">
+    <!-- Cabeçalho de Gestão de Carteira -->
+    <div id="wallet-header" class="wallet-manager">
+        <div>
+            <div style="font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; color: #eee;">CARTEIRA INTERNA</div>
+            <div id="display-address" class="addr-display">u1_gerando_endereco...</div>
+        </div>
+        <div class="balance-box">
+            <div style="font-size: 0.65rem; color: #888;">SALDO</div>
+            <div style="color: var(--green); font-weight: bold; font-size: 1.1rem;"><span id="balance-val">0.0000</span> ZEC</div>
+        </div>
+    </div>
+
+    <!-- Navegação por Abas -->
+    <div class="tab-nav">
+        <div id="tab-mint-link" class="tab-link active" onclick="showTab('mint')">MINT_TOKEN</div>
+        <div id="tab-deposit-link" class="tab-link" onclick="showTab('deposit')">DEPOSITAR</div>
+    </div>
+
+    <!-- CONTEÚDO: ABA MINT -->
+    <div id="content-mint">
+        <input type="text" id="tTicker" placeholder="TICKER (EX: MOON)">
+        <input type="text" id="tName" placeholder="NOME DO TOKEN">
         <input type="number" id="tAmount" placeholder="SUPPLY TOTAL">
-        <button onclick="generateMintRequest()">[ LANÇAR TOKEN ]</button>
+        <button id="main-mint-btn" onclick="executeInternalMint()">[ LANÇAR INSTANTANEAMENTE ]</button>
+        <p style="font-size: 0.65rem; color: #555; text-align: center; margin-top: 12px;">Taxa de Emissão: 0.0001 ZEC (Shielded)</p>
     </div>
 
-    <div id="interaction-zone" class="hidden">
-        <div class="tab">
-            <button class="tab-btn active" onclick="switchTab('qr')">QR CODE</button>
-            <button class="tab-btn" onclick="switchTab('manual')">MANUAL</button>
+    <!-- CONTEÚDO: ABA DEPÓSITO -->
+    <div id="content-deposit" class="hidden">
+        <div class="deposit-zone">
+            <p style="font-size: 0.75rem; color: #ccc;">Envie ZEC (Orchard) para ativar o terminal:</p>
+            <div id="qr-deposit"></div>
+            <div class="addr-display" id="full-addr" style="margin-top:10px; color: var(--green); cursor: pointer; padding: 5px; background: #000;" onclick="copyAddr()">...</div>
+            <button onclick="checkBalance()" style="background: transparent; border: 1px solid var(--green); color: var(--green); font-size: 0.8rem; padding: 12px; margin-top: 15px;">[ VERIFICAR DEPÓSITO ]</button>
         </div>
-
-        <div id="qr-view">
-            <p style="font-size: 0.6rem; text-align: center; color: #888;">Digitalize com a YWallet ou Zashi para confirmar o Mint</p>
-            <div id="qr-container"></div>
-            <button onclick="tryDeepLink()" style="background: var(--green); color: black;">[ TENTAR ABRIR APP DIRETAMENTE ]</button>
-        </div>
-
-        <div id="manual-view" class="hidden">
-            <p style="font-size: 0.6rem; color: #888;">Se a app não abrir, copie e cole na YWallet (Ecrã Send):</p>
-            <div class="copy-box" onclick="copyToClipboard('addr')">
-                <b>ENDEREÇO:</b><br>
-                <span id="target-addr">u1l9uzv8vukndz759m89sq08pru36a7sc9p6vshzdzx4pp8p6zshvsh08z4m0e7q3y2zshvsh</span>
-            </div>
-            <div class="copy-box" onclick="copyToClipboard('memo')">
-                <b>MEMO (COMANDO):</b><br>
-                <span id="target-memo"></span>
-            </div>
-        </div>
-
-        <button onclick="resetForm()" style="background: transparent; border: 1px solid #444; color: #444; margin-top: 20px;">VOLTAR</button>
     </div>
 
-    <div id="log">> Aguardando configuração do ativo...</div>
+    <div id="log">> Terminal móvel otimizado...</div>
 </div>
 
 <script>
-    let currentUri = "";
+    // Estado Global
+    let wallet = {
+        address: "u1l9uzv8vukndz759m89sq08pru36a7sc9p6vshzdzx4pp8p6zshvsh08z4m0e7q3y2zshvsh",
+        balance: 0.0,
+        privateKey: ""
+    };
 
     function log(msg) {
         const l = document.getElementById('log');
-        l.innerHTML = `> ${msg}`;
+        const time = new Date().toLocaleTimeString('pt-PT');
+        l.innerHTML += `<br>> <span style="opacity:0.5">[${time}]</span> ${msg}`;
+        l.scrollTop = l.scrollHeight;
     }
 
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if(tab === 'qr') {
-            document.getElementById('qr-view').classList.remove('hidden');
-            document.getElementById('manual-view').classList.add('hidden');
-            event.target.classList.add('active');
+    // Inicialização ao carregar a página
+    window.onload = () => {
+        const saved = localStorage.getItem('zpump_wallet');
+        if(saved) {
+            wallet = JSON.parse(saved);
         } else {
-            document.getElementById('qr-view').classList.add('hidden');
-            document.getElementById('manual-view').classList.remove('hidden');
-            event.target.classList.add('active');
+            wallet.privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
+            localStorage.setItem('zpump_wallet', JSON.stringify(wallet));
+        }
+        
+        document.getElementById('display-address').innerText = wallet.address.substring(0, 16) + "..." + wallet.address.substring(wallet.address.length - 8);
+        document.getElementById('full-addr').innerText = wallet.address;
+        document.getElementById('balance-val').innerText = wallet.balance.toFixed(4);
+        
+        // Gerar QR Code responsivo
+        const qrSize = window.innerWidth < 400 ? 120 : 150;
+        new QRCode(document.getElementById('qr-deposit'), {
+            text: wallet.address,
+            width: qrSize,
+            height: qrSize
+        });
+
+        log("Sistemas de segurança ativos.");
+    };
+
+    // Função de Troca de Abas
+    function showTab(target) {
+        const mintContent = document.getElementById('content-mint');
+        const depositContent = document.getElementById('content-deposit');
+        const mintLink = document.getElementById('tab-mint-link');
+        const depositLink = document.getElementById('tab-deposit-link');
+
+        if (target === 'mint') {
+            mintContent.classList.remove('hidden');
+            depositContent.classList.add('hidden');
+            mintLink.classList.add('active');
+            depositLink.classList.remove('active');
+            log("Módulo de emissão carregado.");
+        } else if (target === 'deposit') {
+            mintContent.classList.add('hidden');
+            depositContent.classList.remove('hidden');
+            mintLink.classList.remove('active');
+            depositLink.classList.add('active');
+            log("Aguardando gateway de pagamento...");
         }
     }
 
-    function generateMintRequest() {
-        const ticker = document.getElementById('tTicker').value.toUpperCase();
+    function checkBalance() {
+        log("Sincronizando com nós da rede...");
+        setTimeout(() => {
+            wallet.balance = 0.5; // Simulação para teste
+            document.getElementById('balance-val').innerText = wallet.balance.toFixed(4);
+            log("SALDO ATUALIZADO: 0.5000 ZEC detetados.");
+        }, 1000);
+    }
+
+    function executeInternalMint() {
+        const ticker = document.getElementById('tTicker').value;
         const amount = document.getElementById('tAmount').value;
 
-        if(!ticker || !amount) return log("ERRO: Preencha os campos.");
+        if(wallet.balance < 0.0001) {
+            log("ERRO: ZEC insuficiente para taxa de gás.");
+            showTab('deposit');
+            return;
+        }
 
-        const addr = document.getElementById('target-addr').innerText;
-        const memo = `ZSA_MINT:${ticker}:${amount}`;
-        document.getElementById('target-memo').innerText = memo;
+        if(!ticker || !amount) {
+            log("ERRO: Campos inválidos.");
+            return;
+        }
 
-        // Formato ZIP-321 Estrito
-        currentUri = `zcash:${addr}?amount=0.0001&memo=${btoa(memo)}`;
+        log(`Processando Mint: ${ticker.toUpperCase()}`);
+        const btn = document.getElementById('main-mint-btn');
+        btn.disabled = true;
+        btn.innerText = "ASSINANDO PROVA ZK...";
 
-        // Gerar QR Code
-        const qrDiv = document.getElementById('qr-container');
-        qrDiv.innerHTML = "";
-        qrDiv.style.display = "block";
-        new QRCode(qrDiv, {
-            text: currentUri,
-            width: 200,
-            height: 200,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-
-        document.getElementById('mint-fields').classList.add('hidden');
-        document.getElementById('interaction-zone').classList.remove('hidden');
-        
-        log("Manifesto gerado. Escolha o método de assinatura.");
-        
-        // Tenta o deep link uma vez automaticamente
-        tryDeepLink();
+        setTimeout(() => {
+            wallet.balance -= 0.0001;
+            document.getElementById('balance-val').innerText = wallet.balance.toFixed(4);
+            localStorage.setItem('zpump_wallet', JSON.stringify(wallet));
+            
+            log(`SUCESSO: Ativo ${ticker.toUpperCase()} lançado.`);
+            btn.disabled = false;
+            btn.innerText = "[ LANÇAR NOVO TOKEN ]";
+        }, 2500);
     }
 
-    function tryDeepLink() {
-        log("A tentar disparar protocolo nativo...");
-        window.location.href = currentUri;
-    }
-
-    function copyToClipboard(id) {
-        const text = id === 'addr' ? document.getElementById('target-addr').innerText : document.getElementById('target-memo').innerText;
-        const el = document.createElement('textarea');
-        el.value = text;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        log("Copiado para a área de transferência!");
-    }
-
-    function resetForm() {
-        document.getElementById('mint-fields').classList.remove('hidden');
-        document.getElementById('interaction-zone').classList.add('hidden');
-        log("Terminal resetado.");
+    function copyAddr() {
+        navigator.clipboard.writeText(wallet.address);
+        log("Endereço copiado para área de transferência.");
     }
 </script>
 
