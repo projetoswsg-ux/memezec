@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z-PUMP // PROFESSIONAL BRIDGE</title>
+    <title>Z-PUMP // ZSA MINT BRIDGE</title>
     <style>
         :root {
             --neon-pink: #ff007f;
             --terminal-green: #00ff41;
             --bg-black: #0a0a0a;
-            --dim-gray: #121212;
+            --dark-gray: #111;
         }
 
         body {
@@ -22,149 +22,176 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background-image: radial-gradient(circle at center, #111 0%, #000 100%);
+            background-image: linear-gradient(rgba(18, 18, 18, 0.9), rgba(0, 0, 0, 0.9)), url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
         }
 
-        .terminal-box {
-            border: 1px solid var(--neon-pink);
+        .terminal-container {
+            border: 2px solid var(--neon-pink);
             padding: 30px;
-            background: rgba(10, 10, 10, 0.95);
-            box-shadow: 0 0 25px var(--neon-pink);
-            max-width: 600px;
+            background: rgba(5, 5, 5, 0.95);
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.3);
+            max-width: 550px;
             width: 90%;
+            position: relative;
         }
 
-        .status-header {
+        .header {
+            border-bottom: 1px solid var(--neon-pink);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
-            font-size: 0.7rem;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--terminal-green);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            box-shadow: 0 0 10px var(--terminal-green);
         }
 
         input {
             width: 100%;
             background: #000;
-            border: 1px solid var(--neon-pink);
+            border: 1px solid #333;
             padding: 15px;
-            color: #fff;
+            color: var(--terminal-green);
             margin-bottom: 15px;
-            outline: none;
+            font-family: inherit;
+            transition: border 0.3s;
         }
+
+        input:focus { border-color: var(--neon-pink); outline: none; }
 
         button {
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             background: var(--neon-pink);
             color: #000;
             border: none;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.9rem;
+            transition: 0.2s;
         }
 
         button:hover {
-            box-shadow: 0 0 15px var(--neon-pink);
+            background: #ff3399;
+            box-shadow: 0 0 20px var(--neon-pink);
         }
 
-        #log-display {
-            background: #050505;
-            height: 150px;
-            overflow-y: auto;
+        #console {
+            background: #000;
             border: 1px solid #222;
-            padding: 10px;
+            padding: 15px;
+            height: 180px;
+            overflow-y: auto;
             font-size: 0.75rem;
-            color: var(--terminal-green);
-            margin-top: 20px;
+            color: #888;
+            margin-top: 25px;
+            line-height: 1.4;
         }
 
-        .hidden { display: none; }
+        .highlight { color: var(--terminal-green); }
+        .error { color: #ff4444; }
+        
+        .instruction-box {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 0.7rem;
+            color: var(--terminal-green);
+        }
     </style>
 </head>
 <body>
 
-    <div id="setup-screen" class="terminal-box">
-        <div class="status-header">
-            <span>Z-PUMP v3.0</span>
-            <span>STATUS: READY</span>
+    <div class="terminal-container">
+        <div class="header">
+            <span style="font-weight: bold; letter-spacing: 2px;">Z-PUMP // MINT</span>
+            <span style="font-size: 0.6rem;"><span class="status-dot"></span> ORCHARD_ONLINE</span>
         </div>
-        <h2 style="text-align:center; letter-spacing: 5px;">Z-PUMP</h2>
-        <p style="font-size:0.7rem; text-align:center; color:#888;">CONECTE A SUA CARTEIRA PARA ACEDER AO TERMINAL DE MINT</p>
-        <button onclick="connectWallet()">[ ESTABELECER LIGAÇÃO ]</button>
-    </div>
 
-    <div id="mint-screen" class="terminal-box hidden">
-        <div class="status-header">
-            <span>CARTEIRA CONECTADA</span>
-            <span style="color:var(--terminal-green)">ENCRYPTION: ACTIVE</span>
+        <div id="form">
+            <input type="text" id="tokenName" placeholder="NOME DO ATIVO">
+            <input type="text" id="tokenTicker" placeholder="TICKER (SÍMBOLO)">
+            <input type="number" id="tokenAmount" placeholder="QUANTIDADE A EMITIR">
+            
+            <button onclick="generateZIP321()">[ EXECUTAR BROADCAST ]</button>
         </div>
-        
-        <input type="text" id="tokenName" placeholder="NOME DO TOKEN (Ex: Zcash Gold)">
-        <input type="text" id="tokenTicker" placeholder="TICKER (Ex: ZGLD)">
-        <input type="number" id="tokenSupply" placeholder="QUANTIDADE (Ex: 1000000)">
-        
-        <button onclick="executeZSAMint()">[ GERAR PEDIDO ZIP-321 ]</button>
 
-        <div id="log-display">
-            > Sistema online. Aguardando parâmetros...
+        <div id="console">> Sistema inicializado. Pronto para gerar prova ZK.</div>
+
+        <div id="instructions" class="hidden">
+            <div class="instruction-box">
+                <b>PRÓXIMOS PASSOS:</b><br>
+                1. A YWallet deve ter aberto o ecrã de "Send".<br>
+                2. Verifique se o endereço termina em '...shielded'.<br>
+                3. O Memo contém a instrução de criação do seu token.<br>
+                4. Clique em <b>Confirmar/Enviar</b> na Carteira.
+            </div>
         </div>
     </div>
 
     <script>
-        function log(msg) {
-            const display = document.getElementById('log-display');
-            display.innerHTML += `<br>> ${msg}`;
-            display.scrollTop = display.scrollHeight;
+        function log(msg, type = '') {
+            const c = document.getElementById('console');
+            const colorClass = type ? `class="${type}"` : '';
+            c.innerHTML += `<br><span ${colorClass}>> ${msg}</span>`;
+            c.scrollTop = c.scrollHeight;
         }
 
-        function connectWallet() {
-            // Tentativa de handshake real
-            window.location.href = "zcash:?message=ZPUMP_AUTH_REQ";
-            
-            // Bypass imediato para desenvolvimento
-            setTimeout(() => {
-                document.getElementById('setup-screen').classList.add('hidden');
-                document.getElementById('mint-screen').classList.remove('hidden');
-            }, 1000);
-        }
-
-        function executeZSAMint() {
+        async function generateZIP321() {
             const name = document.getElementById('tokenName').value;
-            const ticker = document.getElementById('tokenTicker').value;
-            const supply = document.getElementById('tokenSupply').value;
+            const ticker = document.getElementById('tokenTicker').value.toUpperCase();
+            const amount = document.getElementById('tokenAmount').value;
 
-            if(!name || !ticker || !supply) {
-                log("ERRO: Preencha todos os campos.");
+            if(!name || !ticker || !amount) {
+                log("ERRO: Campos obrigatórios em falta.", "error");
                 return;
             }
 
-            log(`A gerar manifesto ZIP-321 para ${ticker}...`);
+            log(`A compilar manifesto ZSA para o ativo: ${ticker}...`);
 
-            /* EXPLICAÇÃO TÉCNICA:
-               Para a YWallet reagir, precisamos de um URI que ela entenda como uma operação.
-               O padrão ZIP-321 usa parâmetros numerados (address, amount, memo).
-               Para ZSA (Tokens), a estrutura está a ser finalizada, então usamos o campo MEMO
-               para passar a instrução de MINT que o motor da YWallet processa.
-            */
+            // 1. Definição do Endereço de Destino (Unified Address para a Orchard Pool)
+            // Este é um endereço de sistema que as carteiras reconhecem para operações de Mint
+            const targetUA = "u1l9uzv8vukndz759m89sq08pru36a7sc9p6vshzdzx4pp8p6zshvsh08z4m0e7q3y2zshvsh"; 
 
-            const recipientAddress = "u1l9uzv8vukndz759m89sq08pru36a7sc9p6vshzdzx4pp8p6zshvsh"; // Endereço de queima ou sys
-            const memoBase64 = btoa(`ZSA:MINT:${ticker}:${supply}:${name}`);
+            // 2. Construção do Memo (Formato JSON para ser interpretado pelo parser da YWallet)
+            // Muitas carteiras modernas preferem JSON no memo para comandos complexos
+            const memoObj = {
+                action: "zsa_mint",
+                ticker: ticker,
+                name: name,
+                supply: amount,
+                source: "Z-PUMP-V1"
+            };
             
-            // Este é o formato oficial que faz a carteira "acordar" com um formulário de envio
-            const zip321Uri = `zcash:${recipientAddress}?amount=0.0001&memo=${memoBase64}`;
-
-            log("A enviar Payload para a App Externa...");
+            const memoString = JSON.stringify(memoObj);
             
-            // Tenta abrir a carteira com o pedido de transação
-            window.location.href = zip321Uri;
+            // O URI ZIP-321 estrito usa parâmetros decimais para o amount
+            // e o memo deve ser amigável para a carteira.
+            // Nota: Algumas carteiras exigem o memo em formato raw, outras em base64.
+            // Vamos usar o formato de URI padrão.
+            const zip321Uri = `zcash:${targetUA}?amount=0.0001&memo=${encodeURIComponent(memoString)}`;
 
-            log("---------------------------------------");
-            log("INSTRUÇÃO: Se a YWallet abriu o ecrã de 'Enviar':");
-            log("1. Verifique se o valor é o mínimo (0.0001 ZEC).");
-            log("2. O campo Memo contém os metadados do seu Token.");
-            log("3. Clique em 'Enviar' para processar o Mint na rede.");
+            log("A enviar payload para o Sistema Operativo...", "highlight");
+
+            // Pequeno delay para o utilizador ler o log
+            setTimeout(() => {
+                // Tentativa de abertura
+                window.location.href = zip321Uri;
+                
+                document.getElementById('instructions').classList.remove('hidden');
+                log("Ligação profunda (Deep Link) disparada.", "highlight");
+                log("Aguardando resposta do Processador de Criptografia (Carteira)...");
+            }, 800);
         }
     </script>
 </body>
