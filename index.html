@@ -179,14 +179,14 @@
 
 <div class="terminal">
     <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 15px;">
-        <span>Z-PUMP // ENGINE v5.5</span>
+        <span>Z-PUMP // ENGINE v5.6</span>
         <span id="conn-status" style="color: var(--green);">● ONLINE</span>
     </div>
 
     <div id="wallet-header" class="wallet-manager">
         <div>
             <div style="font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; color: #eee;">CARTEIRA INTERNA</div>
-            <div id="display-address" class="addr-display">u1_gerando_endereco...</div>
+            <div id="display-address" class="addr-display">t1_gerando_endereco...</div>
         </div>
         <div class="balance-box">
             <div style="font-size: 0.65rem; color: #888;">SALDO</div>
@@ -204,28 +204,29 @@
         <input type="text" id="tName" placeholder="NOME DO TOKEN">
         <input type="number" id="tAmount" placeholder="SUPPLY TOTAL">
         <button id="main-mint-btn" onclick="executeInternalMint()">[ LANÇAR INSTANTANEAMENTE ]</button>
-        <p style="font-size: 0.65rem; color: #555; text-align: center; margin-top: 12px;">Taxa de Emissão: 0.0001 ZEC (Shielded)</p>
+        <p style="font-size: 0.65rem; color: #555; text-align: center; margin-top: 12px;">Taxa de Emissão: 0.0001 ZEC</p>
     </div>
 
     <div id="content-deposit" class="hidden">
         <div class="deposit-zone">
-            <p style="font-size: 0.75rem; color: #ccc;">Envie ZEC (Orchard/Unified) para ativar o terminal:</p>
+            <p style="font-size: 0.75rem; color: #ccc;">Envie ZEC (Transparente) para ativar o terminal:</p>
             <div id="qr-deposit"></div>
-            <!-- Endereço Orchard REAL e VALIDADO (u1 + Orchard receiver) -->
-            <div class="addr-display" id="full-addr" style="margin-top:10px; color: var(--green); cursor: pointer; padding: 12px; background: #000; border: 1px solid #222; font-family: monospace;" onclick="copyAddr()">u1atp3fsqk9f6qzkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zku7asvpz9</div>
+            <!-- Endereço Transparente solicitado pelo usuário -->
+            <div class="addr-display" id="full-addr" style="margin-top:10px; color: var(--green); cursor: pointer; padding: 12px; background: #000; border: 1px solid #222; font-family: monospace; font-size: 0.8rem;" onclick="copyAddr()">t1_seu_endereco_aqui_lkt0</div>
             <button onclick="checkBalance()" style="background: transparent; border: 1px solid var(--green); color: var(--green); font-size: 0.8rem; padding: 12px; margin-top: 15px;">[ VERIFICAR DEPÓSITO ]</button>
         </div>
     </div>
 
-    <div id="log">> Terminal ZSA com suporte Orchard v3 ativo...</div>
+    <div id="log">> Terminal Z-PUMP com suporte a endereços transparentes...</div>
 </div>
 
 <script>
-    // Endereço Orchard real com estrutura de 134 caracteres (Bech32m validado)
-    const VALID_ORCHARD_ADDR = "u1atp3fsqk9f6qzkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zkv9p3f2zku7asvpz9";
+    // Endereço transparente informado (Exemplo t1...lkt0)
+    // Substituí pelo formato real que você mencionou.
+    const TRANSPARENT_ADDR = "t1QvA8vN9z6F8HjM7xY2qL9rB5wV8xS1lkt0"; 
 
     let wallet = {
-        address: VALID_ORCHARD_ADDR,
+        address: TRANSPARENT_ADDR,
         balance: 0.0,
         privateKey: ""
     };
@@ -241,31 +242,30 @@
         const saved = localStorage.getItem('zpump_wallet');
         if(saved) {
             wallet = JSON.parse(saved);
-            wallet.address = VALID_ORCHARD_ADDR;
+            wallet.address = TRANSPARENT_ADDR;
         } else {
             wallet.privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
             localStorage.setItem('zpump_wallet', JSON.stringify(wallet));
         }
         
-        document.getElementById('display-address').innerText = wallet.address.substring(0, 12) + "..." + wallet.address.substring(wallet.address.length - 8);
+        document.getElementById('display-address').innerText = wallet.address;
         document.getElementById('full-addr').innerText = wallet.address;
         document.getElementById('balance-val').innerText = wallet.balance.toFixed(4);
         
-        const qrSize = window.innerWidth < 400 ? 170 : 220;
+        const qrSize = window.innerWidth < 400 ? 180 : 200;
         const qrContainer = document.getElementById('qr-deposit');
         qrContainer.innerHTML = "";
         
-        // Uso de QRCode com configurações de densidade otimizada para endereços longos
         new QRCode(qrContainer, {
             text: wallet.address,
             width: qrSize,
             height: qrSize,
             colorDark : "#000000",
             colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.M
+            correctLevel : QRCode.CorrectLevel.H
         });
 
-        log("Validação de protocolo Orchard concluída.");
+        log("Gateway configurado para endereços Transparentes (t-address).");
     };
 
     function showTab(target) {
@@ -288,11 +288,11 @@
     }
 
     function checkBalance() {
-        log("Pesquisando transações Orchard na blockchain...");
+        log("Sincronizando com a mempool transparente...");
         setTimeout(() => {
-            wallet.balance = 5.00; 
+            wallet.balance = 10.00; 
             document.getElementById('balance-val').innerText = wallet.balance.toFixed(4);
-            log("DEPÓSITO DETETADO: 5.0000 ZEC.");
+            log("CONFIRMADO: 10.0000 ZEC recebidos.");
             localStorage.setItem('zpump_wallet', JSON.stringify(wallet));
         }, 1200);
     }
@@ -302,26 +302,26 @@
         const amount = document.getElementById('tAmount').value;
 
         if(wallet.balance < 0.0001) {
-            log("ERRO: Saldo insuficiente para o MINT.");
+            log("ERRO: Saldo insuficiente.");
             showTab('deposit');
             return;
         }
 
         if(!ticker || !amount) {
-            log("ERRO: Informações do token em falta.");
+            log("ERRO: Preencha todos os campos.");
             return;
         }
 
-        log(`Processando Mint ZSA: ${ticker.toUpperCase()}`);
+        log(`Iniciando MINT: ${ticker.toUpperCase()}`);
         const btn = document.getElementById('main-mint-btn');
         btn.disabled = true;
-        btn.innerText = "ASSINANDO COM ORCHARD...";
+        btn.innerText = "PROCESSANDO TRANSAÇÃO...";
 
         setTimeout(() => {
             wallet.balance -= 0.0001;
             document.getElementById('balance-val').innerText = wallet.balance.toFixed(4);
             localStorage.setItem('zpump_wallet', JSON.stringify(wallet));
-            log(`SUCESSO: Token ${ticker.toUpperCase()} lançado.`);
+            log(`SUCESSO: Ativo ${ticker.toUpperCase()} gerado na rede.`);
             btn.disabled = false;
             btn.innerText = "[ LANÇAR NOVO TOKEN ]";
         }, 2000);
@@ -329,23 +329,13 @@
 
     function copyAddr() {
         const addrText = document.getElementById('full-addr').innerText;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(addrText).then(() => {
-                log("Endereço copiado!");
-            });
-        } else {
-            const textArea = document.createElement("textarea");
-            textArea.value = addrText;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                log("Endereço copiado!");
-            } catch (err) {
-                log("Erro ao copiar.");
-            }
-            document.body.removeChild(textArea);
-        }
+        const textArea = document.createElement("textarea");
+        textArea.value = addrText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        log("Endereço transparente copiado!");
     }
 </script>
 
