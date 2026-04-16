@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-PUMP // GATEWAY</title>
+    <style>
+        :root {
+            --neon-pink: #ff007f;
+            --terminal-green: #00ff41;
+            --bg-black: #0a0a0a;
+            --dim-gray: #151515;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--neon-pink);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            background-image: radial-gradient(circle at center, #111 0%, #000 100%);
+        }
+
+        .gateway-card {
+            border: 1px solid var(--neon-pink);
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 30px var(--neon-pink);
+            background: rgba(10, 10, 10, 0.9);
+            max-width: 500px;
+            width: 90%;
+            z-index: 10;
+        }
+
+        .wallet-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .wallet-btn {
+            background: transparent;
+            border: 1px solid var(--terminal-green);
+            color: var(--terminal-green);
+            padding: 15px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.3s;
+        }
+
+        .wallet-btn:hover {
+            background: var(--terminal-green);
+            color: black;
+        }
+
+        .main-btn {
+            background: var(--neon-pink);
+            color: black;
+            border: none;
+            padding: 20px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            letter-spacing: 2px;
+        }
+
+        .main-btn:hover {
+            box-shadow: 0 0 20px var(--neon-pink);
+            transform: scale(1.02);
+        }
+
+        #error-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            border: 2px solid var(--terminal-green);
+            padding: 30px;
+            max-width: 400px;
+            background: #000;
+        }
+
+        .app-link {
+            display: block;
+            color: var(--terminal-green);
+            text-decoration: none;
+            margin: 10px 0;
+            border: 1px solid #333;
+            padding: 10px;
+        }
+
+        .app-link:hover { border-color: var(--terminal-green); }
+
+        .hidden { display: none; }
+        
+        /* Simulação de interface de app após conectar */
+        #app-interface {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tela Inicial de Conexão -->
+    <div id="gateway" class="gateway-card">
+        <h1 style="margin-top:0">Z-PUMP</h1>
+        <p style="font-size: 0.8rem; color: #888;">ACESSO À REDE PRIVADA Zcash SHIELDED ASSETS</p>
+        
+        <button class="main-btn" onclick="attemptConnect()">[ CONECTAR CARTEIRA ]</button>
+        
+        <p style="font-size: 0.6rem; margin-top: 20px; color: #444;">Compatível com ZIP-321 / Unified Addresses</p>
+    </div>
+
+    <!-- Modal de Instalação (Erro) -->
+    <div id="error-modal">
+        <div class="modal-content">
+            <h3 style="color: var(--terminal-green)">CARTEIRA NÃO DETETADA</h3>
+            <p style="font-size: 0.8rem; color: #ccc;">Não conseguimos abrir o protocolo 'zcash:'. Para continuar, precisas de uma carteira Orchard compatível.</p>
+            
+            <div style="margin: 20px 0;">
+                <a href="https://ywallet.app/" target="_blank" class="app-link">INSTALAR YWALLET (Recomendado)</a>
+                <a href="https://zashi.io/" target="_blank" class="app-link">INSTALAR ZASHI (Oficial ECC)</a>
+                <a href="https://zingo.cash/" target="_blank" class="app-link">INSTALAR ZINGO!</a>
+            </div>
+            
+            <button onclick="closeModal()" style="border:none; background:none; color:#555; cursor:pointer">FECHAR E TENTAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <!-- Interface Principal (Pós-Conexão) -->
+    <div id="app-interface" class="hidden">
+        <div style="border: 1px solid var(--neon-pink); padding: 20px; background: rgba(0,0,0,0.8);">
+            <div style="display:flex; justify-content: space-between; align-items:center">
+                <h2 style="margin:0">> DASHBOARD_PRIVADO</h2>
+                <span style="color: var(--terminal-green); font-size: 0.7rem;">CONECTADO: u1...shielded_node</span>
+            </div>
+            <hr style="border:0; border-top:1px solid #222; margin: 20px 0;">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h3>MINT NOVO TOKEN</h3>
+                    <input type="text" id="tName" placeholder="NOME" style="width:100%; background:none; border:1px solid var(--neon-pink); padding:10px; color:white; margin-bottom:10px;">
+                    <input type="text" id="tTicker" placeholder="TICKER" style="width:100%; background:none; border:1px solid var(--neon-pink); padding:10px; color:white; margin-bottom:10px;">
+                    <button onclick="requestSignature()" style="width:100%; padding:15px; background:var(--neon-pink); border:none; cursor:pointer; font-weight:bold">EXECUTAR EMISSÃO ZSA</button>
+                </div>
+                <div style="background: #111; padding: 15px; font-size: 0.7rem;">
+                    <h4 style="margin-top:0">LOG DE ATIVIDADE</h4>
+                    <div id="mini-log">> Sessão iniciada via Bridge...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function attemptConnect() {
+            const start = Date.now();
+            let hasApp = true;
+
+            // Tenta disparar o protocolo nativo
+            window.location.href = "zcash:?test=connect";
+
+            // Se o browser não conseguir abrir a app, ele fica na página.
+            // Se ele abrir a app, o temporizador de "focus" vai notar a diferença.
+            setTimeout(() => {
+                if (Date.now() - start < 1500) {
+                    // O browser não saiu da página rápido o suficiente = Provavelmente não tem a app
+                    showError();
+                } else {
+                    // Sucesso na abertura (ou o utilizador mudou de aba)
+                    proceedToApp();
+                }
+            }, 1000);
+        }
+
+        function showError() {
+            document.getElementById('error-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('error-modal').style.display = 'none';
+        }
+
+        function proceedToApp() {
+            document.getElementById('gateway').classList.add('hidden');
+            document.getElementById('app-interface').classList.remove('hidden');
+            logToMini("Handshake com carteira externa concluído.");
+        }
+
+        function logToMini(msg) {
+            const l = document.getElementById('mini-log');
+            l.innerHTML += `<br>> ${msg}`;
+        }
+
+        function requestSignature() {
+            const ticker = document.getElementById('tTicker').value || "TOKEN";
+            logToMini(`A enviar pedido de emissão (${ticker}) para a carteira...`);
+            
+            // Dispara o pedido real de assinatura para a carteira
+            window.location.href = `zcash:?asset=${ticker}&action=mint`;
+            
+            setTimeout(() => {
+                logToMini("A aguardar confirmação no dispositivo...");
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
