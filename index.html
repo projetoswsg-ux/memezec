@@ -22,7 +22,7 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            overflow-x: hidden;
             background-image: radial-gradient(circle at center, #111 0%, #000 100%);
         }
 
@@ -37,28 +37,6 @@
             z-index: 10;
         }
 
-        .wallet-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .wallet-btn {
-            background: transparent;
-            border: 1px solid var(--terminal-green);
-            color: var(--terminal-green);
-            padding: 15px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            transition: 0.3s;
-        }
-
-        .wallet-btn:hover {
-            background: var(--terminal-green);
-            color: black;
-        }
-
         .main-btn {
             background: var(--neon-pink);
             color: black;
@@ -70,6 +48,7 @@
             cursor: pointer;
             margin-top: 20px;
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .main-btn:hover {
@@ -77,10 +56,11 @@
             transform: scale(1.02);
         }
 
+        /* Modal de Erro / Ajuda */
         #error-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -93,8 +73,9 @@
         .modal-content {
             border: 2px solid var(--terminal-green);
             padding: 30px;
-            max-width: 400px;
+            max-width: 450px;
             background: #000;
+            box-shadow: 0 0 20px var(--terminal-green);
         }
 
         .app-link {
@@ -103,92 +84,148 @@
             text-decoration: none;
             margin: 10px 0;
             border: 1px solid #333;
-            padding: 10px;
+            padding: 12px;
+            font-size: 0.8rem;
         }
 
-        .app-link:hover { border-color: var(--terminal-green); }
+        .app-link:hover { background: rgba(0, 255, 65, 0.1); border-color: var(--terminal-green); }
 
-        .hidden { display: none; }
-        
-        /* Simulação de interface de app após conectar */
-        #app-interface {
+        .bypass-btn {
+            background: var(--terminal-green);
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-weight: bold;
             width: 100%;
+        }
+
+        #app-interface {
+            width: 95%;
             max-width: 1000px;
             padding: 20px;
+        }
+
+        .hidden { display: none; }
+
+        input {
+            width: 100%;
+            background: #111;
+            border: 1px solid var(--neon-pink);
+            padding: 15px;
+            color: white;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        #log-terminal {
+            background: #050505;
+            border: 1px solid #222;
+            padding: 15px;
+            height: 150px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            color: var(--terminal-green);
         }
     </style>
 </head>
 <body>
 
-    <!-- Tela Inicial de Conexão -->
+    <!-- Gateway de Conexão -->
     <div id="gateway" class="gateway-card">
-        <h1 style="margin-top:0">Z-PUMP</h1>
-        <p style="font-size: 0.8rem; color: #888;">ACESSO À REDE PRIVADA Zcash SHIELDED ASSETS</p>
+        <h1 style="margin:0">Z-PUMP</h1>
+        <p style="font-size: 0.7rem; color: #888; letter-spacing: 1px;">SHIELDED ASSET PROTOCOL</p>
         
-        <button class="main-btn" onclick="attemptConnect()">[ CONECTAR CARTEIRA ]</button>
+        <div style="margin: 30px 0;">
+            <div id="loader" class="hidden">
+                <p style="color: var(--terminal-green)">A TENTAR ABRIR CARTEIRA...</p>
+                <div style="width: 50px; height: 2px; background: var(--terminal-green); margin: 10px auto; animation: scan 1s infinite;"></div>
+            </div>
+            <button id="connect-trigger" class="main-btn" onclick="attemptConnect()">[ CONECTAR CARTEIRA ]</button>
+        </div>
         
-        <p style="font-size: 0.6rem; margin-top: 20px; color: #444;">Compatível com ZIP-321 / Unified Addresses</p>
+        <p style="font-size: 0.55rem; color: #444;">Compatível com: YWallet, Zashi, Zingo</p>
     </div>
 
-    <!-- Modal de Instalação (Erro) -->
+    <!-- Modal de Ajuda/Instalação -->
     <div id="error-modal">
         <div class="modal-content">
-            <h3 style="color: var(--terminal-green)">CARTEIRA NÃO DETETADA</h3>
-            <p style="font-size: 0.8rem; color: #ccc;">Não conseguimos abrir o protocolo 'zcash:'. Para continuar, precisas de uma carteira Orchard compatível.</p>
+            <h3 style="color: var(--terminal-green); text-transform: uppercase;">Deteção de Protocolo</h3>
+            <p style="font-size: 0.75rem; color: #ccc; line-height: 1.5;">
+                Não conseguimos confirmar a abertura automática da sua carteira. 
+                Se acabou de instalar, selecione uma opção abaixo:
+            </p>
             
             <div style="margin: 20px 0;">
-                <a href="https://ywallet.app/" target="_blank" class="app-link">INSTALAR YWALLET (Recomendado)</a>
-                <a href="https://zashi.io/" target="_blank" class="app-link">INSTALAR ZASHI (Oficial ECC)</a>
-                <a href="https://zingo.cash/" target="_blank" class="app-link">INSTALAR ZINGO!</a>
+                <p style="font-size: 0.6rem; color: #666; text-align: left;">AINDA NÃO TENHO:</p>
+                <a href="https://ywallet.app/" target="_blank" class="app-link">DESCARREGAR YWALLET</a>
+                <a href="https://zashi.io/" target="_blank" class="app-link">DESCARREGAR ZASHI</a>
+                
+                <p style="font-size: 0.6rem; color: #666; text-align: left; margin-top: 15px;">JÁ INSTALEI E QUERO AVANÇAR:</p>
+                <button class="bypass-btn" onclick="proceedToApp()">JÁ ESTÁ INSTALADA (ENTRAR)</button>
             </div>
             
-            <button onclick="closeModal()" style="border:none; background:none; color:#555; cursor:pointer">FECHAR E TENTAR NOVAMENTE</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:#444; cursor:pointer; font-size: 0.6rem;">CANCELAR</button>
         </div>
     </div>
 
-    <!-- Interface Principal (Pós-Conexão) -->
+    <!-- Interface Pós-Conexão -->
     <div id="app-interface" class="hidden">
-        <div style="border: 1px solid var(--neon-pink); padding: 20px; background: rgba(0,0,0,0.8);">
-            <div style="display:flex; justify-content: space-between; align-items:center">
-                <h2 style="margin:0">> DASHBOARD_PRIVADO</h2>
-                <span style="color: var(--terminal-green); font-size: 0.7rem;">CONECTADO: u1...shielded_node</span>
+        <div style="border: 1px solid var(--neon-pink); padding: 30px; background: rgba(0,0,0,0.9); box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);">
+            <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+                <h2 style="margin:0; font-size: 1rem;">> CONSOLE_TERMINAL</h2>
+                <div style="font-size: 0.6rem; color: var(--terminal-green); border: 1px solid var(--terminal-green); padding: 2px 8px;">LINK_ACTIVE</div>
             </div>
-            <hr style="border:0; border-top:1px solid #222; margin: 20px 0;">
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 30px;">
                 <div>
-                    <h3>MINT NOVO TOKEN</h3>
-                    <input type="text" id="tName" placeholder="NOME" style="width:100%; background:none; border:1px solid var(--neon-pink); padding:10px; color:white; margin-bottom:10px;">
-                    <input type="text" id="tTicker" placeholder="TICKER" style="width:100%; background:none; border:1px solid var(--neon-pink); padding:10px; color:white; margin-bottom:10px;">
-                    <button onclick="requestSignature()" style="width:100%; padding:15px; background:var(--neon-pink); border:none; cursor:pointer; font-weight:bold">EXECUTAR EMISSÃO ZSA</button>
+                    <p style="font-size: 0.8rem; margin-bottom: 20px; color: #aaa;">Configure os parâmetros para a emissão do ativo blindado (ZSA).</p>
+                    <input type="text" id="tokenName" placeholder="NOME DO TOKEN">
+                    <input type="text" id="tokenTicker" placeholder="TICKER">
+                    <button class="main-btn" style="margin-top: 10px;" onclick="sendToWallet()">[ ASSINAR NA CARTEIRA ]</button>
                 </div>
-                <div style="background: #111; padding: 15px; font-size: 0.7rem;">
-                    <h4 style="margin-top:0">LOG DE ATIVIDADE</h4>
-                    <div id="mini-log">> Sessão iniciada via Bridge...</div>
+                
+                <div>
+                    <h4 style="font-size: 0.7rem; margin: 0 0 10px 0; color: #555;">SISTEMA_LOG</h4>
+                    <div id="log-terminal">
+                        > Bridge estabelecido via Deep Link.<br>
+                        > A aguardar input...
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        function log(msg) {
+            const l = document.getElementById('log-terminal');
+            l.innerHTML += `<br>> ${msg}`;
+            l.scrollTop = l.scrollHeight;
+        }
+
         function attemptConnect() {
-            const start = Date.now();
-            let hasApp = true;
+            const btn = document.getElementById('connect-trigger');
+            const loader = document.getElementById('loader');
+            
+            btn.classList.add('hidden');
+            loader.classList.remove('hidden');
 
-            // Tenta disparar o protocolo nativo
-            window.location.href = "zcash:?test=connect";
+            // Dispara o protocolo
+            window.location.href = "zcash:?test=handshake";
 
-            // Se o browser não conseguir abrir a app, ele fica na página.
-            // Se ele abrir a app, o temporizador de "focus" vai notar a diferença.
-            setTimeout(() => {
-                if (Date.now() - start < 1500) {
-                    // O browser não saiu da página rápido o suficiente = Provavelmente não tem a app
-                    showError();
-                } else {
-                    // Sucesso na abertura (ou o utilizador mudou de aba)
-                    proceedToApp();
-                }
-            }, 1000);
+            // Lógica de deteção: Se a página perder o foco, a app abriu.
+            // Se após 2 segundos continuarmos aqui, algo falhou.
+            const checkSession = setTimeout(() => {
+                loader.classList.add('hidden');
+                btn.classList.remove('hidden');
+                showError();
+            }, 2500);
+
+            window.onblur = () => {
+                clearTimeout(checkSession);
+                proceedToApp();
+            };
         }
 
         function showError() {
@@ -201,26 +238,29 @@
 
         function proceedToApp() {
             document.getElementById('gateway').classList.add('hidden');
+            document.getElementById('error-modal').style.display = 'none';
             document.getElementById('app-interface').classList.remove('hidden');
-            logToMini("Handshake com carteira externa concluído.");
         }
 
-        function logToMini(msg) {
-            const l = document.getElementById('mini-log');
-            l.innerHTML += `<br>> ${msg}`;
-        }
-
-        function requestSignature() {
-            const ticker = document.getElementById('tTicker').value || "TOKEN";
-            logToMini(`A enviar pedido de emissão (${ticker}) para a carteira...`);
+        function sendToWallet() {
+            const ticker = document.getElementById('tokenTicker').value || "ZSA";
+            log(`A gerar manifesto para o ativo ${ticker}...`);
             
-            // Dispara o pedido real de assinatura para a carteira
-            window.location.href = `zcash:?asset=${ticker}&action=mint`;
-            
+            // Aqui enviamos o comando real para a carteira externa
             setTimeout(() => {
-                logToMini("A aguardar confirmação no dispositivo...");
+                log("A enviar transação para a aplicação externa...");
+                window.location.href = `zcash:?action=mint&symbol=${ticker}`;
             }, 1000);
         }
     </script>
+
+    <style>
+        @keyframes scan {
+            0% { transform: scaleX(0); opacity: 0; }
+            50% { transform: scaleX(1); opacity: 1; }
+            100% { transform: scaleX(0); opacity: 0; }
+        }
+    </style>
+
 </body>
 </html>
