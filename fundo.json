@@ -3,23 +3,23 @@
   "levels": {
     "1": {
       "name": "riogrande",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase1.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riogsul.jpeg",
       "config": { "speed": 1.5, "target": 500 }
     },
     "2": {
       "name": "parana",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/parana.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
 
        "3": {
       "name": "saopaulo",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/sampa.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "4": {
       "name": "riojaneiro",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "5": {
