@@ -33,14 +33,20 @@
             background-repeat: no-repeat;
         }
 
-        #game-wrapper::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to right, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 15%, rgba(0,0,0,0) 85%, rgba(0,0,0,0.5) 100%);
-            pointer-events: none;
-            z-index: 5;
-        }
+       #game-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* Usando o tom de amarelo do Bitcoin (#f0b90b) com 30% de opacidade */
+    background: linear-gradient(to right, 
+        rgba(240, 185, 11, 0.3) 0%, 
+        rgba(240, 185, 11, 0) 15%, 
+        rgba(240, 185, 11, 0) 85%, 
+        rgba(240, 185, 11, 0.3) 100%
+    );
+    pointer-events: none;
+    z-index: 5;
+}
         
         canvas { 
             display: block; 
