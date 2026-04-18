@@ -27,7 +27,6 @@
             position: relative; 
             width: 100%; 
             height: 100%; 
-            /* Imagem de background adicionada conforme solicitado */
             background-image: url('https://cdn.jsdelivr.net/gh/projetoswsg-ux/Escapela@main/WhatsApp%20Image%202026-04-18%20at%2011.03.47.jpeg');
             background-size: cover;
             background-position: center;
@@ -101,24 +100,24 @@
         }
         .btn-secondary:active { transform: scale(0.95); }
         
+        /* Ajuste 1: Header UI Colado no topo */
         .header-ui { 
             position: absolute; 
-            top: 15px; 
+            top: 0; 
+            left: 0;
             width: 100%; 
-            padding: 0 20px; 
+            padding: 10px 20px; 
             display: flex; 
             justify-content: space-between; 
             z-index: 100; 
-            pointer-events: none; 
+            background: rgba(11, 14, 17, 0.9);
+            border-bottom: 2px solid #474d57;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .ui-badge { 
-            background: rgba(30, 35, 41, 0.8); 
-            padding: 8px 16px; 
-            border-radius: 10px; 
-            border: 1px solid #474d57; 
-            pointer-events: auto;
-            color: #eaecef;
-            font-size: 0.9rem;
+            color: #f0b90b;
+            font-size: 1rem;
+            text-shadow: 1px 1px 2px black;
         }
 
         .swap-control { 
@@ -153,7 +152,7 @@
 </div>
 
 <div id="game-wrapper">
-    <div class="header-ui">
+    <div class="header-ui" id="main-header">
         <div class="ui-badge">NÍVEL: <span id="ui-current-lvl">1</span></div>
         <div class="ui-badge">SCORE: <span id="ui-score">0</span></div>
     </div>
@@ -257,6 +256,7 @@
     const RADIUS = 22;
     const COLS = 8;
     const ROWS = 16;
+    const UI_HEIGHT = 46; // Altura da barra de score
 
     let unlockedLevel = parseInt(localStorage.getItem('crypto_shooter_lvl')) || 1;
     let currentLevel = 1;
@@ -351,8 +351,9 @@
         }
     }
 
+    // Ajuste 2: getLX e getLY para ficarem mais grudadas
     const getLX = (r, c) => (c * RADIUS * 2) + RADIUS + (r % 2 ? RADIUS : 0) + (LOGICAL_WIDTH - COLS * RADIUS * 2) / 2;
-    const getLY = (r) => r * (RADIUS * 1.7) + RADIUS + 40;
+    const getLY = (r) => r * (RADIUS * 1.55) + RADIUS + UI_HEIGHT;
 
     function renderMap() {
         const gridEl = document.getElementById('levels-grid');
@@ -574,7 +575,8 @@
                     currentBubble.vx *= -1;
                     currentBubble.x = Math.max(RADIUS, Math.min(LOGICAL_WIDTH - RADIUS, currentBubble.x));
                 }
-                if (currentBubble.y < RADIUS + 15) { triggerImpact(); return; }
+                // Colisão com o teto (barra de UI)
+                if (currentBubble.y < RADIUS + UI_HEIGHT) { triggerImpact(); return; }
                 let hit = false;
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
@@ -608,7 +610,7 @@
                 bX += dX * 20; bY += dY * 20;
                 if (bX < RADIUS || bX > LOGICAL_WIDTH - RADIUS) dX *= -1;
                 ctx.lineTo(bX * scX, bY * scY);
-                if (bY < 40) break;
+                if (bY < UI_HEIGHT) break;
             }
             ctx.stroke();
             ctx.setLineDash([]);
