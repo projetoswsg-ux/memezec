@@ -100,7 +100,6 @@
         }
         .btn-secondary:active { transform: scale(0.95); }
         
-        /* Ajuste 1: Header UI Colado no topo */
         .header-ui { 
             position: absolute; 
             top: 0; 
@@ -256,7 +255,7 @@
     const RADIUS = 22;
     const COLS = 8;
     const ROWS = 16;
-    const UI_HEIGHT = 46; // Altura da barra de score
+    const UI_HEIGHT = 46;
 
     let unlockedLevel = parseInt(localStorage.getItem('crypto_shooter_lvl')) || 1;
     let currentLevel = 1;
@@ -270,6 +269,7 @@
     let smoothAimAngle = -Math.PI/2;
     let isDragging = false;
     let isShooting = false;
+    let laserPulse = 0; // Para o efeito vivo do laser
 
     function resize() {
         const dpr = window.devicePixelRatio || 1;
@@ -351,7 +351,6 @@
         }
     }
 
-    // Ajuste 2: getLX e getLY para ficarem mais grudadas
     const getLX = (r, c) => (c * RADIUS * 2) + RADIUS + (r % 2 ? RADIUS : 0) + (LOGICAL_WIDTH - COLS * RADIUS * 2) / 2;
     const getLY = (r) => r * (RADIUS * 1.55) + RADIUS + UI_HEIGHT;
 
@@ -395,12 +394,7 @@
 
     function spawnShot() {
         const activeTypes = [...new Set(grid.flat().filter(f => f).map(f => f.type))];
-        
-        if (activeTypes.length === 0 && fallingBubbles.length === 0) {
-            winGame();
-            return;
-        }
-
+        if (activeTypes.length === 0 && fallingBubbles.length === 0) { winGame(); return; }
         currentBubble = new Bubble(LOGICAL_WIDTH/2, LOGICAL_HEIGHT - 80, nextSymbol);
         const nextImgTypes = activeTypes.length > 0 ? activeTypes : CRYPTO_CONFIG.map(c => c.symbol);
         nextSymbol = nextImgTypes[Math.floor(Math.random() * nextImgTypes.length)];
@@ -437,21 +431,13 @@
                 if (d < minDist) { minDist = d; bestR = r; bestC = c; }
             }
         }
-        
-        if (bestR === -1) {
-            currentBubble = null;
-            spawnShot();
-            return;
-        }
-
+        if (bestR === -1) { currentBubble = null; spawnShot(); return; }
         const type = currentBubble.type;
         grid[bestR][bestC] = new Bubble(getLX(bestR, bestC), getLY(bestR), type);
         currentBubble = null;
-
         const matches = [];
         const queue = [[bestR, bestC]];
         const visited = new Set([`${bestR},${bestC}`]);
-
         while(queue.length > 0) {
             const [currR, currC] = queue.shift();
             if (grid[currR][currC].type === type) {
@@ -463,13 +449,11 @@
                 });
             }
         }
-
         if (matches.length >= 3) {
             matches.forEach(([r, c], i) => {
                 setTimeout(() => { grid[r][c] = null; AudioEngine.match(); }, i * 40);
             });
             score += matches.length * 10;
-            
             setTimeout(() => {
                 const connected = new Set();
                 const rootQ = [];
@@ -486,10 +470,8 @@
                     for (let c = 0; c < COLS; c++) {
                         if (grid[r][c] && !connected.has(`${r},${c}`)) {
                             const b = grid[r][c]; 
-                            b.vy = 2; 
-                            b.vx = (Math.random() - 0.5) * 4;
-                            fallingBubbles.push(b); 
-                            grid[r][c] = null;
+                            b.vy = 2; b.vx = (Math.random() - 0.5) * 4;
+                            fallingBubbles.push(b); grid[r][c] = null;
                             score += 20; AudioEngine.pop();
                         }
                     }
@@ -503,9 +485,7 @@
                 gameState = 'LOSE';
                 document.getElementById('lose-screen').classList.remove('hidden');
                 AudioEngine.lose();
-            } else {
-                spawnShot();
-            }
+            } else { spawnShot(); }
         }
     }
 
@@ -516,47 +496,32 @@
             unlockedLevel++;
             localStorage.setItem('crypto_shooter_lvl', unlockedLevel);
         }
-        
         const nextBtn = document.getElementById('next-lvl-btn');
-        if (currentLevel >= 12) {
-            nextBtn.classList.add('hidden');
-        } else {
-            nextBtn.classList.remove('hidden');
-        }
-        
+        if (currentLevel >= 12) nextBtn.classList.add('hidden');
+        else nextBtn.classList.remove('hidden');
         document.getElementById('win-screen').classList.remove('hidden');
         AudioEngine.win();
     }
 
     function nextLevel() {
-        if (currentLevel < 12) {
-            startGame(currentLevel + 1);
-        } else {
-            backToMap();
-        }
+        if (currentLevel < 12) startGame(currentLevel + 1);
+        else backToMap();
     }
 
     function update() {
+        laserPulse += 0.2; // Incrementa pulsação
         smoothAimAngle += (rawAimAngle - smoothAimAngle) * 0.15;
         
         for (let i = fallingBubbles.length - 1; i >= 0; i--) {
             const b = fallingBubbles[i];
-            b.vy += 0.8;
-            b.x += b.vx;
-            b.y += b.vy;
-
+            b.vy += 0.8; b.x += b.vx; b.y += b.vy;
             if (b.y + RADIUS > LOGICAL_HEIGHT) {
-                b.y = LOGICAL_HEIGHT - RADIUS;
-                b.vy *= -0.5;
-                b.vx *= 0.8;
+                b.y = LOGICAL_HEIGHT - RADIUS; b.vy *= -0.5; b.vx *= 0.8;
                 if (Math.abs(b.vy) > 1) AudioEngine.impact();
             }
-            
             if (b.x < RADIUS || b.x > LOGICAL_WIDTH - RADIUS) {
-                b.vx *= -1;
-                b.x = Math.max(RADIUS, Math.min(LOGICAL_WIDTH - RADIUS, b.x));
+                b.vx *= -1; b.x = Math.max(RADIUS, Math.min(LOGICAL_WIDTH - RADIUS, b.x));
             }
-
             if (Math.abs(b.vy) < 0.5 && b.y > LOGICAL_HEIGHT - RADIUS - 5) {
                 fallingBubbles.splice(i, 1);
                 if (grid.flat().filter(v => v).length === 0 && fallingBubbles.length === 0 && !isShooting) {
@@ -575,7 +540,6 @@
                     currentBubble.vx *= -1;
                     currentBubble.x = Math.max(RADIUS, Math.min(LOGICAL_WIDTH - RADIUS, currentBubble.x));
                 }
-                // Colisão com o teto (barra de UI)
                 if (currentBubble.y < RADIUS + UI_HEIGHT) { triggerImpact(); return; }
                 let hit = false;
                 for (let r = 0; r < ROWS; r++) {
@@ -598,22 +562,34 @@
         const scX = rect.width / LOGICAL_WIDTH;
         const scY = rect.height / LOGICAL_HEIGHT;
 
+        // --- AJUSTE: RAIO LASER VIVO ---
         if (isDragging && !isShooting) {
-            ctx.setLineDash([4, 12]);
-            ctx.strokeStyle = "rgba(240, 185, 11, 0.3)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
+            ctx.save();
             let bX = currentBubble.x, bY = currentBubble.y;
             let dX = Math.cos(smoothAimAngle), dY = Math.sin(smoothAimAngle);
+            
+            // Desenha o brilho externo (Glow)
+            ctx.shadowBlur = 10 + Math.sin(laserPulse) * 4;
+            ctx.shadowColor = "white";
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+            ctx.lineWidth = 4 + Math.sin(laserPulse) * 1.5;
+            
+            ctx.beginPath();
             ctx.moveTo(bX * scX, bY * scY);
-            for(let i=0; i<30; i++) {
-                bX += dX * 20; bY += dY * 20;
+            for(let i=0; i<40; i++) {
+                bX += dX * 15; bY += dY * 15;
                 if (bX < RADIUS || bX > LOGICAL_WIDTH - RADIUS) dX *= -1;
                 ctx.lineTo(bX * scX, bY * scY);
                 if (bY < UI_HEIGHT) break;
             }
             ctx.stroke();
-            ctx.setLineDash([]);
+
+            // Desenha o núcleo branco sólido
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
         }
 
         grid.flat().forEach(b => b && b.draw(scX, scY));
@@ -662,7 +638,6 @@
     
     function retryLevel() { startGame(currentLevel); }
     function resetProgress() { localStorage.setItem('crypto_shooter_lvl', 1); unlockedLevel = 1; renderMap(); }
-
     function loop() { update(); draw(); requestAnimationFrame(loop); }
     loadLogos();
     loop();
