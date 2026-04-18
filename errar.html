@@ -566,22 +566,53 @@
         const scX = rect.width / LOGICAL_WIDTH;
         const scY = rect.height / LOGICAL_HEIGHT;
 
-        if (isDragging && !isShooting) {
-            ctx.save();
-            let bX = currentBubble.x, bY = currentBubble.y;
-            let dX = Math.cos(smoothAimAngle), dY = Math.sin(smoothAimAngle);
-            
-            ctx.shadowBlur = 10 + Math.sin(laserPulse) * 4;
-            ctx.shadowColor = "white";
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-            ctx.lineWidth = 4 + Math.sin(laserPulse) * 1.5;
-            
-            ctx.beginPath();
-            ctx.moveTo(bX * scX, bY * scY);
+  if (isDragging && !isShooting) {
+    ctx.save();
+    let bX = currentBubble.x, bY = currentBubble.y;
+    let dX = Math.cos(smoothAimAngle), dY = Math.sin(smoothAimAngle);
+    
+    // Configurações visuais das bolinhas
+    ctx.fillStyle = "rgba(255, 255, 255, 0.6)"; // Cor das bolinhas
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = "white";
 
-            for(let i=0; i<40; i++) {
-                bX += dX * 15; 
-                bY += dY * 15;
+    // O loop calcula a trajetória
+    for(let i = 0; i < 40; i++) {
+        bX += dX * 20; // Aumentei o passo para as bolinhas não ficarem coladas
+        bY += dY * 20;
+
+        // Ricochete lateral
+        if (bX < RADIUS || bX > LOGICAL_WIDTH - RADIUS) {
+            dX *= -1;
+            bX = Math.max(RADIUS, Math.min(LOGICAL_WIDTH - RADIUS, bX));
+        }
+
+        // --- Detecção de colisão (Ajuste que adicionamos antes) ---
+        let laserHit = false;
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                if (grid[r][c]) {
+                    const dist = Math.hypot(bX - getLX(r, c), bY - getLY(r));
+                    if (dist < RADIUS * 1.5) { laserHit = true; break; }
+                }
+            }
+            if (laserHit) break;
+        }
+
+        // Desenha a bolinha em vez de uma linha
+        // O tamanho da bolinha pulsa levemente com o laserPulse
+        const dotSize = (2 + Math.sin(laserPulse) * 0.5) * scX;
+        
+        ctx.beginPath();
+        ctx.arc(bX * scX, bY * scY, dotSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Para se bater numa bolinha ou chegar no topo
+        if (laserHit || bY < UI_HEIGHT) break;
+    }
+    
+    ctx.restore();
+}
 
                 // Ricochete nas paredes
                 if (bX < RADIUS || bX > LOGICAL_WIDTH - RADIUS) dX *= -1;
