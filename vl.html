@@ -32,11 +32,23 @@
             background-position: center;
             background-repeat: no-repeat;
         }
+
+        /* Adicionando a sombra suave nas laterais da área de jogo */
+        #game-wrapper::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 15%, rgba(0,0,0,0) 85%, rgba(0,0,0,0.5) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
         
         canvas { 
             display: block; 
             width: 100%; 
             height: 100%; 
+            position: relative;
+            z-index: 1;
         }
 
         .overlay-screen { 
@@ -269,7 +281,7 @@
     let smoothAimAngle = -Math.PI/2;
     let isDragging = false;
     let isShooting = false;
-    let laserPulse = 0; // Para o efeito vivo do laser
+    let laserPulse = 0;
 
     function resize() {
         const dpr = window.devicePixelRatio || 1;
@@ -509,7 +521,7 @@
     }
 
     function update() {
-        laserPulse += 0.2; // Incrementa pulsação
+        laserPulse += 0.2; 
         smoothAimAngle += (rawAimAngle - smoothAimAngle) * 0.15;
         
         for (let i = fallingBubbles.length - 1; i >= 0; i--) {
@@ -562,13 +574,11 @@
         const scX = rect.width / LOGICAL_WIDTH;
         const scY = rect.height / LOGICAL_HEIGHT;
 
-        // --- AJUSTE: RAIO LASER VIVO ---
         if (isDragging && !isShooting) {
             ctx.save();
             let bX = currentBubble.x, bY = currentBubble.y;
             let dX = Math.cos(smoothAimAngle), dY = Math.sin(smoothAimAngle);
             
-            // Desenha o brilho externo (Glow)
             ctx.shadowBlur = 10 + Math.sin(laserPulse) * 4;
             ctx.shadowColor = "white";
             ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
@@ -584,7 +594,6 @@
             }
             ctx.stroke();
 
-            // Desenha o núcleo branco sólido
             ctx.shadowBlur = 0;
             ctx.strokeStyle = "white";
             ctx.lineWidth = 1.5;
