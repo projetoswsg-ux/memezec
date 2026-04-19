@@ -206,7 +206,7 @@
 </div>
 
 <script>
-    let levelAssets = null; // Armazenará os dados do JSON de background
+    let levelAssets = null;
 
     const AudioEngine = (() => {
         let ctx = null;
@@ -228,7 +228,12 @@
             impact: () => play(200, 'sine', 0.05, 0.03),
             win: () => play(700, 'triangle', 0.4, 0.1),
             lose: () => play(150, 'sawtooth', 0.6, 0.1),
-            swap: () => play(800, 'sine', 0.1, 0.05)
+            swap: () => play(800, 'sine', 0.1, 0.05),
+            cashRegister: () => {
+                // Simula barulho de caixa registradora / dinheiro
+                play(1000, 'sine', 0.1, 0.1);
+                setTimeout(() => play(1500, 'sine', 0.15, 0.1), 50);
+            }
         };
     })();
 
@@ -243,7 +248,6 @@
 
     async function loadLogos() {
         try {
-            // Carregar o JSON de backgrounds solicitado
             const bgResponse = await fetch('https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/fundo.json');
             levelAssets = await bgResponse.json();
 
@@ -389,7 +393,6 @@
         }
     }
 
-    // AJUSTE: Função para trocar o background do wrapper
     function updateBackground(lvl) {
         if (levelAssets && levelAssets.levels && levelAssets.levels[lvl]) {
             const bgUrl = levelAssets.levels[lvl].background;
@@ -406,9 +409,7 @@
         document.getElementById('win-screen').classList.add('hidden');
         document.getElementById('lose-screen').classList.add('hidden');
         
-        // Aplica o novo background do nível
         updateBackground(lvl);
-        
         initLevelData(lvl);
         gameState = 'PLAYING';
     }
@@ -511,7 +512,9 @@
                         }
                     }
                 }
+                // AJUSTE: Toca som de dinheiro ao atualizar pontuação
                 document.getElementById('ui-score').innerText = score;
+                AudioEngine.cashRegister(); 
                 spawnShot();
             }, matches.length * 45);
         } else {
