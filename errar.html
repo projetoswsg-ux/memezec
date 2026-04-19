@@ -161,8 +161,8 @@
 
         @keyframes floating-text {
             0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
-            100% { transform: translateY(-80px) scale(1); opacity: 0; }
+            20% { transform: translateY(-20px) scale(1.5); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
         }
 
         .floating-score {
@@ -174,6 +174,17 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             z-index: 200;
             animation: floating-text 1.2s ease-out forwards;
+        }
+
+        .bonus-float {
+            position: absolute;
+            pointer-events: none;
+            color: #00ffcc;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffcc;
+            z-index: 210;
+            animation: floating-text 0.8s ease-out forwards;
         }
 
         .milestone-msg {
@@ -262,8 +273,12 @@
             lose: () => play(150, 'sawtooth', 0.6, 0.1),
             swap: () => play(800, 'sine', 0.1, 0.05),
             cashRegister: () => {
-                play(1000, 'sine', 0.1, 0.1);
-                setTimeout(() => play(1500, 'sine', 0.15, 0.1), 50);
+                play(800, 'sine', 0.1, 0.15);
+                setTimeout(() => play(1200, 'sine', 0.15, 0.1), 60);
+            },
+            coin: () => {
+                play(1800, 'sine', 0.05, 0.1);
+                setTimeout(() => play(2400, 'sine', 0.08, 0.08), 30);
             }
         };
     })();
@@ -305,6 +320,7 @@
     let score = 0;
     let grid = [];
     let fallingBubbles = [];
+    let sparkles = []; // Novas partículas visuais de bônus
     let currentBubble = null;
     let nextSymbol = '';
     let rawAimAngle = -Math.PI/2;
@@ -337,18 +353,15 @@
             const r = (RADIUS - 1) * scX;
 
             ctx.save();
-            
-            // Sombra externa
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 10;
             ctx.shadowOffsetY = 5;
 
-            // Corpo da bola (Gradiente Reforçado para Brilho)
             const grad = ctx.createRadialGradient(
                 dX - r * 0.3, dY - r * 0.3, r * 0.05, 
                 dX, dY, r
             );
-            grad.addColorStop(0, '#ffffff'); // Centro bem brilhante
+            grad.addColorStop(0, '#ffffff'); 
             grad.addColorStop(0.1, this.config.color);
             grad.addColorStop(1, this.darkenColor(this.config.color, 50));
             
@@ -360,16 +373,14 @@
             ctx.shadowBlur = 0;
             ctx.shadowOffsetY = 0;
 
-            // Desenhar Emoji (Efeito de Transparência - dentro do vidro)
             ctx.save();
-            ctx.globalAlpha = 0.60; // Ajuste de transparência solicitado
+            ctx.globalAlpha = 0.60; 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.font = `${Math.round(r * 0.8)}px Arial`;
             ctx.fillText(this.config.emoji, dX, dY + (r * 0.05));
             ctx.restore();
 
-            // Reflexo Principal (Brilho Superior de Vidro)
             const highlight = ctx.createLinearGradient(dX, dY - r, dX, dY + r);
             highlight.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
             highlight.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)');
@@ -380,7 +391,6 @@
             ctx.fillStyle = highlight;
             ctx.fill();
 
-            // Brilho de Borda (Rim Light)
             ctx.beginPath();
             ctx.arc(dX, dY, r - 1.5, 0, Math.PI * 2);
             ctx.strokeStyle = 'rgba(255,255,255,0.4)';
@@ -415,14 +425,14 @@
         }
     }
 
-    function createFloatingScore(x, y, value) {
+    function createFloatingScore(x, y, value, isBonus = false) {
         const el = document.createElement('div');
-        el.className = 'floating-score';
+        el.className = isBonus ? 'bonus-float' : 'floating-score';
         el.style.left = `${(x / LOGICAL_WIDTH) * 100}%`;
         el.style.top = `${(y / LOGICAL_HEIGHT) * 100}%`;
         el.innerText = `+${value}`;
         document.getElementById('game-wrapper').appendChild(el);
-        setTimeout(() => el.remove(), 1200);
+        setTimeout(() => el.remove(), isBonus ? 800 : 1200);
     }
 
     function createMilestoneMessage(text) {
@@ -442,7 +452,7 @@
 
     function startGame(lvl) {
         AudioEngine.init();
-        currentLevel = lvl; score = 0; isShooting = false; fallingBubbles = [];
+        currentLevel = lvl; score = 0; isShooting = false; fallingBubbles = []; sparkles = [];
         document.getElementById('ui-current-lvl').innerText = lvl;
         document.getElementById('ui-score').innerText = '0';
         document.getElementById('map-screen').classList.add('hidden');
@@ -571,9 +581,11 @@
                     }
                 }
                 
-                if (fallCount > 5) createMilestoneMessage("JACKPOT!");
+                if (fallCount > 5) {
+                    createMilestoneMessage("JACKPOT!");
+                    AudioEngine.cashRegister(); 
+                }
                 document.getElementById('ui-score').innerText = score;
-                AudioEngine.cashRegister(); 
                 spawnShot();
             }, matches.length * 45);
         } else {
@@ -605,17 +617,49 @@
         else backToMap();
     }
 
+    function createSparkles(x, y, color) {
+        for(let i=0; i<8; i++) {
+            sparkles.push({
+                x, y, 
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10 - 5,
+                life: 1.0,
+                color
+            });
+        }
+    }
+
     function update() {
         laserPulse += 0.2; 
         smoothAimAngle += (rawAimAngle - smoothAimAngle) * 0.15;
         if (shakeAmount > 0) shakeAmount *= 0.9;
         
+        // Update Sparkles
+        for(let i = sparkles.length-1; i >= 0; i--) {
+            const s = sparkles[i];
+            s.x += s.vx; s.y += s.vy; s.vy += 0.3; s.life -= 0.04;
+            if(s.life <= 0) sparkles.splice(i, 1);
+        }
+
         for (let i = fallingBubbles.length - 1; i >= 0; i--) {
             const b = fallingBubbles[i];
             b.vy += 0.8; b.x += b.vx; b.y += b.vy;
+
+            // QUANDO A BOLA BATE NO CHÃO (BONUS)
             if (b.y + RADIUS > LOGICAL_HEIGHT) {
-                b.y = LOGICAL_HEIGHT - RADIUS; b.vy *= -0.5; b.vx *= 0.8;
-                if (Math.abs(b.vy) > 1) AudioEngine.impact();
+                b.y = LOGICAL_HEIGHT - RADIUS; 
+                b.vy *= -0.5; 
+                b.vx *= 0.8;
+                
+                // Logica de bonus ao tocar o chão
+                if (Math.abs(b.vy) > 1.5) {
+                    AudioEngine.coin(); // Som de dinheiro viciante
+                    score += 2; // +2 pontos extras
+                    document.getElementById('ui-score').innerText = score;
+                    createFloatingScore(b.x, b.y - 20, 2, true); // Apelo visual envolvente
+                    createSparkles(b.x, b.y, b.config.color); // Explosão de brilho
+                    shakeAmount = Math.max(shakeAmount, 3);
+                }
             }
             if (b.x < RADIUS || b.x > LOGICAL_WIDTH - RADIUS) {
                 b.vx *= -1; b.x = Math.max(RADIUS, Math.min(LOGICAL_WIDTH - RADIUS, b.x));
@@ -706,6 +750,17 @@
 
         grid.flat().forEach(b => b && b.draw(scX, scY));
         fallingBubbles.forEach(b => b.draw(scX, scY));
+        
+        // Draw sparkles
+        sparkles.forEach(s => {
+            ctx.fillStyle = s.color;
+            ctx.globalAlpha = s.life;
+            ctx.beginPath();
+            ctx.arc(s.x * scX, s.y * scY, 4 * scX, 0, Math.PI*2);
+            ctx.fill();
+        });
+        ctx.globalAlpha = 1.0;
+
         if (currentBubble && gameState === 'PLAYING') currentBubble.draw(scX, scY);
         
         ctx.restore();
