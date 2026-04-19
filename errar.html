@@ -31,23 +31,22 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            transition: background-image 0.5s ease-in-out;
         }
 
-
-#game-wrapper::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    /* Usando o tom de amarelo do Bitcoin (#f0b90b) com 30% de opacidade */
-    background: linear-gradient(to right, 
-        rgba(240, 185, 11, 0.3) 0%, 
-        rgba(240, 185, 11, 0) 15%, 
-        rgba(240, 185, 11, 0) 85%, 
-        rgba(240, 185, 11, 0.3) 100%
-    );
-    pointer-events: none;
-    z-index: 5;
-}
+        #game-wrapper::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, 
+                rgba(240, 185, 11, 0.3) 0%, 
+                rgba(240, 185, 11, 0) 15%, 
+                rgba(240, 185, 11, 0) 85%, 
+                rgba(240, 185, 11, 0.3) 100%
+            );
+            pointer-events: none;
+            z-index: 5;
+        }
         
         canvas { 
             display: block; 
@@ -207,6 +206,8 @@
 </div>
 
 <script>
+    let levelAssets = null; // Armazenará os dados do JSON de background
+
     const AudioEngine = (() => {
         let ctx = null;
         const init = () => { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); };
@@ -242,6 +243,10 @@
 
     async function loadLogos() {
         try {
+            // Carregar o JSON de backgrounds solicitado
+            const bgResponse = await fetch('https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/fundo.json');
+            levelAssets = await bgResponse.json();
+
             const ids = CRYPTO_CONFIG.map(c => c.id).join(',');
             const response = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}`);
             const data = await response.json();
@@ -384,6 +389,14 @@
         }
     }
 
+    // AJUSTE: Função para trocar o background do wrapper
+    function updateBackground(lvl) {
+        if (levelAssets && levelAssets.levels && levelAssets.levels[lvl]) {
+            const bgUrl = levelAssets.levels[lvl].background;
+            document.getElementById('game-wrapper').style.backgroundImage = `url('${bgUrl}')`;
+        }
+    }
+
     function startGame(lvl) {
         AudioEngine.init();
         currentLevel = lvl; score = 0; isShooting = false; fallingBubbles = [];
@@ -392,6 +405,10 @@
         document.getElementById('map-screen').classList.add('hidden');
         document.getElementById('win-screen').classList.add('hidden');
         document.getElementById('lose-screen').classList.add('hidden');
+        
+        // Aplica o novo background do nível
+        updateBackground(lvl);
+        
         initLevelData(lvl);
         gameState = 'PLAYING';
     }
@@ -597,10 +614,8 @@
                 bX += dX * 15; 
                 bY += dY * 15;
 
-                // Ricochete nas paredes
                 if (bX < RADIUS || bX > LOGICAL_WIDTH - RADIUS) dX *= -1;
 
-                // --- AJUSTE SOLICITADO: Detecção de colisão do laser com bolinhas ---
                 let laserHit = false;
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
@@ -616,8 +631,6 @@
                 }
 
                 ctx.lineTo(bX * scX, bY * scY);
-
-                // Para se bater numa bolinha ou chegar no topo
                 if (laserHit || bY < UI_HEIGHT) break;
             }
             ctx.stroke();
