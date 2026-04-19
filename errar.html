@@ -337,16 +337,20 @@
             const r = (RADIUS - 1) * scX;
 
             ctx.save();
-            ctx.shadowColor = 'rgba(0,0,0,0.4)';
-            ctx.shadowBlur = 8;
-            ctx.shadowOffsetY = 4;
+            
+            // Sombra externa
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 5;
 
+            // Corpo da bola (Gradiente Reforçado para Brilho)
             const grad = ctx.createRadialGradient(
-                dX - r * 0.3, dY - r * 0.3, r * 0.1, 
+                dX - r * 0.3, dY - r * 0.3, r * 0.05, 
                 dX, dY, r
             );
-            grad.addColorStop(0, this.config.color);
-            grad.addColorStop(1, this.darkenColor(this.config.color, 40));
+            grad.addColorStop(0, '#ffffff'); // Centro bem brilhante
+            grad.addColorStop(0.1, this.config.color);
+            grad.addColorStop(1, this.darkenColor(this.config.color, 50));
             
             ctx.beginPath();
             ctx.arc(dX, dY, r, 0, Math.PI * 2);
@@ -356,29 +360,31 @@
             ctx.shadowBlur = 0;
             ctx.shadowOffsetY = 0;
 
-            const highlight = ctx.createRadialGradient(
-                dX - r * 0.35, dY - r * 0.35, 0,
-                dX - r * 0.35, dY - r * 0.35, r * 0.6
-            );
-            highlight.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
-            highlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            // Desenhar Emoji (Efeito de Transparência - dentro do vidro)
+            ctx.save();
+            ctx.globalAlpha = 0.65; // Ajuste de transparência solicitado
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `${Math.round(r * 0.6)}px Arial`;
+            ctx.fillText(this.config.emoji, dX, dY + (r * 0.05));
+            ctx.restore();
+
+            // Reflexo Principal (Brilho Superior de Vidro)
+            const highlight = ctx.createLinearGradient(dX, dY - r, dX, dY + r);
+            highlight.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+            highlight.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)');
+            highlight.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
             
             ctx.beginPath();
-            ctx.arc(dX, dY, r, 0, Math.PI * 2);
+            ctx.ellipse(dX, dY - r * 0.45, r * 0.75, r * 0.4, 0, 0, Math.PI * 2);
             ctx.fillStyle = highlight;
             ctx.fill();
 
-            // Desenhar Emoji no centro
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = `${Math.round(r * 1.2)}px Arial`;
-            ctx.fillStyle = 'white';
-            ctx.fillText(this.config.emoji, dX, dY + (r * 0.1));
-
+            // Brilho de Borda (Rim Light)
             ctx.beginPath();
-            ctx.arc(dX, dY, r - 1, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            ctx.lineWidth = 1.5;
+            ctx.arc(dX, dY, r - 1.5, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 2;
             ctx.stroke();
 
             ctx.restore();
