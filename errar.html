@@ -656,7 +656,7 @@
                     AudioEngine.coin(); // Som de dinheiro viciante
                     score += 12; // +2 pontos extras
                     document.getElementById('ui-score').innerText = score;
-                    createFloatingScore(b.x, b.y - 20, 2, true); // Apelo visual envolvente
+                    createFloatingScore(b.x, b.y - 20, 12, true); // Apelo visual envolvente
                     createSparkles(b.x, b.y, b.config.color); // Explosão de brilho
                     shakeAmount = Math.max(shakeAmount, 3);
                 }
