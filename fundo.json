@@ -24,42 +24,42 @@
     },
        "5": {
       "name": "minas",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "6": {
       "name": "brasilia",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "7": {
       "name": "matogrosso",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "8": {
       "name": "goias",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "9": {
       "name": "bahia",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "10": {
       "name": "maranhao",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "11": {
       "name": "para",
-      "background": "https://cdn.jsdelivr.net/gh/.../fase2.jpg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 2.0, "target": 1000 }
     },
     "12": {
       "name": "amazonas",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/Escapela@main/WhatsApp%20Image%202026-04-18%20at%2011.03.47.jpeg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
       "config": { "speed": 3.5, "target": 5000 }
     }
   }
