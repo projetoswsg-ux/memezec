@@ -6,8 +6,6 @@
     <title>Crypto Shooter: Bitcoin & Friends</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/style.css">
- 
-
 </head>
 <body>
 
@@ -49,7 +47,10 @@
         <div class="reverse-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0b0e11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21l-4-4 4-4"/><path d="M3 17h18"/><path d="M17 3l4 4-4 4"/><path d="M21 7H3"/></svg>
         </div>
-        <div id="next-crypto-preview"></div>
+        <!-- Alterado para conter um canvas de preview -->
+        <div id="next-crypto-preview" class="flex items-center justify-center">
+            <canvas id="previewCanvas" width="50" height="50"></canvas>
+        </div>
         <span class="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-tighter">Próxima</span>
     </div>
 </div>
@@ -91,7 +92,7 @@
 
     const CRYPTO_CONFIG = [
         { id: 'yellow', symbol: 'YELLOW', color: '#ffea00', emoji: '🍌' },
-        { id: 'blue', symbol: 'BLUE', color: '#0000ff', emoji: ' 🍄 ' },
+        { id: 'blue', symbol: 'BLUE', color: '#0000ff', emoji: '🍄' },
         { id: 'green', symbol: 'GREEN', color: '#00ff00', emoji: '🥕' },
         { id: 'red', symbol: 'RED', color: '#ff0000', emoji: '🥩' },
         { id: 'purple', symbol: 'PURPLE', color: '#800080', emoji: '🦴' }
@@ -126,7 +127,7 @@
     let score = 0;
     let grid = [];
     let fallingBubbles = [];
-    let sparkles = []; // Novas partículas visuais de bônus
+    let sparkles = []; 
     let currentBubble = null;
     let nextSymbol = '';
     let rawAimAngle = -Math.PI/2;
@@ -153,17 +154,17 @@
             this.config = CRYPTO_CONFIG.find(c => c.symbol === symbol) || CRYPTO_CONFIG[0];
         }
 
-        draw(scX, scY) {
+        draw(scX, scY, targetCtx = ctx) {
             const dX = this.x * scX;
             const dY = this.y * scY;
             const r = (RADIUS - 1) * scX;
 
-            ctx.save();
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetY = 5;
+            targetCtx.save();
+            targetCtx.shadowColor = 'rgba(0,0,0,0.5)';
+            targetCtx.shadowBlur = 10;
+            targetCtx.shadowOffsetY = 5;
 
-            const grad = ctx.createRadialGradient(
+            const grad = targetCtx.createRadialGradient(
                 dX - r * 0.3, dY - r * 0.3, r * 0.05, 
                 dX, dY, r
             );
@@ -171,39 +172,39 @@
             grad.addColorStop(0.1, this.config.color);
             grad.addColorStop(1, this.darkenColor(this.config.color, 50));
             
-            ctx.beginPath();
-            ctx.arc(dX, dY, r, 0, Math.PI * 2);
-            ctx.fillStyle = grad;
-            ctx.fill();
+            targetCtx.beginPath();
+            targetCtx.arc(dX, dY, r, 0, Math.PI * 2);
+            targetCtx.fillStyle = grad;
+            targetCtx.fill();
             
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
+            targetCtx.shadowBlur = 0;
+            targetCtx.shadowOffsetY = 0;
 
-            ctx.save();
-            ctx.globalAlpha = 0.60; 
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = `${Math.round(r * 0.8)}px Arial`;
-            ctx.fillText(this.config.emoji, dX, dY + (r * 0.05));
-            ctx.restore();
+            targetCtx.save();
+            targetCtx.globalAlpha = 0.60; 
+            targetCtx.textAlign = 'center';
+            targetCtx.textBaseline = 'middle';
+            targetCtx.font = `${Math.round(r * 0.8)}px Arial`;
+            targetCtx.fillText(this.config.emoji, dX, dY + (r * 0.05));
+            targetCtx.restore();
 
-            const highlight = ctx.createLinearGradient(dX, dY - r, dX, dY + r);
+            const highlight = targetCtx.createLinearGradient(dX, dY - r, dX, dY + r);
             highlight.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
             highlight.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)');
             highlight.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
             
-            ctx.beginPath();
-            ctx.ellipse(dX, dY - r * 0.45, r * 0.75, r * 0.4, 0, 0, Math.PI * 2);
-            ctx.fillStyle = highlight;
-            ctx.fill();
+            targetCtx.beginPath();
+            targetCtx.ellipse(dX, dY - r * 0.45, r * 0.75, r * 0.4, 0, 0, Math.PI * 2);
+            targetCtx.fillStyle = highlight;
+            targetCtx.fill();
 
-            ctx.beginPath();
-            ctx.arc(dX, dY, r - 1.5, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            targetCtx.beginPath();
+            targetCtx.arc(dX, dY, r - 1.5, 0, Math.PI * 2);
+            targetCtx.strokeStyle = 'rgba(255,255,255,0.4)';
+            targetCtx.lineWidth = 2;
+            targetCtx.stroke();
 
-            ctx.restore();
+            targetCtx.restore();
         }
 
         darkenColor(hex, percent) {
@@ -214,6 +215,18 @@
             B = (num & 0x0000FF) - amt;
             return "#" + (0x1000000 + (R<255?R<0?0:R:255)*0x10000 + (G<255?G<0?0:G:255)*0x100 + (B<255?B<0?0:B:255)).toString(16).slice(1);
         }
+    }
+
+    // Função para atualizar o preview visual no seletor
+    function updatePreview() {
+        const pCanvas = document.getElementById('previewCanvas');
+        const pCtx = pCanvas.getContext('2d');
+        pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+        
+        // Cria uma bolha temporária centralizada no canvas de preview
+        const previewBubble = new Bubble(25, 25, nextSymbol);
+        // Desenha a bolha usando o contexto do preview (escala 1:1)
+        previewBubble.draw(1, 1, pCtx);
     }
 
     const getLX = (r, c) => (c * RADIUS * 2) + RADIUS + (r % 2 ? RADIUS : 0) + (LOGICAL_WIDTH - COLS * RADIUS * 2) / 2;
@@ -291,8 +304,7 @@
         const pool = activeTypes.length > 0 ? activeTypes : CRYPTO_CONFIG.map(c => c.symbol);
         nextSymbol = pool[Math.floor(Math.random() * pool.length)];
         
-        const nextEmoji = CRYPTO_CONFIG.find(c => c.symbol === nextSymbol).emoji;
-        document.getElementById('next-crypto-preview').innerText = nextEmoji;
+        updatePreview(); // Atualiza o seletor visual
         isShooting = false;
     }
 
@@ -302,8 +314,7 @@
         const temp = currentBubble.type;
         currentBubble = new Bubble(currentBubble.x, currentBubble.y, nextSymbol);
         nextSymbol = temp;
-        const nextEmoji = CRYPTO_CONFIG.find(c => c.symbol === nextSymbol).emoji;
-        document.getElementById('next-crypto-preview').innerText = nextEmoji;
+        updatePreview(); // Atualiza o seletor visual
     }
 
     function getNeighbors(r, c) {
@@ -440,7 +451,6 @@
         smoothAimAngle += (rawAimAngle - smoothAimAngle) * 0.15;
         if (shakeAmount > 0) shakeAmount *= 0.9;
         
-        // Update Sparkles
         for(let i = sparkles.length-1; i >= 0; i--) {
             const s = sparkles[i];
             s.x += s.vx; s.y += s.vy; s.vy += 0.3; s.life -= 0.04;
@@ -451,19 +461,17 @@
             const b = fallingBubbles[i];
             b.vy += 0.8; b.x += b.vx; b.y += b.vy;
 
-            // QUANDO A BOLA BATE NO CHÃO (BONUS)
             if (b.y + RADIUS > LOGICAL_HEIGHT) {
                 b.y = LOGICAL_HEIGHT - RADIUS; 
                 b.vy *= -0.5; 
                 b.vx *= 0.8;
                 
-                // Logica de bonus ao tocar o chão
                 if (Math.abs(b.vy) > 1.5) {
-                    AudioEngine.coin(); // Som de dinheiro viciante
-                    score += 2; // +2 pontos extras
+                    AudioEngine.coin(); 
+                    score += 2; 
                     document.getElementById('ui-score').innerText = score;
-                    createFloatingScore(b.x, b.y - 20, 2, true); // Apelo visual envolvente
-                    createSparkles(b.x, b.y, b.config.color); // Explosão de brilho
+                    createFloatingScore(b.x, b.y - 20, 2, true); 
+                    createSparkles(b.x, b.y, b.config.color); 
                     shakeAmount = Math.max(shakeAmount, 3);
                 }
             }
@@ -557,7 +565,6 @@
         grid.flat().forEach(b => b && b.draw(scX, scY));
         fallingBubbles.forEach(b => b.draw(scX, scY));
         
-        // Draw sparkles
         sparkles.forEach(s => {
             ctx.fillStyle = s.color;
             ctx.globalAlpha = s.life;
