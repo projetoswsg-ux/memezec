@@ -5,203 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Crypto Shooter: Bitcoin & Friends</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-
-        :root {
-            --bg-dark: #0b0e11;
-        }
-
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            overflow: hidden;
-            font-family: 'Fredoka One', cursive;
-            background-color: var(--bg-dark);
-            user-select: none;
-            touch-action: none;
-            color: white;
-        }
-
-        #game-wrapper { 
-            position: relative; 
-            width: 100%; 
-            height: 100%; 
-            background-image: url('https://cdn.jsdelivr.net/gh/projetoswsg-ux/Escapela@main/WhatsApp%20Image%202026-04-18%20at%2011.03.47.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            transition: background-image 0.5s ease-in-out;
-        }
-
-        #game-wrapper::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to right, 
-                rgba(240, 185, 11, 0.3) 0%, 
-                rgba(240, 185, 11, 0) 15%, 
-                rgba(240, 185, 11, 0) 85%, 
-                rgba(240, 185, 11, 0.3) 100%
-            );
-            pointer-events: none;
-            z-index: 5;
-        }
-        
-        canvas { 
-            display: block; 
-            width: 100%; 
-            height: 100%; 
-            position: relative;
-            z-index: 1;
-        }
-
-        .overlay-screen { 
-            position: absolute; 
-            inset: 0; 
-            background: rgba(11, 14, 17, 0.95); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 1000; 
-            backdrop-filter: blur(8px); 
-            text-align: center;
-        }
-        .hidden { display: none !important; }
-
-        #map-screen { 
-            background: linear-gradient(to bottom, #1e2329, #0b0e11); 
-            overflow-y: auto; 
-            padding: 40px 0; 
-        }
-        .levels-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 20px; 
-            padding: 20px; 
-            max-width: 400px; 
-        }
-        
-        .level-node {
-            width: 70px; height: 70px; border-radius: 18px; border: 2px solid #2b2f36;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: #848e9c; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            transition: all 0.2s;
-            background: #1e2329;
-        }
-        .level-node:active { transform: scale(0.9); }
-        .level-node.unlocked { border-color: #f0b90b; color: #f0b90b; background: rgba(240, 185, 11, 0.1); }
-        .level-node.completed { background: #0ecb81; border-color: #0ecb81; color: white; }
-        .level-node.locked { opacity: 0.3; cursor: not-allowed; }
-
-        .btn-crypto { 
-            background: #f0b90b; 
-            color: #0b0e11; padding: 14px 30px; border-radius: 12px; 
-            font-weight: bold; cursor: pointer; font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(240, 185, 11, 0.3);
-            transition: transform 0.2s;
-            width: 220px;
-        }
-        .btn-crypto:active { transform: scale(0.95); }
-
-        .btn-secondary {
-            background: #2b2f36;
-            color: #eaecef;
-            padding: 14px 30px; border-radius: 12px;
-            font-weight: bold; cursor: pointer; font-size: 1.1rem;
-            border: 1px solid #474d57;
-            transition: all 0.2s;
-            width: 220px;
-        }
-        .btn-secondary:active { transform: scale(0.95); }
-        
-        .header-ui { 
-            position: absolute; 
-            top: 0; 
-            left: 0;
-            width: 100%; 
-            padding: 10px 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            z-index: 100; 
-            background: rgba(30, 144, 255, 0.9);
-            border-bottom: 2px solid #474d57;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .ui-badge { 
-            color: white;
-            font-size: 1rem;
-            text-shadow: 1px 1px 2px black;
-        }
-
-        .swap-control { 
-            position: absolute; right: 25px; bottom: 35px; 
-            width: 85px; height: 85px; background: #1e2329; 
-            border-radius: 20px; border: 2px solid #474d57; 
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; z-index: 50; cursor: pointer;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-        }
-
-        #next-crypto-preview { font-size: 40px; display: flex; align-items: center; justify-content: center; }
-
-        .reverse-icon {
-            position: absolute; top: -10px; right: -10px;
-            background: #f0b90b; width: 28px; height: 28px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        }
-
-        #loading-screen {
-            position: absolute; inset: 0; background: #0b0e11;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 2000;
-        }
-
-        @keyframes floating-text {
-            0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            20% { transform: translateY(-20px) scale(1.5); opacity: 1; }
-            100% { transform: translateY(-100px) scale(1); opacity: 0; }
-        }
-
-        .floating-score {
-            position: absolute;
-            pointer-events: none;
-            color: #f0b90b;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            z-index: 200;
-            animation: floating-text 1.2s ease-out forwards;
-        }
-
-        .bonus-float {
-            position: absolute;
-            pointer-events: none;
-            color: #00ffcc;
-            font-size: 28px;
-            font-weight: bold;
-            text-shadow: 0 0 10px #00ffcc;
-            z-index: 210;
-            animation: floating-text 0.8s ease-out forwards;
-        }
-
-        .milestone-msg {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 50px;
-            font-weight: bold;
-            color: #0ecb81;
-            text-shadow: 0 0 20px rgba(14, 203, 129, 0.8);
-            pointer-events: none;
-            z-index: 250;
-            white-space: nowrap;
-            animation: floating-text 1s ease-in-out forwards;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/style.css">
 </head>
 <body>
 
@@ -234,6 +38,7 @@
     <div id="lose-screen" class="overlay-screen hidden">
         <div class="text-7xl mb-4">📉</div>
         <h2 class="text-3xl text-[#f6465d] mb-8">RECUO DO MERCADO</h2>
+        <p id="lose-reason" class="text-white/60 mb-4 text-sm uppercase tracking-widest"></p>
         <button onclick="retryLevel()" class="btn-crypto">TENTAR NOVAMENTE</button>
     </div>
 
@@ -243,7 +48,11 @@
         <div class="reverse-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0b0e11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21l-4-4 4-4"/><path d="M3 17h18"/><path d="M17 3l4 4-4 4"/><path d="M21 7H3"/></svg>
         </div>
-        <div id="next-crypto-preview"></div>
+        <div id="next-crypto-preview" class="flex items-center justify-center relative">
+            <canvas id="previewCanvas" width="50" height="50"></canvas>
+            <!-- Contador de bolas adicionado aqui -->
+            <div id="ball-count-badge" class="absolute -top-1 -right-1 bg-[#f0b90b] text-[#0b0e11] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0b0e11]">0</div>
+        </div>
         <span class="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-tighter">Próxima</span>
     </div>
 </div>
@@ -253,17 +62,7 @@
 
     const AudioEngine = (() => {
         let ctx = null;
-        let musicInterval = null;
-        let step = 0;
-        
-        // Sequência de notas para a música animada estilo 8-bits (Progressão I-IV-V Clássica)
-        const arp = [
-            262, 330, 392, 523, 262, 330, 392, 523, // C
-            349, 440, 523, 698, 349, 440, 523, 698, // F
-            392, 494, 587, 784, 392, 494, 587, 784, // G
-            262, 330, 392, 523, 262, 330, 392, 523  // C
-        ];
-
+        const init = () => { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); };
         const play = (f, t, d, v=0.08) => {
             if (!ctx || ctx.state === 'suspended') return;
             const o = ctx.createOscillator(), g = ctx.createGain();
@@ -273,26 +72,6 @@
             o.connect(g); g.connect(ctx.destination);
             o.start(); o.stop(ctx.currentTime + d);
         };
-
-        const startMusicLoop = () => {
-            if (musicInterval) return;
-            musicInterval = setInterval(() => {
-                // Toca a música apenas se o jogo estiver rodando (gameState === 'PLAYING')
-                if (ctx && ctx.state === 'running' && typeof gameState !== 'undefined' && gameState === 'PLAYING') {
-                    if (step % 4 === 0) play(arp[step]/4, 'square', 0.2, 0.015); // Linha de baixo (Bass)
-                    play(arp[step]/2, 'sine', 0.1, 0.015); // Melodia principal
-                    step = (step + 1) % arp.length;
-                }
-            }, 160); // Ritmo rápido e animado
-        };
-
-        const init = () => { 
-            if (!ctx) {
-                ctx = new (window.AudioContext || window.webkitAudioContext)(); 
-                startMusicLoop();
-            }
-        };
-
         return { 
             init, 
             shoot: () => play(400, 'sine', 0.1, 0.05),
@@ -315,7 +94,7 @@
 
     const CRYPTO_CONFIG = [
         { id: 'yellow', symbol: 'YELLOW', color: '#ffea00', emoji: '🍌' },
-        { id: 'blue', symbol: 'BLUE', color: '#0000ff', emoji: ' 🍄 ' },
+        { id: 'blue', symbol: 'BLUE', color: '#0000ff', emoji: '🍄' },
         { id: 'green', symbol: 'GREEN', color: '#00ff00', emoji: '🥕' },
         { id: 'red', symbol: 'RED', color: '#ff0000', emoji: '🥩' },
         { id: 'purple', symbol: 'PURPLE', color: '#800080', emoji: '🦴' }
@@ -325,7 +104,6 @@
         try {
             const bgResponse = await fetch('https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/fundo.json');
             levelAssets = await bgResponse.json();
-            
             document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('map-screen').classList.remove('hidden');
             renderMap();
@@ -350,7 +128,7 @@
     let score = 0;
     let grid = [];
     let fallingBubbles = [];
-    let sparkles = []; // Novas partículas visuais de bônus
+    let sparkles = []; 
     let currentBubble = null;
     let nextSymbol = '';
     let rawAimAngle = -Math.PI/2;
@@ -359,6 +137,7 @@
     let isShooting = false;
     let laserPulse = 0;
     let shakeAmount = 0;
+    let remainingBalls = 0; // Nova variável para controle de munição
 
     function resize() {
         const dpr = window.devicePixelRatio || 1;
@@ -377,17 +156,17 @@
             this.config = CRYPTO_CONFIG.find(c => c.symbol === symbol) || CRYPTO_CONFIG[0];
         }
 
-        draw(scX, scY) {
+        draw(scX, scY, targetCtx = ctx) {
             const dX = this.x * scX;
             const dY = this.y * scY;
             const r = (RADIUS - 1) * scX;
 
-            ctx.save();
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetY = 5;
+            targetCtx.save();
+            targetCtx.shadowColor = 'rgba(0,0,0,0.5)';
+            targetCtx.shadowBlur = 10;
+            targetCtx.shadowOffsetY = 5;
 
-            const grad = ctx.createRadialGradient(
+            const grad = targetCtx.createRadialGradient(
                 dX - r * 0.3, dY - r * 0.3, r * 0.05, 
                 dX, dY, r
             );
@@ -395,39 +174,39 @@
             grad.addColorStop(0.1, this.config.color);
             grad.addColorStop(1, this.darkenColor(this.config.color, 50));
             
-            ctx.beginPath();
-            ctx.arc(dX, dY, r, 0, Math.PI * 2);
-            ctx.fillStyle = grad;
-            ctx.fill();
+            targetCtx.beginPath();
+            targetCtx.arc(dX, dY, r, 0, Math.PI * 2);
+            targetCtx.fillStyle = grad;
+            targetCtx.fill();
             
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
+            targetCtx.shadowBlur = 0;
+            targetCtx.shadowOffsetY = 0;
 
-            ctx.save();
-            ctx.globalAlpha = 0.60; 
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = `${Math.round(r * 0.8)}px Arial`;
-            ctx.fillText(this.config.emoji, dX, dY + (r * 0.05));
-            ctx.restore();
+            targetCtx.save();
+            targetCtx.globalAlpha = 0.60; 
+            targetCtx.textAlign = 'center';
+            targetCtx.textBaseline = 'middle';
+            targetCtx.font = `${Math.round(r * 0.8)}px Arial`;
+            targetCtx.fillText(this.config.emoji, dX, dY + (r * 0.05));
+            targetCtx.restore();
 
-            const highlight = ctx.createLinearGradient(dX, dY - r, dX, dY + r);
+            const highlight = targetCtx.createLinearGradient(dX, dY - r, dX, dY + r);
             highlight.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
             highlight.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)');
             highlight.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
             
-            ctx.beginPath();
-            ctx.ellipse(dX, dY - r * 0.45, r * 0.75, r * 0.4, 0, 0, Math.PI * 2);
-            ctx.fillStyle = highlight;
-            ctx.fill();
+            targetCtx.beginPath();
+            targetCtx.ellipse(dX, dY - r * 0.45, r * 0.75, r * 0.4, 0, 0, Math.PI * 2);
+            targetCtx.fillStyle = highlight;
+            targetCtx.fill();
 
-            ctx.beginPath();
-            ctx.arc(dX, dY, r - 1.5, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            targetCtx.beginPath();
+            targetCtx.arc(dX, dY, r - 1.5, 0, Math.PI * 2);
+            targetCtx.strokeStyle = 'rgba(255,255,255,0.4)';
+            targetCtx.lineWidth = 2;
+            targetCtx.stroke();
 
-            ctx.restore();
+            targetCtx.restore();
         }
 
         darkenColor(hex, percent) {
@@ -438,6 +217,17 @@
             B = (num & 0x0000FF) - amt;
             return "#" + (0x1000000 + (R<255?R<0?0:R:255)*0x10000 + (G<255?G<0?0:G:255)*0x100 + (B<255?B<0?0:B:255)).toString(16).slice(1);
         }
+    }
+
+    function updatePreview() {
+        const pCanvas = document.getElementById('previewCanvas');
+        const pCtx = pCanvas.getContext('2d');
+        pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+        const previewBubble = new Bubble(25, 25, nextSymbol);
+        previewBubble.draw(1, 1, pCtx);
+        
+        // Atualiza o contador de bolas no seletor
+        document.getElementById('ball-count-badge').innerText = remainingBalls;
     }
 
     const getLX = (r, c) => (c * RADIUS * 2) + RADIUS + (r % 2 ? RADIUS : 0) + (LOGICAL_WIDTH - COLS * RADIUS * 2) / 2;
@@ -483,6 +273,9 @@
     function startGame(lvl) {
         AudioEngine.init();
         currentLevel = lvl; score = 0; isShooting = false; fallingBubbles = []; sparkles = [];
+        // Lógica de bolas: Começa com 30 e aumenta 5 a cada 2 níveis
+        remainingBalls = 30 + (Math.floor(lvl / 2) * 5);
+        
         document.getElementById('ui-current-lvl').innerText = lvl;
         document.getElementById('ui-score').innerText = '0';
         document.getElementById('map-screen').classList.add('hidden');
@@ -492,6 +285,7 @@
         updateBackground(lvl);
         initLevelData(lvl);
         gameState = 'PLAYING';
+        updatePreview();
     }
 
     function initLevelData(lvl) {
@@ -511,23 +305,28 @@
     function spawnShot() {
         const activeTypes = [...new Set(grid.flat().filter(f => f).map(f => f.type))];
         if (activeTypes.length === 0 && fallingBubbles.length === 0) { winGame(); return; }
+        
+        // Verifica se acabaram as bolas
+        if (remainingBalls <= 0) {
+            gameOver("SEM LIQUIDEZ");
+            return;
+        }
+
         currentBubble = new Bubble(LOGICAL_WIDTH/2, LOGICAL_HEIGHT - 80, nextSymbol);
         const pool = activeTypes.length > 0 ? activeTypes : CRYPTO_CONFIG.map(c => c.symbol);
         nextSymbol = pool[Math.floor(Math.random() * pool.length)];
         
-        const nextEmoji = CRYPTO_CONFIG.find(c => c.symbol === nextSymbol).emoji;
-        document.getElementById('next-crypto-preview').innerText = nextEmoji;
+        updatePreview(); 
         isShooting = false;
     }
 
     function swapBubbles() {
-        if (isShooting || gameState !== 'PLAYING') return;
+        if (isShooting || gameState !== 'PLAYING' || !currentBubble) return;
         AudioEngine.swap();
         const temp = currentBubble.type;
         currentBubble = new Bubble(currentBubble.x, currentBubble.y, nextSymbol);
         nextSymbol = temp;
-        const nextEmoji = CRYPTO_CONFIG.find(c => c.symbol === nextSymbol).emoji;
-        document.getElementById('next-crypto-preview').innerText = nextEmoji;
+        updatePreview();
     }
 
     function getNeighbors(r, c) {
@@ -621,11 +420,16 @@
         } else {
             AudioEngine.impact();
             if (bestR >= ROWS - 2) {
-                gameState = 'LOSE';
-                document.getElementById('lose-screen').classList.remove('hidden');
-                AudioEngine.lose();
+                gameOver("RECUO DO MERCADO");
             } else { spawnShot(); }
         }
+    }
+
+    function gameOver(reason) {
+        gameState = 'LOSE';
+        document.getElementById('lose-reason').innerText = reason;
+        document.getElementById('lose-screen').classList.remove('hidden');
+        AudioEngine.lose();
     }
 
     function winGame() {
@@ -664,7 +468,6 @@
         smoothAimAngle += (rawAimAngle - smoothAimAngle) * 0.15;
         if (shakeAmount > 0) shakeAmount *= 0.9;
         
-        // Update Sparkles
         for(let i = sparkles.length-1; i >= 0; i--) {
             const s = sparkles[i];
             s.x += s.vx; s.y += s.vy; s.vy += 0.3; s.life -= 0.04;
@@ -675,19 +478,17 @@
             const b = fallingBubbles[i];
             b.vy += 0.8; b.x += b.vx; b.y += b.vy;
 
-            // QUANDO A BOLA BATE NO CHÃO (BONUS)
             if (b.y + RADIUS > LOGICAL_HEIGHT) {
                 b.y = LOGICAL_HEIGHT - RADIUS; 
                 b.vy *= -0.5; 
                 b.vx *= 0.8;
                 
-                // Logica de bonus ao tocar o chão
                 if (Math.abs(b.vy) > 1.5) {
-                    AudioEngine.coin(); // Som de dinheiro viciante
-                    score += 2; // +2 pontos extras
+                    AudioEngine.coin(); 
+                    score += 2; 
                     document.getElementById('ui-score').innerText = score;
-                    createFloatingScore(b.x, b.y - 20, 2, true); // Apelo visual envolvente
-                    createSparkles(b.x, b.y, b.config.color); // Explosão de brilho
+                    createFloatingScore(b.x, b.y - 20, 2, true); 
+                    createSparkles(b.x, b.y, b.config.color); 
                     shakeAmount = Math.max(shakeAmount, 3);
                 }
             }
@@ -781,7 +582,6 @@
         grid.flat().forEach(b => b && b.draw(scX, scY));
         fallingBubbles.forEach(b => b.draw(scX, scY));
         
-        // Draw sparkles
         sparkles.forEach(s => {
             ctx.fillStyle = s.color;
             ctx.globalAlpha = s.life;
@@ -801,7 +601,7 @@
         return { x: (ex - rect.left) * (LOGICAL_WIDTH / rect.width), y: (ey - rect.top) * (LOGICAL_HEIGHT / rect.height) };
     };
     const start = (e) => {
-        if (gameState !== 'PLAYING' || isShooting) return;
+        if (gameState !== 'PLAYING' || isShooting || !currentBubble) return;
         isDragging = true;
         const p = getRel(e.touches ? e.touches[0].clientX : e.clientX, e.touches ? e.touches[0].clientY : e.clientY);
         rawAimAngle = Math.atan2(p.y - currentBubble.y, p.x - currentBubble.x);
@@ -814,7 +614,11 @@
     };
     const end = () => {
         if (!isDragging) return;
-        isDragging = false; isShooting = true;
+        isDragging = false; 
+        isShooting = true;
+        remainingBalls--; // Gasta uma bola ao atirar
+        updatePreview(); // Atualiza contador visual
+        
         currentBubble.vx = Math.cos(smoothAimAngle) * 22;
         currentBubble.vy = Math.sin(smoothAimAngle) * 22;
         AudioEngine.shoot();
