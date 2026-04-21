@@ -8,48 +8,48 @@
     },
     "2": {
       "name": "parana",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/parana.jpeg",
+      "background": " "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
 
        "3": {
       "name": "saopaulo",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/sampa.jpeg",
+      "background": " "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "4": {
       "name": "riojaneiro",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": " "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "5": {
       "name": "minas",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": " "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "6": {
       "name": "brasilia",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "7": {
       "name": "matogrosso",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "8": {
       "name": "goias",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "9": {
       "name": "bahia",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "10": {
       "name": "maranhao",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
        "11": {
