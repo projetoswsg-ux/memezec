@@ -4,62 +4,98 @@
     "1": {
       "name": "riogrande",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 1.5, "target": 500 }
+      "config": {
+        "speed": 1.5,
+        "target": 500
+      }
     },
     "2": {
       "name": "parana",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "3": {
       "name": "saopaulo",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "4": {
       "name": "riojaneiro",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "5": {
       "name": "minas",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "6": {
       "name": "brasilia",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "7": {
       "name": "matogrosso",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "8": {
       "name": "goias",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "9": {
       "name": "bahia",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "10": {
       "name": "maranhao",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "11": {
       "name": "para",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 2.0, "target": 1000 }
+      "config": {
+        "speed": 2.0,
+        "target": 1000
+      }
     },
     "12": {
       "name": "amazonas",
       "background": "https://raw.githubusercontent.com/projetoswsg-ux/memezec/main/bg1.webp",
-      "config": { "speed": 3.5, "target": 5000 }
+      "config": {
+        "speed": 3.5,
+        "target": 5000
+      }
     }
   }
 }
