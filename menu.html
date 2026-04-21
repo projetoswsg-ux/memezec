@@ -7,162 +7,170 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/style.css">
 
-<style>
-/* ===== LAYOUT PRINCIPAL ===== */
-#game-wrapper {
-    background-image: url('https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/bg1.webp');
-    background-size: cover;
-    background-position: center;
+     <style>
+        /* Define o background padrão diretamente via CSS */
+        #game-wrapper {
+            background-image: url('https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/bg1.webp');
+            background-size: cover;
+            background-position: center;
+        }
 
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-}
+        /* Estilos do Menu Inferior estilo Telegram */
+        .tg-menu {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: rgba(11, 14, 17, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(240, 185, 11, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
 
-/* ===== CANVAS (JOGO) ===== */
-#gameCanvas {
-    flex: 1;
-    width: 100%;
-    display: block;
-}
+        .tg-menu.hidden {
+            transform: translateY(100%);
+            display: none;
+        }
 
-/* ===== HEADER ===== */
-.header-ui {
-    flex-shrink: 0;
-}
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #848e9c;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
 
-/* ===== BOTÃO FLUTUANTE (SWAP) ===== */
-.swap-control {
-    position: absolute;
-    bottom: 80px;
-    right: 10px;
-    z-index: 50;
-}
+        .menu-item.active { color: #f0b90b; }
 
-/* ===== MENU INFERIOR ===== */
-.tg-menu {
-    height: 55px;
-    background: rgba(11, 14, 17, 0.95);
-    backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(240, 185, 11, 0.2);
+        .btn-add-ball {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            background: #f0b90b;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(240, 185, 11, 0.4);
+            cursor: pointer;
+        }
 
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+        /* Overlay de Anúncio */
+        #ad-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
 
-    flex-shrink: 0;
-    z-index: 100;
-}
+        /* Animação do contador piscando */
+        @keyframes pulse-red {
+            0% { transform: scale(1); color: #0b0e11; background-color: #f0b90b; }
+            50% { transform: scale(1.3); color: #fff; background-color: #f6465d; box-shadow: 0 0 15px #f6465d; }
+            100% { transform: scale(1); color: #0b0e11; background-color: #f0b90b; }
+        }
 
-.tg-menu.hidden {
-    display: none;
-}
+        .critical-balls {
+            animation: pulse-red 0.6s infinite !important;
+        }
+    </style>
+    <style>
+        /* Define o background padrão diretamente via CSS */
+        #game-wrapper {
+            background-image: url('https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/bg1.webp');
+            background-size: cover;
+            background-position: center;
+        }
 
-/* ===== ITENS DO MENU ===== */
-.menu-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+        /* Estilos do Menu Inferior estilo Telegram */
+        .tg-menu {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: rgba(11, 14, 17, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(240, 185, 11, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
 
-    color: #848e9c;
-    font-size: 9px;
-    text-transform: uppercase;
-    font-weight: bold;
+        .tg-menu.hidden {
+            transform: translateY(100%);
+            display: none;
+        }
 
-    transition: all 0.2s ease;
-}
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #848e9c;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
 
-/* ÍCONES */
-.menu-item svg {
-    width: 22px;
-    height: 22px;
-    margin-bottom: 2px;
-    transition: all 0.2s ease;
-}
+        .menu-item.active { color: #f0b90b; }
 
-/* TEXTO */
-.menu-item span {
-    margin-top: 2px;
-}
+        .btn-add-ball {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            background: #f0b90b;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(240, 185, 11, 0.4);
+            cursor: pointer;
+        }
 
-/* ITEM ATIVO */
-.menu-item.active {
-    color: #f0b90b;
-}
+        /* Overlay de Anúncio */
+        #ad-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
 
-.menu-item.active svg {
-    transform: scale(1.1);
-}
+        /* Animação do contador piscando */
+        @keyframes pulse-red {
+            0% { transform: scale(1); color: #0b0e11; background-color: #f0b90b; }
+            50% { transform: scale(1.3); color: #fff; background-color: #f6465d; box-shadow: 0 0 15px #f6465d; }
+            100% { transform: scale(1); color: #0b0e11; background-color: #f0b90b; }
+        }
 
-/* ===== BOTÃO CENTRAL (+ BOLAS) ===== */
-.btn-add-ball {
-    position: relative;
-    width: 44px;
-    height: 44px;
-
-    background: #f0b90b;
-    border-radius: 50%;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    margin-top: -20px; /* efeito flutuante */
-    border: 3px solid #0b0e11;
-
-    box-shadow: 0 0 15px rgba(240, 185, 11, 0.4);
-    cursor: pointer;
-
-    transition: transform 0.2s ease;
-}
-
-.btn-add-ball:active {
-    transform: scale(0.9);
-}
-
-/* ===== OVERLAY DE ANÚNCIO ===== */
-#ad-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    background: #000;
-    z-index: 1000;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-/* ===== ANIMAÇÃO CONTADOR ===== */
-@keyframes pulse-red {
-    0% {
-        transform: scale(1);
-        color: #0b0e11;
-        background-color: #f0b90b;
-    }
-    50% {
-        transform: scale(1.3);
-        color: #fff;
-        background-color: #f6465d;
-        box-shadow: 0 0 15px #f6465d;
-    }
-    100% {
-        transform: scale(1);
-        color: #0b0e11;
-        background-color: #f0b90b;
-    }
-}
-
-.critical-balls {
-    animation: pulse-red 0.6s infinite !important;
-}
-</style>
+        .critical-balls {
+            animation: pulse-red 0.6s infinite !important;
+        }
+    </style>
 
 
     
