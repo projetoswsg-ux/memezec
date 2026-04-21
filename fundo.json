@@ -8,51 +8,50 @@
     },
     "2": {
       "name": "parana",
-      "background": " "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-
-       "3": {
+    "3": {
       "name": "saopaulo",
-      "background": " "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-       "4": {
+    "4": {
       "name": "riojaneiro",
-      "background": " "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-       "5": {
+    "5": {
       "name": "minas",
-      "background": " "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-       "6": {
+    "6": {
       "name": "brasilia",
       "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-       "7": {
+    "7": {
       "name": "matogrosso",
       "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-       "8": {
+    "8": {
       "name": "goias",
       "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-       "9": {
+    "9": {
       "name": "bahia",
       "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-       "10": {
+    "10": {
       "name": "maranhao",
       "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
     },
-       "11": {
+    "11": {
       "name": "para",
       "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp",
       "config": { "speed": 2.0, "target": 1000 }
