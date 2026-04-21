@@ -54,12 +54,12 @@
     },
        "11": {
       "name": "para",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": "   https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/IMG-20260420-WA0027%20(1).webp ",
       "config": { "speed": 2.0, "target": 1000 }
     },
     "12": {
       "name": "amazonas",
-      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojaneiro.jpeg",
+      "background": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/riojang",
       "config": { "speed": 3.5, "target": 5000 }
     }
   }
