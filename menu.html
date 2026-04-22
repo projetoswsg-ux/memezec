@@ -9,6 +9,50 @@
 
 
     <style>
+
+
+
+
+.swap-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    /* EFEITO VIDRO */
+    background: rgba(255, 255, 255, 0.1); /* Fundo branco bem transparente */
+    backdrop-filter: blur(12px);          /* Embaça o que está atrás */
+    -webkit-backdrop-filter: blur(12px);
+    
+    /* BORDA BRILHANTE */
+    border: 1px solid rgba(255, 255, 255, 0.2); 
+    border-radius: 16px;
+    
+    /* SOMBRA PARA DAR PROFUNDIDADE */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* EFEITO AO PASSAR O MOUSE */
+.swap-control:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* AJUSTE NO ÍCONE PARA BRILHAR */
+.reverse-icon svg {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
+}
+
+
+
+
+
+
+
+        
         /* Define o background padrão diretamente via CSS */
         #game-wrapper {
             background-image: url('https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/bg1.webp');
