@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chainboy Pro - Multi-Game OS</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --console-body: #121212;
+            --accent-gold: #ffcc00;
+            --screen-bg: #1a1c15;
+            --button-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --led-red: #ff3333;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .chainboy {
+            background: var(--console-body);
+            width: 360px;
+            padding: 25px;
+            border-radius: 20px 20px 80px 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), 
+                        inset 0 2px 3px rgba(255,255,255,0.05);
+            border: 1px solid #222;
+            position: relative;
+        }
+
+        .screen-bezel {
+            background: #000;
+            padding: 15px 15px 30px 15px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--accent-gold);
+            position: relative;
+        }
+
+        .screen-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 0 5px;
+        }
+
+        .brand {
+            color: var(--accent-gold);
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-size: 14px;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.3);
+        }
+
+        .power-light {
+            width: 7px;
+            height: 7px;
+            background: var(--led-red);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--led-red);
+        }
+
+        canvas {
+            background: var(--screen-bg);
+            display: block;
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 4px;
+            image-rendering: pixelated;
+        }
+
+        .controls-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px;
+        }
+
+        .d-pad {
+            position: relative;
+            width: 110px;
+            height: 110px;
+        }
+
+        .d-btn {
+            position: absolute;
+            background: var(--button-bg);
+            border: none;
+            color: var(--accent-gold);
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            box-shadow: 0 4px 0 #000;
+            transition: all 0.1s;
+        }
+
+        .d-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #000;
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        .up { top: 0; left: 37.5px; border-radius: 5px 5px 0 0; }
+        .down { bottom: 0; left: 37.5px; border-radius: 0 0 5px 5px; }
+        .left { top: 37.5px; left: 0; border-radius: 5px 0 0 5px; }
+        .right { top: 37.5px; right: 0; border-radius: 0 5px 5px 0; }
+        
+        .center-dot {
+            position: absolute;
+            top: 37.5px;
+            left: 37.5px;
+            width: 35px;
+            height: 35px;
+            background: var(--button-bg);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 15px;
+            transform: rotate(-15deg);
+            margin-top: 20px;
+        }
+
+        .circle-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            border: none;
+            background: var(--button-bg);
+            color: var(--accent-gold);
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 3px 5px 0 #000;
+            cursor: pointer;
+            transition: 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circle-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #000;
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        .btn-a { margin-top: -15px; }
+
+        .system-tray {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 50px;
+            padding-bottom: 20px;
+        }
+
+        .pill-btn {
+            width: 50px;
+            height: 12px;
+            background: #252525;
+            border-radius: 10px;
+            transform: rotate(-20deg);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .pill-btn::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: #555;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chainboy">
+        <div class="screen-bezel">
+            <div class="screen-top">
+                <span class="brand">Chainboy OS</span>
+                <div class="power-light"></div>
+            </div>
+            <canvas id="gameCanvas" width="300" height="300"></canvas>
+        </div>
+
+        <div class="controls-area">
+            <div class="d-pad">
+                <div class="center-dot"></div>
+                <button class="d-btn up" onclick="handleInput('UP')">▲</button>
+                <button class="d-btn down" onclick="handleInput('DOWN')">▼</button>
+                <button class="d-btn left" onclick="handleInput('LEFT')">◀</button>
+                <button class="d-btn right" onclick="handleInput('RIGHT')">▶</button>
+            </div>
+
+            <div class="action-btns">
+                <button class="circle-btn btn-b" onclick="handleInput('B')">B</button>
+                <button class="circle-btn btn-a" onclick="handleInput('A')">A</button>
+            </div>
+        </div>
+
+        <div class="system-tray">
+            <div class="pill-btn" data-label="SELECT" onclick="handleInput('SELECT')"></div>
+            <div class="pill-btn" data-label="START" onclick="handleInput('START')"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        
+        // State Management
+        let currentMode = "MENU"; // MENU, SNAKE, BREAKOUT, INVADERS, GAMEOVER
+        let selectedOption = 0;
+        const options = ["SNAKE CLASSIC", "BLOCK BREAKER", "VOID SHOOTER"];
+        
+        let gameInterval = null;
+        let score = 0;
+
+        // Audio System
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq, type, duration, volume = 0.05) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        // --- SNAKE GAME LOGIC ---
+        let snake = [], food = {}, sDx = 1, sDy = 0;
+        function initSnake() {
+            snake = [{x: 10, y: 10}, {x: 9, y: 10}, {x: 8, y: 10}];
+            sDx = 1; sDy = 0;
+            score = 0;
+            spawnFood();
+            currentMode = "SNAKE";
+            gameInterval = setInterval(updateSnake, 120);
+        }
+        function spawnFood() {
+            food = { x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20) };
+        }
+        function updateSnake() {
+            const head = { x: snake[0].x + sDx, y: snake[0].y + sDy };
+            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || snake.some(p => p.x === head.x && p.y === head.y)) {
+                return endGame();
+            }
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                playSound(600, 'square', 0.1);
+                spawnFood();
+            } else {
+                snake.pop();
+            }
+            drawSnake();
+        }
+        function drawSnake() {
+            ctx.fillStyle = "#1a1c15";
+            ctx.fillRect(0,0,300,300);
+            const ts = 15;
+            ctx.fillStyle = "#ffcc00";
+            snake.forEach(p => ctx.fillRect(p.x * ts, p.y * ts, ts-1, ts-1));
+            ctx.fillStyle = "#ff3333";
+            ctx.fillRect(food.x * ts, food.y * ts, ts-1, ts-1);
+        }
+
+        // --- BREAKOUT LOGIC ---
+        let paddle = 125, ball = {x: 150, y: 250, dx: 3, dy: -3}, bricks = [];
+        function initBreakout() {
+            paddle = 125;
+            ball = {x: 150, y: 200, dx: 3, dy: -3};
+            bricks = [];
+            for(let i=0; i<5; i++) for(let j=0; j<8; j++) bricks.push({x: j*35 + 10, y: i*15 + 30, active: true});
+            currentMode = "BREAKOUT";
+            gameInterval = setInterval(updateBreakout, 20);
+        }
+        function updateBreakout() {
+            ball.x += ball.dx; ball.y += ball.dy;
+            if (ball.x <= 0 || ball.x >= 295) ball.dx *= -1;
+            if (ball.y <= 0) ball.dy *= -1;
+            if (ball.y >= 285) {
+                if (ball.x > paddle && ball.x < paddle + 50) {
+                    ball.dy *= -1;
+                    playSound(400, 'triangle', 0.1);
+                } else return endGame();
+            }
+            bricks.forEach(b => {
+                if(b.active && ball.x > b.x && ball.x < b.x+30 && ball.y > b.y && ball.y < b.y+10) {
+                    b.active = false; ball.dy *= -1; playSound(800, 'square', 0.05);
+                }
+            });
+            drawBreakout();
+        }
+        function drawBreakout() {
+            ctx.fillStyle = "#1a1c15"; ctx.fillRect(0,0,300,300);
+            ctx.fillStyle = "#ffcc00"; ctx.fillRect(paddle, 285, 50, 8);
+            ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(ball.x, ball.y, 4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#555"; bricks.forEach(b => b.active && ctx.fillRect(b.x, b.y, 30, 10));
+        }
+
+        // --- OS CORE ---
+        function drawMenu() {
+            ctx.fillStyle = "#1a1c15";
+            ctx.fillRect(0,0,300,300);
+            
+            ctx.fillStyle = "var(--accent-gold)";
+            ctx.font = "bold 20px Courier New";
+            ctx.fillText("SELECT GAME", 80, 50);
+            
+            options.forEach((opt, i) => {
+                ctx.fillStyle = (i === selectedOption) ? "#fff" : "#444";
+                if(i === selectedOption) ctx.fillText(">", 50, 120 + (i*40));
+                ctx.fillText(opt, 80, 120 + (i*40));
+            });
+
+            ctx.font = "10px Courier New";
+            ctx.fillStyle = "#666";
+            ctx.fillText("UP/DOWN TO SELECT - START TO RUN", 50, 270);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            playSound(200, 'sawtooth', 0.5);
+            currentMode = "GAMEOVER";
+            ctx.fillStyle = "rgba(0,0,0,0.7)";
+            ctx.fillRect(0,0,300,300);
+            ctx.fillStyle = "#ffcc00";
+            ctx.font = "24px Courier New";
+            ctx.fillText("GAME OVER", 85, 140);
+            ctx.font = "12px Courier New";
+            ctx.fillText("PRESS SELECT FOR MENU", 75, 170);
+        }
+
+        function handleInput(btn) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            if (currentMode === "MENU") {
+                if (btn === 'UP') { selectedOption = (selectedOption - 1 + options.length) % options.length; playSound(300, 'sine', 0.05); }
+                if (btn === 'DOWN') { selectedOption = (selectedOption + 1) % options.length; playSound(300, 'sine', 0.05); }
+                if (btn === 'START' || btn === 'A') {
+                    if (selectedOption === 0) initSnake();
+                    if (selectedOption === 1) initBreakout();
+                    if (selectedOption === 2) alert("Space Invaders coming soon!"); 
+                }
+            } else if (currentMode === "SNAKE") {
+                if (btn === 'UP' && sDy === 0) { sDx = 0; sDy = -1; }
+                if (btn === 'DOWN' && sDy === 0) { sDx = 0; sDy = 1; }
+                if (btn === 'LEFT' && sDx === 0) { sDx = -1; sDy = 0; }
+                if (btn === 'RIGHT' && sDx === 0) { sDx = 1; sDy = 0; }
+            } else if (currentMode === "BREAKOUT") {
+                if (btn === 'LEFT') paddle = Math.max(0, paddle - 20);
+                if (btn === 'RIGHT') paddle = Math.min(250, paddle + 20);
+            }
+
+            if (btn === 'SELECT') {
+                clearInterval(gameInterval);
+                currentMode = "MENU";
+                drawMenu();
+            }
+
+            if (currentMode === "MENU") drawMenu();
+        }
+
+        // Init
+        window.onload = () => drawMenu();
+        window.addEventListener("keydown", e => {
+            const map = { "ArrowUp": "UP", "ArrowDown": "DOWN", "ArrowLeft": "LEFT", "ArrowRight": "RIGHT", "Enter": "START", "Shift": "SELECT", "a": "A", "s": "B" };
+            if (map[e.key]) handleInput(map[e.key]);
+        });
+    </script>
+</body>
+</html>
