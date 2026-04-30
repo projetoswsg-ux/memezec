@@ -180,18 +180,18 @@
 
     <div id="win-screen" class="overlay-screen hidden">
         <div class="text-7xl mb-4">🚀</div>
-        <h2 class="text-3xl text-[#0ecb81] mb-8">BULL MARKET!</h2>
+        <h2 class="text-3xl text-[#0ecb81] mb-8">Grande vitória!</h2>
         <div class="flex flex-col gap-4">
-            <button id="next-lvl-btn" onclick="nextLevel()" class="btn-crypto">PRÓXIMA FASE</button>
+            <button id="next-lvl-btn" onclick="nextLevel()" class="btn-crypto">PRÓXIMO JOGO</button>
             <button onclick="backToMap()" class="btn-secondary">VER MAPA</button>
         </div>
     </div>
 
     <div id="lose-screen" class="overlay-screen hidden">
         <div class="text-7xl mb-4">📉</div>
-        <h2 class="text-3xl text-[#f6465d] mb-8">RECUO DO MERCADO</h2>
+        <h2 class="text-3xl text-[#f6465d] mb-8">VOCÊ ESTÁ DESCLASSIFICADO</h2>
         <p id="lose-reason" class="text-white/60 mb-4 text-sm uppercase tracking-widest"></p>
-        <button onclick="retryLevel()" class="btn-crypto">TENTAR NOVAMENTE</button>
+        <button onclick="retryLevel()" class="btn-crypto">VOLTE PARA O CT</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -479,7 +479,7 @@
         if (activeTypes.length === 0 && fallingBubbles.length === 0) { winGame(); return; }
         
         if (remainingBalls <= 0) {
-            gameOver("SEM LIQUIDEZ");
+            gameOver("CARTÃO VERMELHO 🟥");
             return;
         }
 
@@ -576,8 +576,8 @@
                 }, i * 40);
             });
 
-            if (matches.length >= 6) createMilestoneMessage("BULL RUN!");
-            else if (matches.length >= 5) createMilestoneMessage("MOON!");
+            if (matches.length >= 6) createMilestoneMessage("UMA MÁQUINA");
+            else if (matches.length >= 5) createMilestoneMessage("GOOOOLLLLLLL");
 
             score += matches.length * 10;
             setTimeout(() => {
@@ -607,7 +607,7 @@
                 }
                 
                 if (fallCount > 5) {
-                    createMilestoneMessage("JACKPOT!");
+                    createMilestoneMessage("GOOOOLLL!");
                     AudioEngine.cashRegister(); 
                 }
                 document.getElementById('ui-score').innerText = score;
@@ -616,7 +616,7 @@
         } else {
             AudioEngine.impact();
             if (bestR >= ROWS - 2) {
-                gameOver("RECUO DO MERCADO");
+                gameOver("Você está fora!");
             } else { spawnShot(); }
         }
     }
@@ -849,14 +849,7 @@
 
 
 
-<!-- BEGIN AADS AD UNIT 2435282 -->
 
-<div id="frame" style="width: 100%;margin: auto;position: relative; z-index: 99998;">
-          <iframe data-aa='2435282' src='//acceptable.a-ads.com/2435282/?size=Adaptive'
-                            style='border:0; padding:0; width:70%; height:auto; overflow:hidden;display: block;margin: auto'></iframe>
-        </div>
-
-<!-- END AADS AD UNIT 2435282 -->
 
 
 
