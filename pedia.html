@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Memepédia - A enciclopédia livre dos memes. Layout estilo Wikipedia com navbar rolável, barra de pesquisa integrada, infoboxes e referências.">
+    <meta name="keywords" content="memes, enciclopédia, memepédia, wikipedia de memes, pesquisa">
+    <meta name="author" content="Memepédia">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ff69b4">
+    <meta property="og:title" content="Memepédia - Enciclopédia de Memes">
+    <meta property="og:description" content="Navbar rolável (não fixa), barra de pesquisa, layout responsivo, cores rosa e amarelo.">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630.png?text=Memepédia">
+    <meta property="og:type" content="website">
+    <title>Memepédia – Início</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #f8f9fa;
+            color: #202122;
+            line-height: 1.6;
+        }
+
+        /* Cores tema */
+        :root {
+            --pink-base: #ff69b4;
+            --pink-dark: #d63a8a;
+            --yellow-accent: #ffcc00;
+            --yellow-light: #fff3bf;
+            --gray-bg: #f8f9fa;
+            --border-gray: #eaecf0;
+        }
+
+        /* ===== NAVBAR ESTÁTICA (rola com a página) ===== */
+        .navbar-static {
+            background: white;
+            border-bottom: 1px solid var(--border-gray);
+            padding: 0.5rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .navbar-logo {
+            font-size: 1.7rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--pink-base), var(--yellow-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .navbar-logo i {
+            color: var(--pink-base);
+        }
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #0645ad;
+            font-weight: 500;
+        }
+        .nav-links a:hover {
+            color: var(--pink-dark);
+            text-decoration: underline;
+        }
+        /* Barra de busca na navbar */
+        .search-nav {
+            display: flex;
+            gap: 5px;
+            background: white;
+            border: 1px solid #a2a9b1;
+            border-radius: 2px;
+            padding: 4px 8px;
+        }
+        .search-nav input {
+            border: none;
+            padding: 5px 8px;
+            width: 200px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .search-nav button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #0645ad;
+        }
+        /* Menu hambúrguer para mobile (navbar) */
+        .mobile-nav-toggle {
+            display: none;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--pink-base);
+        }
+
+        /* ===== LAYOUT PRINCIPAL (SIDEBAR + CONTEÚDO) ===== */
+        .wiki-layout {
+            display: flex;
+            max-width: 1440px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR ESQUERDA (sticky, rola junto com a página - fica visível enquanto desce) */
+        .sidebar-left {
+            width: 260px;
+            background: var(--gray-bg);
+            border-right: 1px solid var(--border-gray);
+            padding: 1.2rem 0.8rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            align-self: flex-start;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-left h3 {
+            font-size: 1rem;
+            margin: 1rem 0 0.5rem;
+            padding-left: 8px;
+            border-left: 4px solid var(--pink-base);
+        }
+        .sidebar-left ul {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+        .sidebar-left li {
+            margin-bottom: 0.5rem;
+        }
+        .sidebar-left a {
+            display: block;
+            padding: 4px 10px;
+            color: #0645ad;
+            text-decoration: none;
+        }
+        .sidebar-left a:hover {
+            background: var(--yellow-light);
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        .main-content {
+            flex: 1;
+            padding: 2rem 2.5rem;
+            background: white;
+        }
+
+        /* Estilo de artigos (Wikipedia-like) */
+        .article-header h1 {
+            font-family: 'Georgia', serif;
+            font-weight: normal;
+            border-bottom: 1px solid var(--border-gray);
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.2rem;
+        }
+        .infobox {
+            float: right;
+            clear: right;
+            width: 280px;
+            background: #f8f9fa;
+            border: 1px solid #eaecf0;
+            padding: 0.8rem;
+            margin: 0 0 1rem 1.5rem;
+            font-size: 0.9rem;
+        }
+        .infobox h3 {
+            background: #eaecf0;
+            text-align: center;
+            padding: 5px;
+            margin-top: -0.5rem;
+            margin-bottom: 0.8rem;
+        }
+        .infobox img {
+            max-width: 100%;
+        }
+        .infobox table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .infobox td {
+            padding: 4px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .infobox td:first-child {
+            font-weight: bold;
+        }
+        .article-text h2 {
+            font-family: 'Georgia', serif;
+            font-weight: normal;
+            border-bottom: 1px solid #a2a9b1;
+            margin: 1.2rem 0 0.6rem;
+        }
+        .references {
+            font-size: 0.85rem;
+            border-top: 1px solid #eaecf0;
+            margin-top: 2rem;
+            padding-top: 1rem;
+        }
+        .last-edit {
+            font-size: 0.8rem;
+            color: #54595d;
+            text-align: right;
+            margin-top: 1rem;
+        }
+        .recent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .meme-card {
+            border: 1px solid var(--border-gray);
+            padding: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .meme-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .btn-voltar {
+            background: none;
+            border: none;
+            color: #0645ad;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-gray);
+            margin-top: 2rem;
+            padding-top: 1rem;
+            color: #6c757d;
+        }
+
+        /* MOBILE RESPONSIVO */
+        @media (max-width: 768px) {
+            .navbar-static {
+                padding: 0.5rem 1rem;
+                flex-wrap: wrap;
+            }
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.8rem;
+                margin-top: 0.8rem;
+            }
+            .nav-links.show {
+                display: flex;
+            }
+            .mobile-nav-toggle {
+                display: block;
+            }
+            .search-nav {
+                order: 2;
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+            .search-nav input {
+                flex: 1;
+                width: auto;
+            }
+            .sidebar-left {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100%;
+                z-index: 1200;
+                background: white;
+                transition: left 0.2s;
+            }
+            .sidebar-left.open {
+                left: 0;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .infobox {
+                float: none;
+                width: 100%;
+                margin: 0 0 1rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR ESTÁTICA (NÃO FIXA, ROLA COM A PÁGINA) -->
+<nav class="navbar-static">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        
+        <div class="navbar-logo">
+            <i class="fas fa-laugh-squint"></i> Memepédia
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#" data-route="home">Início</a></li>
+            <li><a href="#" data-route="artigos">Artigos</a></li>
+            <li><a href="#" data-route="random">Aleatório</a></li>
+            <li><a href="#" data-route="sobre">Sobre</a></li>
+        </ul>
+    </div>
+    <div class="search-nav">
+        <input type="text" id="navbarSearch" placeholder="Pesquisar na Memepédia..." aria-label="Buscar">
+        <button id="searchNavBtn"><i class="fas fa-search"></i></button>
+    </div>
+</nav>
+
+<div class="wiki-layout">
+    <!-- SIDEBAR ESQUERDA (STICKY) -->
+    <aside class="sidebar-left" id="sidebarLeft">
+        <h3>Navegação</h3>
+        <ul>
+            <li><a href="#" data-route="home">Início</a></li>
+            <li><a href="#" data-route="artigos">Todos os artigos</a></li>
+            <li><a href="#" data-route="random">Página aleatória</a></li>
+            <li><a href="#" data-route="sobre">Sobre o projeto</a></li>
+        </ul>
+        <h3>Ferramentas</h3>
+        <ul>
+            <li><a href="#" id="randomSidebarLink">Aleatório</a></li>
+            <li><a href="#">Citar esta página</a></li>
+        </ul>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content" id="mainContent">
+        <div id="dynamicContent">
+            Carregando...
+        </div>
+        <footer>
+            <i class="fas fa-copyright"></i> Memepédia – Licença Creative Commons Atribuição-CompartilhaIgual<br>
+            Navbar rolável (não fixa) + sidebar sticky – design inspirado na Wikipédia, cores rosa & amarelo.
+        </footer>
+    </main>
+</div>
+
+<script>
+    // ===================== BASE DE ARTIGOS =====================
+    const artigos = [
+        {
+            id: 0,
+            slug: "memepedia",
+            titulo: "Memepédia – A enciclopédia dos memes",
+            dataModificacao: "2026-05-09",
+            resumo: "Projeto colaborativo que documenta memes.",
+            conteudo: `
+                <div class="infobox">
+                    <h3>Memepédia</h3>
+                    <img src="https://via.placeholder.com/260x150?text=Memepédia" style="width:100%">
+                    <table>
+                        <tr><td>Lançamento</td><td>2023</td></tr>
+                        <tr><td>Cores</td><td>Rosa e Amarelo</td></tr>
+                    </table>
+                </div>
+                <p><strong>Memepédia</strong> é uma enciclopédia online livre inspirada na Wikipédia, dedicada a catalogar memes da internet. Possui barra de navegação estática (rola com a página) com pesquisa integrada, infoboxes, referências e layout responsivo.</p>
+                <h2>História</h2>
+                <p>Criada em 2023, a plataforma cresceu com a comunidade de entusiastas de memes. Oferece artigos detalhados sobre Rickrolling, Pepe, Distracted Boyfriend e outros.</p>
+                <div class="references"><h3>Referências</h3><ol><li>Dawkins, Richard. O Gene Egoísta, 1976.</li><li>Enciclopédia de Memes Online, 2025.</li></ol></div>
+            `,
+            institucional: true
+        },
+        {
+            id: 1,
+            slug: "rickroll",
+            titulo: "Rickrolling",
+            dataModificacao: "2026-05-01",
+            resumo: "A maior pegadinha da internet com Rick Astley.",
+            conteudo: `<div class="infobox"><h3>Rick Astley</h3><img src="https://upload.wikimedia.org/wikipedia/en/9/96/Rickroll.jpg" style="width:100%"><tr><td>Origem</td><td>2007 (4chan)</td></tr></table></div><p><strong>Rickrolling</strong> é um meme que redireciona para o clipe "Never Gonna Give You Up". Tornou-se fenômeno mundial.</p><h2>Impacto</h2><p>Usado em eventos ao vivo, e-mails e até na Macy's Parade.</p><div class="references"><h3>Referências</h3><ol><li>The Verge, 2016.</li></ol></div>`
+        },
+        {
+            id: 2,
+            slug: "pepe-frog",
+            titulo: "Pepe the Frog",
+            dataModificacao: "2026-05-05",
+            resumo: "Sapo mutante que expressa emoções.",
+            conteudo: `<div class="infobox"><h3>Pepe</h3><img src="https://upload.wikimedia.org/wikipedia/en/9/9a/Pepe_the_Frog.png" style="width:100%"><tr><td>Criador</td><td>Matt Furie (2005)</td></tr></table></div><p>Pepe é um personagem de quadrinhos que se tornou um dos memes mais versáteis, com variações como Sad Pepe e Smug Pepe.</p><div class="references"><h3>Referências</h3><ol><li>Know Your Meme</li></ol></div>`
+        },
+        {
+            id: 3,
+            slug: "distracted-boyfriend",
+            titulo: "Distracted Boyfriend",
+            dataModificacao: "2026-05-10",
+            resumo: "O namorado que olha para outra.",
+            conteudo: `<div class="infobox"><h3>Distracted Boyfriend</h3><img src="https://i.imgflip.com/1bij.jpg" style="width:100%"><tr><td>Ano</td><td>2017</td></tr></table></div><p>Meme de três painéis que simboliza a atração por novidades. Amplamente usado em comparações.</p><div class="references"><h3>Referências</h3><ol><li>Wired, 2018.</li></ol></div>`
+        },
+        {
+            id: 4,
+            slug: "two-buttons",
+            titulo: "Two Buttons",
+            dataModificacao: "2026-05-12",
+            resumo: "O dilema entre dois botões.",
+            conteudo: `<div class="infobox"><h3>Two Buttons</h3><img src="https://i.imgflip.com/1ur9b0.jpg" style="width:100%"><tr><td>Origem</td><td>Reddit (2015)</td></tr></table></div><p>Escolha difícil entre duas opções cômicas.</p><div class="references"><h3>Referências</h3><ol><li>Museu de Memes, 2023.</li></ol></div>`
+        },
+        {
+            id: 5,
+            slug: "this-is-fine",
+            titulo: "This is Fine",
+            dataModificacao: "2026-05-15",
+            resumo: "Cachorro que ignora o incêndio.",
+            conteudo: `<div class="infobox"><h3>This is Fine</h3><img src="https://i.imgflip.com/26am.jpg" style="width:100%"><tr><td>Artista</td><td>KC Green (2013)</td></tr></table></div><p>Símbolo de negação diante do caos.</p><div class="references"><h3>Referências</h3><ol><li>Gunshow Comics, 2013.</li></ol></div>`
+        },
+        {
+            id: 6,
+            slug: "woman-cat",
+            titulo: "Woman Yelling at Cat",
+            dataModificacao: "2026-05-18",
+            resumo: "Discussão entre mulher e gato confuso.",
+            conteudo: `<div class="infobox"><h3>Woman Yelling at Cat</h3><img src="https://i.imgflip.com/3si4.jpg" style="width:100%"><tr><td>Origem</td><td>2019/Twitter</td></tr></table></div><p>Representa desentendimentos online.</p><div class="references"><h3>Referências</h3><ol><li>Smudge the Cat Instagram.</li></ol></div>`
+        }
+    ];
+
+    // 4 últimos artigos (excluindo o institucional)
+    function ultimosArtigos(quant = 4) {
+        return [...artigos].filter(a => !a.institucional).sort((a,b)=>new Date(b.dataModificacao)-new Date(a.dataModificacao)).slice(0,quant);
+    }
+
+    function renderizarArtigo(artigo) {
+        return `
+            <div class="article-container">
+                <div class="article-header"><h1>${artigo.titulo}</h1></div>
+                <div class="article-text">${artigo.conteudo}</div>
+                <div class="last-edit">Última modificação: ${artigo.dataModificacao} por Memepédia</div>
+                <button class="btn-voltar" id="backHomeBtn"><i class="fas fa-arrow-left"></i> Voltar ao início</button>
+            </div>
+        `;
+    }
+
+    function paginaInicial() {
+        const institucional = artigos.find(a => a.institucional === true);
+        const ultimos = ultimosArtigos(4);
+        let cards = `<div class="recent-grid">`;
+        ultimos.forEach(meme => {
+            cards += `<div class="meme-card" data-slug="${meme.slug}"><h3>${meme.titulo}</h3><p>${meme.resumo}</p><small>${meme.dataModificacao}</small></div>`;
+        });
+        cards += `</div>`;
+        return `
+            <div>
+                ${renderizarArtigo(institucional)}
+                <hr>
+                <h2><i class="fas fa-clock"></i> Últimos memes adicionados</h2>
+                ${cards}
+            </div>
+        `;
+    }
+
+    function todosArtigos() {
+        let list = `<h1>Todos os artigos</h1><ul>`;
+        artigos.forEach(art => {
+            list += `<li><a href="#" data-route="artigo/${art.slug}">${art.titulo}</a> (${art.dataModificacao})</li>`;
+        });
+        list += `</ul><button class="btn-voltar" id="backHomeBtn">Voltar</button>`;
+        return list;
+    }
+
+    function paginaSobre() {
+        return `<h1>Sobre a Memepédia</h1><p>Projeto com navbar estática (rola com a página), barra de pesquisa integrada, infobox, referências, responsivo.</p><button class="btn-voltar" id="backHomeBtn">Voltar</button>`;
+    }
+
+    function buscarArtigos(query) {
+        const term = query.trim().toLowerCase();
+        if (!term) return null;
+        const encontrados = artigos.filter(a => a.titulo.toLowerCase().includes(term) || a.conteudo.toLowerCase().includes(term));
+        if (encontrados.length === 0) { alert("Nenhum artigo encontrado."); return null; }
+        if (encontrados.length === 1) return encontrados[0];
+        let results = `<h2>Resultados para "${term}"</h2><ul>`;
+        encontrados.forEach(a => { results += `<li><a href="#" data-route="artigo/${a.slug}">${a.titulo}</a></li>`; });
+        results += `</ul><button class="btn-voltar" id="backHomeBtn">Voltar</button>`;
+        document.getElementById('dynamicContent').innerHTML = results;
+        anexarEventosDinamicos();
+        return null;
+    }
+
+    function carregarRota() {
+        let hash = window.location.hash.substring(1);
+        if (!hash || hash === "home") {
+            document.getElementById('dynamicContent').innerHTML = paginaInicial();
+            anexarEventosDinamicos();
+            document.title = "Memepédia - Início";
+        } else if (hash === "artigos") {
+            document.getElementById('dynamicContent').innerHTML = todosArtigos();
+            anexarEventosDinamicos();
+            document.title = "Memepédia - Artigos";
+        } else if (hash === "sobre") {
+            document.getElementById('dynamicContent').innerHTML = paginaSobre();
+            anexarEventosDinamicos();
+            document.title = "Memepédia - Sobre";
+        } else if (hash === "random") {
+            const naoInst = artigos.filter(a => !a.institucional);
+            const rand = naoInst[Math.floor(Math.random() * naoInst.length)];
+            window.location.hash = `artigo/${rand.slug}`;
+        } else if (hash.startsWith("artigo/")) {
+            const slug = hash.split('/')[1];
+            const artigo = artigos.find(a => a.slug === slug);
+            if (artigo) {
+                document.getElementById('dynamicContent').innerHTML = renderizarArtigo(artigo);
+                anexarEventosDinamicos();
+                document.title = `Memepédia - ${artigo.titulo}`;
+            } else {
+                document.getElementById('dynamicContent').innerHTML = `<p>Artigo não encontrado.</p><button class="btn-voltar" id="backHomeBtn">Voltar</button>`;
+                anexarEventosDinamicos();
+            }
+        } else {
+            window.location.hash = "home";
+        }
+    }
+
+    function anexarEventosDinamicos() {
+        document.querySelectorAll('[data-route]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                const rota = el.getAttribute('data-route');
+                if (rota) window.location.hash = rota;
+            });
+        });
+        document.querySelectorAll('.meme-card').forEach(card => {
+            const slug = card.getAttribute('data-slug');
+            if (slug) card.addEventListener('click', () => window.location.hash = `artigo/${slug}`);
+        });
+        const backBtn = document.getElementById('backHomeBtn');
+        if (backBtn) backBtn.addEventListener('click', () => window.location.hash = "home");
+        const randomSide = document.getElementById('randomSidebarLink');
+        if (randomSide) randomSide.addEventListener('click', (e) => { e.preventDefault(); window.location.hash = "random"; });
+    }
+
+    function initNavbarSearch() {
+        const searchInput = document.getElementById('navbarSearch');
+        const searchBtn = document.getElementById('searchNavBtn');
+        const performSearch = () => {
+            const query = searchInput.value;
+            const resultado = buscarArtigos(query);
+            if (resultado && typeof resultado === 'object') window.location.hash = `artigo/${resultado.slug}`;
+        };
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
+    }
+
+    // Mobile: toggle do menu de navegação
+    const mobileToggle = document.getElementById('mobileNavToggle');
+    const navLinks = document.getElementById('navLinks');
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+        });
+    }
+
+    // Sidebar mobile: adicionar botão específico para abrir sidebar
+    const sidebar = document.getElementById('sidebarLeft');
+    const sidebarToggleBtn = document.createElement('button');
+    sidebarToggleBtn.className = 'mobile-nav-toggle';
+    sidebarToggleBtn.style.marginRight = '10px';
+    sidebarToggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    const navbarFirstDiv = document.querySelector('.navbar-static > div:first-child');
+    if (navbarFirstDiv && window.innerWidth <= 768) {
+        navbarFirstDiv.insertBefore(sidebarToggleBtn, navbarFirstDiv.firstChild);
+    }
+    sidebarToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sidebar.classList.toggle('open');
+    });
+    document.querySelectorAll('.sidebar-left a').forEach(link => {
+        link.addEventListener('click', () => sidebar.classList.remove('open'));
+    });
+
+    window.addEventListener('hashchange', carregarRota);
+    window.addEventListener('load', () => {
+        if (!window.location.hash || window.location.hash === "#") window.location.hash = "home";
+        else carregarRota();
+        initNavbarSearch();
+    });
+</script>
+</body>
+</html>
