@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WowneroOS Gaming Edition</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -19,18 +19,18 @@
 
     body {
       overflow: hidden;
-      font-family: 'VT323', monospace;
+      font-family: 'Inter', sans-serif;
       background: #000;
       height: 100vh;
       color: #fff;
     }
 
     .desktop {
-      background-image:
-        radial-gradient(circle at 20% 20%, rgba(255,79,216,0.18), transparent 25%),
-        radial-gradient(circle at 80% 80%, rgba(255,212,59,0.15), transparent 25%),
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      isolation: isolate;
+      background:
+        radial-gradient(circle at top left, rgba(255,79,216,0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(255,191,0,0.12), transparent 28%),
+        linear-gradient(180deg, #090909 0%, #111111 45%, #050505 100%);
       width: 100%;
       height: 100vh;
       position: relative;
@@ -42,6 +42,7 @@
     }
 
     .grid {
+      mask-image: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0));
       position: absolute;
       inset: 0;
       background-image:
@@ -50,7 +51,7 @@
       background-size: 120px 120px, 120px 120px, 28px 28px, 28px 28px;
       transform: perspective(600px) rotateX(75deg);
       transform-origin: center bottom;
-      opacity: 0.2;
+      opacity: 0.08;
       bottom: -50%;
     }
 
@@ -60,19 +61,22 @@
       left: 0;
       width: 100%;
       height: 48px;
-      background: rgba(20,20,20,0.8);
+      background: rgba(10,10,10,0.75);
       border-bottom: 2px solid #ff4fd8;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.35);
       z-index: 100;
     }
 
     .logo {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      font-weight: 700;
       color: #ff4fd8;
       text-shadow: 0 0 12px #ff4fd8, 0 0 25px rgba(255,79,216,0.8);
       animation: glow 2s infinite alternate;
@@ -88,12 +92,14 @@
     }
 
     .clock {
-      font-size: 24px;
+      font-size: 20px;
+      line-height: 1.8;
       color: #ffd43b;
       text-shadow: 0 0 12px #ffd43b;
     }
 
     .icons {
+      align-items: flex-start;
       position: absolute;
       top: 80px;
       left: 20px;
@@ -104,10 +110,11 @@
     }
 
     .icon {
+      user-select: none;
       width: 90px;
       text-align: center;
       cursor: pointer;
-      transition: 0.2s;
+      transition: all 0.25s ease;
     }
 
     .icon:hover {
@@ -115,21 +122,25 @@
     }
 
     .icon-box {
+      position: relative;
       width: 70px;
       height: 70px;
       margin: auto;
       border-radius: 18px;
-      background: rgba(255,255,255,0.08);
-      border: 2px solid rgba(255,255,255,0.1);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.08);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
+      font-size: 30px;
       backdrop-filter: blur(8px);
       box-shadow: 0 0 24px rgba(255,79,216,0.5), 0 0 10px rgba(255,212,59,0.25);
     }
 
     .icon p {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.5px;
       margin-top: 10px;
       font-size: 20px;
       color: #fff;
@@ -137,6 +148,7 @@
     }
 
     .window {
+      z-index: 20;
       background-image:
         linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
@@ -145,9 +157,9 @@
       position: absolute;
       top: 120px;
       left: 180px;
-      background: rgba(20,20,20,0.85);
+      background: rgba(10,10,10,0.82);
       border: 2px solid #ff4fd8;
-      border-radius: 20px;
+      border-radius: 28px;
       overflow: hidden;
       backdrop-filter: blur(14px);
       background-size: 24px 24px;
@@ -167,6 +179,7 @@
     }
 
     .window-header {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       height: 46px;
       background: linear-gradient(90deg, #ff4fd8 0%, #ffb300 100%);
       display: flex;
@@ -174,7 +187,8 @@
       justify-content: space-between;
       padding: 0 14px;
       font-family: 'Press Start 2P', cursive;
-      font-size: 10px;
+      font-size: 11px;
+      letter-spacing: 1px;
     }
 
     .buttons {
@@ -183,6 +197,7 @@
     }
 
     .btn {
+      box-shadow: 0 0 10px rgba(255,255,255,0.15);
       width: 16px;
       height: 16px;
       border-radius: 50%;
@@ -207,10 +222,11 @@
     }
 
     .terminal {
+      overflow: hidden;
       position: relative;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.7);
+      background: linear-gradient(180deg, rgba(12,12,12,0.96), rgba(0,0,0,0.9));
       border-radius: 12px;
       padding: 18px;
       color: #ffd43b;
@@ -241,21 +257,23 @@
     }
 
     .dock {
+      z-index: 50;
       position: absolute;
       bottom: 18px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 18px;
-      background: rgba(255,255,255,0.08);
+      background: rgba(15,15,15,0.7);
       padding: 14px 20px;
-      border-radius: 24px;
-      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.08);
       backdrop-filter: blur(10px);
       box-shadow: 0 0 30px rgba(255,79,216,0.3), 0 0 60px rgba(255,212,59,0.15);
     }
 
     .dock-item {
+      border: 1px solid rgba(255,255,255,0.05);
       width: 60px;
       height: 60px;
       border-radius: 18px;
@@ -270,7 +288,7 @@
 
     .dock-item:hover {
       background: rgba(255, 212, 59, 0.12);
-      transform: translateY(-8px) scale(1.1);
+      transform: translateY(-6px) scale(1.05);
       box-shadow: 0 0 24px rgba(255,212,59,0.55), 0 0 40px rgba(255,79,216,0.35);
     }
 
@@ -282,6 +300,7 @@
     }
 
     .particle {
+      filter: blur(1px);
       position: absolute;
       width: 4px;
       height: 4px;
@@ -469,7 +488,23 @@
       </div>
 
       <div class="window-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;color:#fff;">Gaming Control Center</div>
+            <div style="opacity:.6;font-size:14px;">Next-gen cloud gaming operating system</div>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="padding:8px 14px;border-radius:14px;background:rgba(255,79,216,0.12);border:1px solid rgba(255,79,216,0.25);font-size:13px;">144 FPS</div>
+            <div style="padding:8px 14px;border-radius:14px;background:rgba(255,212,59,0.12);border:1px solid rgba(255,212,59,0.25);font-size:13px;">LOW LATENCY</div>
+          </div>
+        </div>
         <div class="terminal">
+          <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+            <div style="padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.04);font-size:13px;">ONLINE</div>
+            <div style="padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.04);font-size:13px;">SERVER EU-01</div>
+            <div style="padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.04);font-size:13px;">GPU MODE</div>
+          </div>
           <div>> booting WowneroOS Gaming...</div>
           <div>> loading retro arcade engine...</div>
           <div>> connecting multiplayer servers...</div>
