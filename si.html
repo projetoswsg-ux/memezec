@@ -2,287 +2,366 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WowOS - Wownero Dedicated System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WowOS - Much Gaming Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --wow-orange: #ff9d00;
             --wow-purple: #9b59b6;
-            --wow-dark: #0f0f0f;
+            --wow-dark: #0a0a0a;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: #000;
+            background: var(--wow-dark);
             color: white;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            margin: 0;
+            touch-action: manipulation;
         }
 
-        .pixel-font { font-family: 'Fira Code', monospace; }
+        .pixel-font { font-family: 'Press Start 2P', cursive; }
 
         .glass {
-            background: rgba(20, 20, 20, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 157, 0, 0.3);
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 157, 0, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
         }
 
         .window {
             position: absolute;
-            min-width: 300px;
-            min-height: 200px;
             z-index: 10;
             display: none;
             flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-
-        .scanline::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: rgba(255, 157, 0, 0.1);
-            animation: scanline 8s linear infinite;
-            pointer-events: none;
-        }
-
-        /* Mobile specific adjustments */
-        @media (max-width: 640px) {
+        /* Mobile full-screen windows */
+        @media (max-width: 768px) {
             .window {
                 width: 100% !important;
-                height: calc(100% - 60px) !important;
+                height: calc(100% - 64px) !important;
                 top: 0 !important;
                 left: 0 !important;
-                transform: none !important;
+                border-radius: 0 !important;
             }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 157, 0, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(255, 157, 0, 0.6); }
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            animation: pulse-glow 2s infinite;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+            background: #000;
+            width: 100%;
+            height: 100%;
+            max-height: 70vh;
+        }
+
+        .d-pad-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--wow-orange);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            user-select: none;
         }
     </style>
 </head>
-<body class="scanline select-none">
+<body class="select-none">
 
-    <div id="boot-screen" class="fixed inset-0 bg-black z-[100] flex flex-col p-8 pixel-font text-orange-500 overflow-hidden">
-        <div id="boot-log"></div>
-        <div id="boot-cursor" class="w-2 h-5 bg-orange-500 mt-2 animate-pulse"></div>
+    <div id="boot-screen" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center p-8 text-center">
+        <div class="text-6xl mb-6 animate-bounce">🐕</div>
+        <h1 class="pixel-font text-orange-500 text-xl mb-4">WowOS GAMING</h1>
+        <div class="w-64 h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div id="boot-progress" class="h-full bg-orange-500 w-0 transition-all duration-300"></div>
+        </div>
+        <p class="mt-4 text-xs text-zinc-500 pixel-font" id="boot-status">Loading much graphics...</p>
     </div>
 
-    <main id="desktop" class="relative w-full h-full bg-cover bg-center hidden" style="background-image: url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=2070');">
-        
-        <!-- Wallpaper Overlay -->
-        <div class="absolute inset-0 bg-black/40"></div>
+    <main id="desktop" class="relative w-full h-screen bg-zinc-950 hidden overflow-hidden">
+        <!-- Background Grid -->
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgba(255,157,0,0.05) 1px, transparent 0); background-size: 40px 40px;"></div>
 
-        <!-- App Icons Grid -->
-        <div class="relative z-10 p-6 grid grid-cols-3 sm:grid-cols-1 gap-6 w-fit">
-            <div onclick="openApp('wallet')" class="group flex flex-col items-center gap-2 cursor-pointer w-20">
-                <div class="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">💰</div>
-                <span class="text-xs font-bold text-center drop-shadow-md">Much Wallet</span>
+        <div class="relative z-10 p-6 md:p-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <!-- Game Icon 1: Flappy Doge -->
+            <div onclick="openGame('flappy')" class="game-card flex flex-col items-center gap-3 cursor-pointer group">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-3xl flex items-center justify-center text-4xl shadow-xl">🚀</div>
+                <span class="text-xs pixel-font text-center group-hover:text-orange-400">Flappy Doge</span>
             </div>
-            <div onclick="openApp('terminal')" class="group flex flex-col items-center gap-2 cursor-pointer w-20">
-                <div class="w-14 h-14 bg-zinc-800 rounded-2xl border border-orange-500/50 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">💻</div>
-                <span class="text-xs font-bold text-center drop-shadow-md">Wow Terminal</span>
+
+            <!-- Game Icon 2: Wow Snake -->
+            <div onclick="openGame('snake')" class="game-card flex flex-col items-center gap-3 cursor-pointer group">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-3xl flex items-center justify-center text-4xl shadow-xl">🐍</div>
+                <span class="text-xs pixel-font text-center group-hover:text-green-400">Wow Snake</span>
             </div>
-            <div onclick="openApp('stats')" class="group flex flex-col items-center gap-2 cursor-pointer w-20">
-                <div class="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">📈</div>
-                <span class="text-xs font-bold text-center drop-shadow-md">Very Stats</span>
+
+            <!-- Game Icon 3: Dodge FUD -->
+            <div onclick="openGame('dodge')" class="game-card flex flex-col items-center gap-3 cursor-pointer group">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-400 to-purple-600 rounded-3xl flex items-center justify-center text-4xl shadow-xl">💎</div>
+                <span class="text-xs pixel-font text-center group-hover:text-purple-400">Dodge FUD</span>
+            </div>
+            
+            <!-- Terminal App -->
+            <div onclick="openApp('terminal')" class="flex flex-col items-center gap-3 cursor-pointer group opacity-60 hover:opacity-100">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-zinc-800 rounded-3xl flex items-center justify-center text-3xl border border-white/10">💻</div>
+                <span class="text-xs font-bold text-center">Settings</span>
             </div>
         </div>
 
-        
-        <!-- Wallet Window -->
-        <div id="app-wallet" class="window glass rounded-xl overflow-hidden" style="top: 10%; left: 20%; width: 400px;">
-            <div class="bg-white/10 p-3 flex justify-between items-center cursor-move window-header">
-                <span class="text-sm font-bold">💰 Much Wallet v1.0</span>
-                <button onclick="closeApp('wallet')" class="text-red-400 hover:text-red-200">✕</button>
-            </div>
-            <div class="p-6 flex flex-col gap-4">
-                <div class="bg-black/50 p-4 rounded-lg border border-orange-500/30">
-                    <p class="text-xs text-gray-400 uppercase">Seu Saldo</p>
-                    <h2 class="text-3xl font-bold text-orange-400">420.69 WOW</h2>
+        <div id="game-window" class="window glass rounded-3xl overflow-hidden shadow-2xl" style="top: 5%; left: 10%; width: 80%; max-width: 600px; height: 80vh;">
+            <div class="bg-white/5 p-4 flex justify-between items-center border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <span id="game-title" class="pixel-font text-sm text-orange-400">Playing...</span>
                 </div>
-                <button class="bg-orange-600 hover:bg-orange-500 p-3 rounded-lg font-bold transition-colors">Enviar Wow</button>
-                <button class="bg-zinc-800 hover:bg-zinc-700 p-3 rounded-lg font-bold border border-white/10 transition-colors">Receber Wow</button>
+                <button onclick="closeApp('game-window')" class="w-8 h-8 flex items-center justify-center bg-red-500/20 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-colors">✕</button>
             </div>
-        </div>
-
-        <!-- Terminal Window -->
-        <div id="app-terminal" class="window glass rounded-xl overflow-hidden" style="top: 15%; left: 25%; width: 500px; height: 350px;">
-            <div class="bg-white/10 p-3 flex justify-between items-center cursor-move window-header">
-                <span class="text-sm font-bold pixel-font">💻 wow-terminal</span>
-                <button onclick="closeApp('terminal')" class="text-red-400 hover:text-red-200">✕</button>
-            </div>
-            <div class="p-4 flex-1 pixel-font text-sm text-green-400 overflow-y-auto" id="terminal-content">
-                <p>> welcome to wow-os 4.0</p>
-                <p>> type 'help' for commands</p>
-                <div class="flex gap-2 mt-2">
-                    <span>$</span>
-                    <input type="text" id="terminal-input" class="bg-transparent border-none outline-none w-full text-green-400" autofocus>
+            
+            <div id="game-container" class="relative flex-1 bg-black flex flex-col">
+                <!-- Game Canvas -->
+                <canvas id="game-canvas"></canvas>
+                
+                <!-- On-Screen Controls (Visible on mobile) -->
+                <div id="mobile-controls" class="p-6 grid grid-cols-3 gap-2 mt-auto bg-zinc-900/50 md:hidden">
+                    <div class="col-start-2 flex justify-center">
+                        <button class="d-pad-btn" id="ctrl-up">▲</button>
+                    </div>
+                    <div class="col-start-1 flex justify-center">
+                        <button class="d-pad-btn" id="ctrl-left">◀</button>
+                    </div>
+                    <div class="col-start-2 flex justify-center">
+                        <button class="d-pad-btn" id="ctrl-down">▼</button>
+                    </div>
+                    <div class="col-start-3 flex justify-center">
+                        <button class="d-pad-btn" id="ctrl-right">▶</button>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Stats Window -->
-        <div id="app-stats" class="window glass rounded-xl overflow-hidden" style="top: 20%; left: 30%; width: 450px;">
-            <div class="bg-white/10 p-3 flex justify-between items-center cursor-move window-header">
-                <span class="text-sm font-bold">📈 Very Stats</span>
-                <button onclick="closeApp('stats')" class="text-red-400 hover:text-red-200">✕</button>
-            </div>
-            <div class="p-4 grid grid-cols-2 gap-4">
-                <div class="p-3 bg-white/5 rounded">
-                    <p class="text-[10px] text-gray-400">Bloco Atual</p>
-                    <p class="font-bold">#1,234,567</p>
-                </div>
-                <div class="p-3 bg-white/5 rounded">
-                    <p class="text-[10px] text-gray-400">Hashrate</p>
-                    <p class="font-bold">69.42 MH/s</p>
-                </div>
-                <div class="p-3 bg-white/5 rounded">
-                    <p class="text-[10px] text-gray-400">Dificuldade</p>
-                    <p class="font-bold">Much High</p>
-                </div>
-                <div class="p-3 bg-white/5 rounded">
-                    <p class="text-[10px] text-gray-400">Nós Conectados</p>
-                    <p class="font-bold">1337</p>
+                
+                <!-- Game Overlay (Start/Game Over) -->
+                <div id="game-overlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-center p-6 z-20">
+                    <h2 id="overlay-msg" class="pixel-font text-2xl mb-6 text-orange-500">READY?</h2>
+                    <button id="start-btn" class="bg-orange-500 hover:bg-orange-400 text-black pixel-font px-8 py-4 rounded-xl shadow-lg transition-transform active:scale-95">START WOW</button>
                 </div>
             </div>
         </div>
 
-        <nav class="absolute bottom-0 w-full h-14 glass border-t border-orange-500/30 z-50 flex items-center px-4 justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-orange-500 shadow-[0_0_15px_rgba(255,157,0,0.5)]">
+        <div id="terminal-window" class="window glass rounded-3xl overflow-hidden shadow-2xl" style="top: 15%; left: 15%; width: 70%; max-width: 500px; height: 60vh;">
+            <div class="bg-white/5 p-4 flex justify-between items-center border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <span class="pixel-font text-sm text-zinc-400">WOW SETTINGS</span>
+                </div>
+                <button onclick="closeApp('terminal-window')" class="w-8 h-8 flex items-center justify-center bg-red-500/20 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-colors">✕</button>
+            </div>
+            <div class="p-6 overflow-y-auto bg-zinc-950/50 h-full text-zinc-300 text-sm">
+                <div class="mb-6 border-b border-white/5 pb-4">
+                    <h3 class="pixel-font text-orange-500 mb-2">NETWORK STATUS</h3>
+                    <p>Wownero Node: <span class="text-green-500">Connected</span></p>
+                    <p>Mining: <span class="text-red-500">Disabled</span></p>
+                </div>
+                <div class="mb-6">
+                    <h3 class="pixel-font text-orange-500 mb-2">SYSTEM INFO</h3>
+                    <p>OS: WowOS v1.0.420-Gaming</p>
+                    <p>Much: Privacy</p>
+                    <p>Very: Game</p>
+                </div>
+                <button onclick="location.reload()" class="w-full bg-zinc-800 hover:bg-zinc-700 p-3 rounded-xl pixel-font text-[10px]">REBOOT SYSTEM</button>
+            </div>
+        </div>
+
+        <!-- Taskbar -->
+        <nav class="absolute bottom-0 w-full h-16 glass border-t border-white/5 z-50 flex items-center px-6 justify-between">
+            <div class="flex items-center gap-6">
+                <div class="w-12 h-12 bg-orange-600 rounded-2xl flex items-center justify-center cursor-pointer hover:rotate-12 transition-transform shadow-[0_0_20px_rgba(255,157,0,0.4)]">
                     🐕
                 </div>
-                <div id="active-apps" class="flex gap-2">
-                    <!-- Dynamic active apps will show here on mobile -->
+                <div class="hidden md:flex gap-4 text-xs font-bold text-zinc-400">
+                    <span class="hover:text-white cursor-pointer">HOME</span>
+                    <span class="hover:text-white cursor-pointer">STORE</span>
+                    <span class="hover:text-white cursor-pointer">FRIENDS</span>
                 </div>
             </div>
             
-            <div class="flex flex-col items-end pr-2">
-                <span id="clock" class="text-sm font-bold">00:00:00</span>
-                <span class="text-[10px] text-orange-400 font-bold uppercase tracking-widest">Wow Mode Active</span>
+            <div class="flex flex-col items-end">
+                <span id="clock" class="text-sm font-bold pixel-font text-orange-500">00:00</span>
+                <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Wow Online</span>
             </div>
         </nav>
     </main>
 
     <script>
-        /* Boot Sequence Logic */
-        const bootLog = document.getElementById('boot-log');
-        const lines = [
-            "Initializing WowKernel v4.20.69...",
-            "Loading privacy modules...",
-            "Connecting to Wownero Network...",
-            "Much security detected...",
-            "Starting GUI...",
-            "Welcome to the such privacy era."
-        ];
+        const bootProgress = document.getElementById('boot-progress');
+        const bootStatus = document.getElementById('boot-status');
+        const statusMsgs = ["Initializing Kernel...", "Such Graphics...", "Loading Games...", "Very Privacy...", "Ready!"];
 
-        async function startBoot() {
-            for(let line of lines) {
-                const p = document.createElement('p');
-                p.textContent = `> ${line}`;
-                bootLog.appendChild(p);
-                await new Promise(r => setTimeout(r, 400 + Math.random() * 600));
+        async function boot() {
+            for(let i = 0; i <= 100; i += 2) {
+                bootProgress.style.width = i + '%';
+                if(i % 25 === 0) bootStatus.textContent = statusMsgs[i/25];
+                await new Promise(r => setTimeout(r, 30));
             }
-            setTimeout(() => {
-                document.getElementById('boot-screen').style.display = 'none';
-                document.getElementById('desktop').classList.remove('hidden');
-            }, 1000);
+            document.getElementById('boot-screen').style.display = 'none';
+            document.getElementById('desktop').classList.remove('hidden');
         }
 
-        /* Window Management */
-        function openApp(id) {
-            const app = document.getElementById(`app-${id}`);
-            app.style.display = 'flex';
-            app.style.zIndex = Math.floor(Date.now() / 100000);
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const overlay = document.getElementById('game-overlay');
+        const overlayMsg = document.getElementById('overlay-msg');
+        const startBtn = document.getElementById('start-btn');
+        let currentGame = null;
+        let gameActive = false;
+        let score = 0;
+
+        function openGame(type) {
+            document.getElementById('game-window').style.display = 'flex';
+            document.getElementById('game-title').textContent = type.toUpperCase() + ' WOW';
+            currentGame = type;
+            resetGame();
+        }
+
+        function openApp(appId) {
+            const win = document.getElementById(appId + '-window');
+            if (win) {
+                win.style.display = 'flex';
+                // Bring to front
+                win.style.zIndex = parseInt(new Date().getTime() / 100000);
+            }
         }
 
         function closeApp(id) {
-            document.getElementById(`app-${id}`).style.display = 'none';
+            document.getElementById(id).style.display = 'none';
+            gameActive = false;
         }
 
-        /* Clock Logic */
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleTimeString();
+        function resetGame() {
+            gameActive = false;
+            score = 0;
+            overlay.style.display = 'flex';
+            overlayMsg.textContent = "READY?";
+            resizeCanvas();
         }
-        setInterval(updateClock, 1000);
-        updateClock();
 
-        /* Simple Terminal Logic */
-        const terminalInput = document.getElementById('terminal-input');
-        const terminalContent = document.getElementById('terminal-content');
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight * 0.7; // Deja espacio para controles mobile
+        }
 
-        terminalInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const cmd = terminalInput.value.toLowerCase();
-                const line = document.createElement('p');
-                line.className = 'text-white';
-                line.textContent = `$ ${cmd}`;
-                terminalContent.insertBefore(line, terminalInput.parentElement);
+        let doge = { x: 50, y: 150, v: 0 };
+        let pipes = [];
+        function loopFlappy() {
+            if(!gameActive) return;
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0,0,canvas.width, canvas.height);
 
-                const response = document.createElement('p');
-                if (cmd === 'help') {
-                    response.textContent = "Available: status, balance, whoami, clear";
-                } else if (cmd === 'whoami') {
-                    response.textContent = "Such User. Very Privacy.";
-                } else if (cmd === 'balance') {
-                    response.textContent = "420.69 WOW (Locked in much cold storage)";
-                } else if (cmd === 'status') {
-                    response.textContent = "Network: Synced | Nodes: 1337 | Such: Wow";
-                } else if (cmd === 'clear') {
-                    terminalContent.innerHTML = '';
-                    terminalContent.appendChild(terminalInput.parentElement);
-                } else {
-                    response.textContent = `Command not found: ${cmd}`;
-                }
+            // Doge
+            doge.v += 0.4;
+            doge.y += doge.v;
+            ctx.font = '30px Arial';
+            ctx.fillText('🐕', doge.x, doge.y);
+
+            // Pipes
+            if(Math.random() < 0.02) pipes.push({x: canvas.width, y: Math.random() * (canvas.height - 100)});
+            pipes.forEach((p, i) => {
+                p.x -= 3;
+                ctx.fillStyle = '#ff9d00';
+                ctx.fillRect(p.x, 0, 40, p.y);
+                ctx.fillRect(p.x, p.y + 100, 40, canvas.height);
                 
-                terminalContent.insertBefore(response, terminalInput.parentElement);
-                terminalInput.value = '';
-                terminalContent.scrollTop = terminalContent.scrollHeight;
-            }
-        });
-
-        /* Draggable Logic (Simplificada) */
-        let activeWindow = null;
-        let offset = { x: 0, y: 0 };
-
-        document.querySelectorAll('.window-header').forEach(header => {
-            header.addEventListener('mousedown', (e) => {
-                activeWindow = header.parentElement;
-                activeWindow.style.zIndex = 1000;
-                offset.x = e.clientX - activeWindow.offsetLeft;
-                offset.y = e.clientY - activeWindow.offsetTop;
+                // Collision
+                if(doge.x + 20 > p.x && doge.x < p.x + 40 && (doge.y < p.y || doge.y > p.y + 100)) gameOver();
             });
-        });
 
-        window.addEventListener('mousemove', (e) => {
-            if (activeWindow && window.innerWidth > 640) {
-                activeWindow.style.left = (e.clientX - offset.x) + 'px';
-                activeWindow.style.top = (e.clientY - offset.y) + 'px';
+            if(doge.y > canvas.height || doge.y < 0) gameOver();
+            requestAnimationFrame(loopFlappy);
+        }
+
+        let snake = [{x: 10, y: 10}];
+        let food = {x: 15, y: 15};
+        let dx = 1, dy = 0;
+        let lastMove = 0;
+
+        function loopSnake(time) {
+            if(!gameActive) return;
+            requestAnimationFrame(loopSnake);
+
+            if(time - lastMove < 100) return;
+            lastMove = time;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0,0,canvas.width, canvas.height);
+
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            snake.unshift(head);
+
+            if(head.x === food.x && head.y === food.y) {
+                food = {x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20)};
+                score++;
+            } else {
+                snake.pop();
             }
-        });
 
-        window.addEventListener('mouseup', () => {
-            activeWindow = null;
-        });
+            // Draw
+            const size = canvas.width / 20;
+            ctx.fillStyle = '#4ade80';
+            snake.forEach(p => ctx.fillRect(p.x * size, p.y * size, size-2, size-2));
+            ctx.fillStyle = '#ff4444';
+            ctx.fillRect(food.x * size, food.y * size, size-2, size-2);
 
-        /* Touch support for mobile */
-        document.querySelectorAll('.window-header').forEach(header => {
-            header.addEventListener('touchstart', (e) => {
-                activeWindow = header.parentElement;
-                const touch = e.touches[0];
-                offset.x = touch.clientX - activeWindow.offsetLeft;
-                offset.y = touch.clientY - activeWindow.offsetTop;
-            }, {passive: true});
-        });
+            if(head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) gameOver();
+        }
 
-        window.onload = startBoot;
+        function gameOver() {
+            gameActive = false;
+            overlay.style.display = 'flex';
+            overlayMsg.textContent = "MUCH DIED! SCORE: " + score;
+        }
+
+        startBtn.onclick = () => {
+            overlay.style.display = 'none';
+            gameActive = true;
+            if(currentGame === 'flappy') { doge.y = 150; doge.v = 0; pipes = []; loopFlappy(); }
+            if(currentGame === 'snake') { snake = [{x:10, y:10}]; dx=1; dy=0; loopSnake(); }
+        };
+
+        /* Controls */
+        window.onkeydown = (e) => {
+            if(currentGame === 'flappy' && e.code === 'Space') doge.v = -6;
+            if(currentGame === 'snake') {
+                if(e.key === 'ArrowUp' && dy === 0) { dx=0; dy=-1; }
+                if(e.key === 'ArrowDown' && dy === 0) { dx=0; dy=1; }
+                if(e.key === 'ArrowLeft' && dx === 0) { dx=-1; dy=0; }
+                if(e.key === 'ArrowRight' && dx === 0) { dx=1; dy=0; }
+            }
+        };
+
+        // Mobile Controls
+        document.getElementById('ctrl-up').onclick = () => { if(currentGame === 'snake') { dx=0; dy=-1; } else doge.v = -7; };
+        document.getElementById('ctrl-down').onclick = () => { if(currentGame === 'snake') { dx=0; dy=1; } };
+        document.getElementById('ctrl-left').onclick = () => { if(currentGame === 'snake') { dx=-1; dy=0; } };
+        document.getElementById('ctrl-right').onclick = () => { if(currentGame === 'snake') { dx=1; dy=0; } };
+
+        /* Clock */
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        }, 1000);
+
+        window.onload = boot;
+        window.onresize = resizeCanvas;
     </script>
 </body>
 </html>
