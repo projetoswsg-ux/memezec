@@ -60,19 +60,21 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 48px;
-      background: rgba(10,10,10,0.75);
-      border-bottom: 2px solid #ff4fd8;
+      height: 64px;
+      background: rgba(18,18,18,0.55);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
+      padding: 0 26px;
+      padding-top: 10px;
       backdrop-filter: blur(20px);
       box-shadow: 0 4px 30px rgba(0,0,0,0.35);
       z-index: 100;
     }
 
     .logo {
+      text-transform: uppercase;
       font-family: 'Orbitron', sans-serif;
       font-size: 13px;
       letter-spacing: 1px;
@@ -99,19 +101,29 @@
     }
 
     .icons {
-      align-items: flex-start;
+      width: calc(100% - 40px);
+      flex-direction: row;
+      justify-content: space-between;
+      top: 100px;
+      left: 20px;
+      align-items: center;
       position: absolute;
       top: 80px;
       left: 20px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 18px;
       z-index: 10;
     }
 
     .icon {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 28px;
+      padding: 18px 12px;
       user-select: none;
-      width: 90px;
+      width: 31%;
       text-align: center;
       cursor: pointer;
       transition: all 0.25s ease;
@@ -122,11 +134,12 @@
     }
 
     .icon-box {
+      background: linear-gradient(180deg, rgba(255,79,216,0.28), rgba(255,191,0,0.12));
       position: relative;
-      width: 70px;
-      height: 70px;
+      width: 72px;
+      height: 72px;
       margin: auto;
-      border-radius: 18px;
+      border-radius: 20px;
       background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
       border: 1px solid rgba(255,255,255,0.08);
       display: flex;
@@ -148,18 +161,24 @@
     }
 
     .window {
+      width: calc(100% - 40px);
+      max-width: 860px;
+      height: 58vh;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 250px;
       z-index: 20;
       background-image:
         linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      width: 520px;
-      height: 320px;
+      width: calc(100% - 40px)
+      height: 58vh
       position: absolute;
       top: 120px;
-      left: 180px;
-      background: rgba(10,10,10,0.82);
+      left: 50%
+      background: linear-gradient(180deg, rgba(25,25,25,0.82), rgba(10,10,10,0.92));
       border: 2px solid #ff4fd8;
-      border-radius: 28px;
+      border-radius: 36px;
       overflow: hidden;
       backdrop-filter: blur(14px);
       background-size: 24px 24px;
@@ -179,9 +198,11 @@
     }
 
     .window-header {
+      height: 58px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
-      height: 46px;
-      background: linear-gradient(90deg, #ff4fd8 0%, #ffb300 100%);
+      height: 58px
+      background: linear-gradient(90deg, rgba(255,79,216,0.22), rgba(255,191,0,0.18));
+      backdrop-filter: blur(20px);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -257,22 +278,25 @@
     }
 
     .dock {
+      width: calc(100% - 30px);
+      max-width: 720px;
       z-index: 50;
       position: absolute;
-      bottom: 18px;
+      bottom: 14px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 18px;
-      background: rgba(15,15,15,0.7);
+      background: rgba(255,255,255,0.08);
       padding: 14px 20px;
-      border-radius: 26px;
+      border-radius: 34px;
       border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(30px);
       box-shadow: 0 0 30px rgba(255,79,216,0.3), 0 0 60px rgba(255,212,59,0.15);
     }
 
     .dock-item {
+      background: linear-gradient(180deg, rgba(255,79,216,0.18), rgba(255,191,0,0.08));
       border: 1px solid rgba(255,255,255,0.05);
       width: 60px;
       height: 60px;
@@ -454,6 +478,8 @@
 
     <div class="particles" id="particles"></div>
 
+    <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:140px;height:34px;background:#000;border-radius:20px;z-index:120;box-shadow:0 10px 30px rgba(0,0,0,.45);"></div>
+
     <div class="topbar">
       <div class="logo">WowneroOS GAMING</div>
       <div class="clock" id="clock"></div>
@@ -515,7 +541,7 @@
       </div>
     </div>
 
-    <div class="dock">
+    <div style="position:absolute;right:24px;top:100px;display:flex;flex-direction:column;gap:12px;z-index:30;">
       <div class="dock-item">🎮</div>
       <div class="dock-item">🔥</div>
       <div class="dock-item">🕹️</div>
