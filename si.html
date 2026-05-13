@@ -6,7 +6,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WowneroOS Style</title>
+  <title>WowneroOS Gaming Edition</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 
@@ -26,6 +26,11 @@
     }
 
     .desktop {
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255,79,216,0.18), transparent 25%),
+        radial-gradient(circle at 80% 80%, rgba(255,212,59,0.15), transparent 25%),
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
       width: 100%;
       height: 100vh;
       position: relative;
@@ -42,7 +47,7 @@
       background-image:
         linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background-size: 120px 120px, 120px 120px, 28px 28px, 28px 28px;
       transform: perspective(600px) rotateX(75deg);
       transform-origin: center bottom;
       opacity: 0.2;
@@ -132,6 +137,9 @@
     }
 
     .window {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
       width: 520px;
       height: 320px;
       position: absolute;
@@ -142,6 +150,7 @@
       border-radius: 20px;
       overflow: hidden;
       backdrop-filter: blur(14px);
+      background-size: 24px 24px;
       box-shadow: 0 0 40px rgba(255,79,216,0.45), 0 0 80px rgba(255,212,59,0.15);
       animation: pop 0.4s ease;
     }
@@ -198,6 +207,7 @@
     }
 
     .terminal {
+      position: relative;
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.7);
@@ -206,6 +216,17 @@
       color: #ffd43b;
       font-size: 24px;
       box-shadow: inset 0 0 25px rgba(255,212,59,0.2);
+      border: 1px solid rgba(255,212,59,0.15);
+    }
+
+    .terminal::before {
+      content: 'ONLINE';
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      color: #00ff88;
+      font-size: 16px;
+      text-shadow: 0 0 10px #00ff88;
     }
 
     .typing::after {
@@ -248,6 +269,7 @@
     }
 
     .dock-item:hover {
+      background: rgba(255, 212, 59, 0.12);
       transform: translateY(-8px) scale(1.1);
       box-shadow: 0 0 24px rgba(255,212,59,0.55), 0 0 40px rgba(255,79,216,0.35);
     }
@@ -414,30 +436,30 @@
     <div class="particles" id="particles"></div>
 
     <div class="topbar">
-      <div class="logo">WowneroOS</div>
+      <div class="logo">WowneroOS GAMING</div>
       <div class="clock" id="clock"></div>
     </div>
 
     <div class="icons">
       <div class="icon">
-        <div class="icon-box">💎</div>
-        <p>Wallet</p>
+        <div class="icon-box">🎮</div>
+        <p>Arcade</p>
       </div>
 
       <div class="icon">
-        <div class="icon-box">🚀</div>
-        <p>Apps</p>
+        <div class="icon-box">👾</div>
+        <p>Games</p>
       </div>
 
       <div class="icon">
-        <div class="icon-box">🖥️</div>
-        <p>Terminal</p>
+        <div class="icon-box">🏆</div>
+        <p>Ranking</p>
       </div>
     </div>
 
     <div class="window">
       <div class="window-header">
-        <span>terminal.wownero</span>
+        <span>gamehub.wownero</span>
 
         <div class="buttons">
           <div class="btn red"></div>
@@ -448,21 +470,22 @@
 
       <div class="window-content">
         <div class="terminal">
-          <div>> booting wowneroOS...</div>
-          <div>> loading memes...</div>
-          <div>> syncing blockchain...</div>
+          <div>> booting WowneroOS Gaming...</div>
+          <div>> loading retro arcade engine...</div>
+          <div>> connecting multiplayer servers...</div>
+          <div>> syncing leaderboard...</div>
           <br>
-          <div class="typing">welcome anon</div>
+          <div class="typing">press start anon</div>
         </div>
       </div>
     </div>
 
     <div class="dock">
-      <div class="dock-item">🌐</div>
-      <div class="dock-item">💬</div>
-      <div class="dock-item">📁</div>
-      <div class="dock-item">🎵</div>
-      <div class="dock-item">⚙️</div>
+      <div class="dock-item">🎮</div>
+      <div class="dock-item">🔥</div>
+      <div class="dock-item">🕹️</div>
+      <div class="dock-item">🏁</div>
+      <div class="dock-item">⚡</div>
     </div>
 
   </div>
