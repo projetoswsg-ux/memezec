@@ -1,681 +1,288 @@
-# WowneroOS Visual (HTML + CSS + JS)
-
-```html
-<!DOCTYPE html>  
-<html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WowneroOS Gaming Edition</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      overflow: hidden;
-      font-family: 'Inter', sans-serif;
-      background: #000;
-      height: 100vh;
-      color: #fff;
-    }
-
-    .desktop {
-      isolation: isolate;
-      background:
-        radial-gradient(circle at top left, rgba(255,79,216,0.14), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(255,191,0,0.12), transparent 28%),
-        linear-gradient(180deg, #090909 0%, #111111 45%, #050505 100%);
-      width: 100%;
-      height: 100vh;
-      position: relative;
-      background:
-        radial-gradient(circle at top, rgba(255, 0, 170, 0.35), transparent 45%),
-        radial-gradient(circle at bottom, rgba(255, 210, 0, 0.25), transparent 45%),
-        linear-gradient(180deg, #1a0014 0%, #12000f 45%, #050505 100%);
-      overflow: hidden;
-    }
-
-    .grid {
-      mask-image: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0));
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-      background-size: 120px 120px, 120px 120px, 28px 28px, 28px 28px;
-      transform: perspective(600px) rotateX(75deg);
-      transform-origin: center bottom;
-      opacity: 0.08;
-      bottom: -50%;
-    }
-
-    .topbar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 64px;
-      background: rgba(18,18,18,0.55);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 26px;
-      padding-top: 10px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.35);
-      z-index: 100;
-    }
-
-    .logo {
-      text-transform: uppercase;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 13px;
-      letter-spacing: 1px;
-      font-weight: 700;
-      color: #ff4fd8;
-      text-shadow: 0 0 12px #ff4fd8, 0 0 25px rgba(255,79,216,0.8);
-      animation: glow 2s infinite alternate;
-    }
-
-    @keyframes glow {
-      from {
-        text-shadow: 0 0 6px #ff4fd8;
-      }
-      to {
-        text-shadow: 0 0 24px #ff4fd8, 0 0 40px rgba(255,79,216,0.9);
-      }
-    }
-
-    .clock {
-      font-size: 20px;
-      line-height: 1.8;
-      color: #ffd43b;
-      text-shadow: 0 0 12px #ffd43b;
-    }
-
-    .icons {
-      width: calc(100% - 40px);
-      flex-direction: row;
-      justify-content: space-between;
-      top: 100px;
-      left: 20px;
-      align-items: center;
-      position: absolute;
-      top: 80px;
-      left: 20px;
-      display: flex;
-      flex-direction: row;
-      gap: 18px;
-      z-index: 10;
-    }
-
-    .icon {
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 36px;
-      padding: 18px 12px;
-      user-select: none;
-      width: 31%;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .icon:hover {
-      transform: scale(1.08);
-    }
-
-    .icon-box {
-      background: linear-gradient(180deg, rgba(255,79,216,0.28), rgba(255,191,0,0.12));
-      position: relative;
-      width: 72px;
-      height: 72px;
-      margin: auto;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-      border: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 0 24px rgba(255,79,216,0.5), 0 0 10px rgba(255,212,59,0.25);
-    }
-
-    .icon p {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-top: 10px;
-      font-size: 20px;
-      color: #fff;
-      text-shadow: 0 0 10px #000;
-    }
-
-    .window {
-      width: calc(100% - 40px);
-      max-width: 860px;
-      height: 58vh;
-      left: 50%;
-      transform: translateX(-50%);
-      top: 250px;
-      z-index: 20;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      width: calc(100% - 40px)
-      height: 58vh
-      position: absolute;
-      top: 120px;
-      left: 50%
-      background: linear-gradient(180deg, rgba(25,25,25,0.82), rgba(10,10,10,0.92));
-      border: 2px solid #ff4fd8;
-      border-radius: 28px;
-      overflow: hidden;
-      backdrop-filter: blur(14px);
-      background-size: 24px 24px;
-      box-shadow: 0 0 40px rgba(255,79,216,0.45), 0 0 80px rgba(255,212,59,0.15);
-      animation: pop 0.4s ease;
-    }
-
-    @keyframes pop {
-      from {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .window-header {
-      height: 58px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      height: 58px
-      background: linear-gradient(90deg, rgba(255,79,216,0.22), rgba(255,191,0,0.18));
-      backdrop-filter: blur(20px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 14px;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 11px;
-      letter-spacing: 1px;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn {
-      box-shadow: 0 0 10px rgba(255,255,255,0.15);
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-    }
-
-    .red {
-      background: #ff3b3b;
-    }
-
-    .yellow {
-      background: #ffcf33;
-    }
-
-    .green {
-      background: #00ff99;
-    }
-
-    .window-content {
-      padding: 24px;
-      height: calc(100% - 46px);
-      overflow-y: auto;
-    }
-
-    .terminal {
-      overflow: hidden;
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(180deg, rgba(12,12,12,0.96), rgba(0,0,0,0.9));
-      border-radius: 12px;
-      padding: 18px;
-      color: #ffd43b;
-      font-size: 24px;
-      box-shadow: inset 0 0 25px rgba(255,212,59,0.2);
-      border: 1px solid rgba(255,212,59,0.15);
-    }
-
-    .terminal::before {
-      content: 'ONLINE';
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      color: #00ff88;
-      font-size: 16px;
-      text-shadow: 0 0 10px #00ff88;
-    }
-
-    .typing::after {
-      content: '_';
-      animation: blink 0.8s infinite;
-    }
-
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
-
-    .dock {
-      width: calc(100% - 30px);
-      max-width: 720px;
-      z-index: 50;
-      position: absolute;
-      bottom: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 18px;
-      background: rgba(255,255,255,0.08);
-      padding: 14px 20px;
-      border-radius: 34px;
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(30px);
-      box-shadow: 0 0 30px rgba(255,79,216,0.3), 0 0 60px rgba(255,212,59,0.15);
-    }
-
-    .dock-item {
-      background: linear-gradient(180deg, rgba(255,79,216,0.18), rgba(255,191,0,0.08));
-      border: 1px solid rgba(255,255,255,0.05);
-      width: 60px;
-      height: 60px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      background: rgba(255,255,255,0.08);
-      transition: 0.2s;
-      cursor: pointer;
-    }
-
-    .dock-item:hover {
-      background: rgba(255, 212, 59, 0.12);
-      transform: translateY(-6px) scale(1.05);
-      box-shadow: 0 0 24px rgba(255,212,59,0.55), 0 0 40px rgba(255,79,216,0.35);
-    }
-
-    .particles {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .particle {
-      filter: blur(1px);
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #fff;
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: float linear infinite;
-    }
-
-    @keyframes float {
-      from {
-        transform: translateY(100vh);
-      }
-      to {
-        transform: translateY(-100vh);
-      }
-    }
-
-    @media (max-width: 768px) {
-      body {
-        overflow-x: hidden;
-        overflow-y: auto;
-      }
-
-      .topbar {
-        height: 74px;
-        padding: 0 16px;
-        padding-top: 14px;
-      }
-
-      .logo {
-        font-size: 10px;
-      }
-
-      .clock {
-        font-size: 16px;
-      }
-
-      .icons {
-        top: 96px;
-        left: 12px;
-        width: calc(100% - 24px);
-        gap: 8px;
-      }
-
-      .icon {
-        width: 32%;
-        padding: 14px 8px;
-        border-radius: 22px;
-      }
-
-      .icon-box {
-        width: 58px;
-        height: 58px;
-        font-size: 24px;
-        border-radius: 18px;
-      }
-
-      .icon p {
-        font-size: 13px;
-        margin-top: 8px;
-      }
-
-      .window {
-        width: calc(100% - 16px) !important;
-        height: auto !important;
-        min-height: 420px;
-        max-height: unset;
-        left: 8px !important;
-        right: 8px;
-        transform: none !important;
-        top: 220px !important;
-        border-radius: 28px;
-      }
-
-      .window-header {
-        height: 54px;
-        padding: 0 14px;
-        font-size: 9px;
-      }
-
-      .window-content {
-        padding: 14px;
-      }
-
-      .terminal {
-        font-size: 15px;
-        line-height: 1.7;
-        padding: 16px;
-      }
-
-      .dock {
-        position: fixed;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 16px);
-        gap: 6px;
-        padding: 10px;
-        border-radius: 28px;
-      }
-
-      .dock-item {
-        width: 48px;
-        height: 48px;
-        font-size: 20px;
-        border-radius: 16px;
-      }
-
-      .grid {
-        transform: perspective(400px) rotateX(80deg);
-      }
-
-      .particle {
-        width: 3px;
-        height: 3px;
-      }
-
-      div[style*="position:absolute;right:24px"] {
-        top: 172px !important;
-        right: 14px !important;
-        flex-direction: row !important;
-      }
-
-      div[style*="Gaming Control Center"] {
-        font-size: 18px !important;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .topbar {
-        height: 70px;
-      }
-
-      .logo {
-        font-size: 8px;
-      }
-
-      .clock {
-        font-size: 14px;
-      }
-
-      .icons {
-        top: 92px;
-      }
-
-      .icon {
-        padding: 10px 6px;
-      }
-
-      .icon-box {
-        width: 52px;
-        height: 52px;
-        font-size: 20px;
-      }
-
-      .icon p {
-        font-size: 11px;
-      }
-
-      .window {
-        top: 205px !important;
-        min-height: 400px;
-        border-radius: 24px;
-      }
-
-      .window-header {
-        height: 50px;
-        font-size: 8px;
-      }
-
-      .terminal {
-        font-size: 14px;
-        padding: 14px;
-      }
-
-      .dock {
-        padding: 8px;
-        gap: 4px;
-      }
-
-      .dock-item {
-        width: 42px;
-        height: 42px;
-        font-size: 17px;
-      }
-
-      .btn {
-        width: 13px;
-        height: 13px;
-      }
-    }
-
-      .dock {
-        gap: 10px;
-        padding: 10px 12px;
-      }
-
-      .dock-item {
-        width: 50px;
-        height: 50px;
-      }
-
-      .icon-box {
-        width: 60px;
-        height: 60px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WowOS - Wownero Dedicated System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wow-orange: #ff9d00;
+            --wow-purple: #9b59b6;
+            --wow-dark: #0f0f0f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .pixel-font { font-family: 'Fira Code', monospace; }
+
+        .glass {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 157, 0, 0.3);
+        }
+
+        .window {
+            position: absolute;
+            min-width: 300px;
+            min-height: 200px;
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .scanline::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(255, 157, 0, 0.1);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 640px) {
+            .window {
+                width: 100% !important;
+                height: calc(100% - 60px) !important;
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="scanline select-none">
 
-  <div class="desktop">
-
-    <div class="grid"></div>
-
-    <div class="particles" id="particles"></div>
-
-    <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:140px;height:34px;background:#000;border-radius:20px;z-index:120;box-shadow:0 10px 30px rgba(0,0,0,.45);"></div>
-
-    <div class="topbar">
-      <div class="logo">WowneroOS GAMING</div>
-      <div class="clock" id="clock"></div>
+    <div id="boot-screen" class="fixed inset-0 bg-black z-[100] flex flex-col p-8 pixel-font text-orange-500 overflow-hidden">
+        <div id="boot-log"></div>
+        <div id="boot-cursor" class="w-2 h-5 bg-orange-500 mt-2 animate-pulse"></div>
     </div>
 
-    <div class="icons">
-      <div class="icon">
-        <div class="icon-box">🎮</div>
-        <p>Arcade</p>
-      </div>
+    <main id="desktop" class="relative w-full h-full bg-cover bg-center hidden" style="background-image: url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=2070');">
+        
+        <!-- Wallpaper Overlay -->
+        <div class="absolute inset-0 bg-black/40"></div>
 
-      <div class="icon">
-        <div class="icon-box">👾</div>
-        <p>Games</p>
-      </div>
-
-      <div class="icon">
-        <div class="icon-box">🏆</div>
-        <p>Ranking</p>
-      </div>
-    </div>
-
-    <div class="window">
-      <div class="window-header">
-        <span>gamehub.wownero</span>
-
-        <div class="buttons">
-          <div class="btn red"></div>
-          <div class="btn yellow"></div>
-          <div class="btn green"></div>
+        <!-- App Icons Grid -->
+        <div class="relative z-10 p-6 grid grid-cols-3 sm:grid-cols-1 gap-6 w-fit">
+            <div onclick="openApp('wallet')" class="group flex flex-col items-center gap-2 cursor-pointer w-20">
+                <div class="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">💰</div>
+                <span class="text-xs font-bold text-center drop-shadow-md">Much Wallet</span>
+            </div>
+            <div onclick="openApp('terminal')" class="group flex flex-col items-center gap-2 cursor-pointer w-20">
+                <div class="w-14 h-14 bg-zinc-800 rounded-2xl border border-orange-500/50 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">💻</div>
+                <span class="text-xs font-bold text-center drop-shadow-md">Wow Terminal</span>
+            </div>
+            <div onclick="openApp('stats')" class="group flex flex-col items-center gap-2 cursor-pointer w-20">
+                <div class="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">📈</div>
+                <span class="text-xs font-bold text-center drop-shadow-md">Very Stats</span>
+            </div>
         </div>
-      </div>
 
-      <div class="window-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
-          <div>
-            <div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;color:#fff;">Gaming Control Center</div>
-            <div style="opacity:.6;font-size:14px;">Next-gen cloud gaming operating system</div>
-          </div>
-
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <div style="padding:8px 14px;border-radius:14px;background:rgba(255,79,216,0.12);border:1px solid rgba(255,79,216,0.25);font-size:13px;">144 FPS</div>
-            <div style="padding:8px 14px;border-radius:14px;background:rgba(255,212,59,0.12);border:1px solid rgba(255,212,59,0.25);font-size:13px;">LOW LATENCY</div>
-          </div>
+        
+        <!-- Wallet Window -->
+        <div id="app-wallet" class="window glass rounded-xl overflow-hidden" style="top: 10%; left: 20%; width: 400px;">
+            <div class="bg-white/10 p-3 flex justify-between items-center cursor-move window-header">
+                <span class="text-sm font-bold">💰 Much Wallet v1.0</span>
+                <button onclick="closeApp('wallet')" class="text-red-400 hover:text-red-200">✕</button>
+            </div>
+            <div class="p-6 flex flex-col gap-4">
+                <div class="bg-black/50 p-4 rounded-lg border border-orange-500/30">
+                    <p class="text-xs text-gray-400 uppercase">Seu Saldo</p>
+                    <h2 class="text-3xl font-bold text-orange-400">420.69 WOW</h2>
+                </div>
+                <button class="bg-orange-600 hover:bg-orange-500 p-3 rounded-lg font-bold transition-colors">Enviar Wow</button>
+                <button class="bg-zinc-800 hover:bg-zinc-700 p-3 rounded-lg font-bold border border-white/10 transition-colors">Receber Wow</button>
+            </div>
         </div>
-        <div class="terminal">
-          <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
-            <div style="padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.04);font-size:13px;">ONLINE</div>
-            <div style="padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.04);font-size:13px;">SERVER EU-01</div>
-            <div style="padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.04);font-size:13px;">GPU MODE</div>
-          </div>
-          <div>> booting WowneroOS Gaming...</div>
-          <div>> loading retro arcade engine...</div>
-          <div>> connecting multiplayer servers...</div>
-          <div>> syncing leaderboard...</div>
-          <br>
-          <div class="typing">press start anon</div>
+
+        <!-- Terminal Window -->
+        <div id="app-terminal" class="window glass rounded-xl overflow-hidden" style="top: 15%; left: 25%; width: 500px; height: 350px;">
+            <div class="bg-white/10 p-3 flex justify-between items-center cursor-move window-header">
+                <span class="text-sm font-bold pixel-font">💻 wow-terminal</span>
+                <button onclick="closeApp('terminal')" class="text-red-400 hover:text-red-200">✕</button>
+            </div>
+            <div class="p-4 flex-1 pixel-font text-sm text-green-400 overflow-y-auto" id="terminal-content">
+                <p>> welcome to wow-os 4.0</p>
+                <p>> type 'help' for commands</p>
+                <div class="flex gap-2 mt-2">
+                    <span>$</span>
+                    <input type="text" id="terminal-input" class="bg-transparent border-none outline-none w-full text-green-400" autofocus>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <div style="position:absolute;right:24px;top:100px;display:flex;flex-direction:column;gap:12px;z-index:30;">
-      <div style="width:54px;height:54px;border-radius:18px;background:rgba(255,255,255,.08);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.06);">🎧</div>
-      <div style="width:54px;height:54px;border-radius:18px;background:rgba(255,255,255,.08);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.06);">⚡</div>
-    </div>
+        <!-- Stats Window -->
+        <div id="app-stats" class="window glass rounded-xl overflow-hidden" style="top: 20%; left: 30%; width: 450px;">
+            <div class="bg-white/10 p-3 flex justify-between items-center cursor-move window-header">
+                <span class="text-sm font-bold">📈 Very Stats</span>
+                <button onclick="closeApp('stats')" class="text-red-400 hover:text-red-200">✕</button>
+            </div>
+            <div class="p-4 grid grid-cols-2 gap-4">
+                <div class="p-3 bg-white/5 rounded">
+                    <p class="text-[10px] text-gray-400">Bloco Atual</p>
+                    <p class="font-bold">#1,234,567</p>
+                </div>
+                <div class="p-3 bg-white/5 rounded">
+                    <p class="text-[10px] text-gray-400">Hashrate</p>
+                    <p class="font-bold">69.42 MH/s</p>
+                </div>
+                <div class="p-3 bg-white/5 rounded">
+                    <p class="text-[10px] text-gray-400">Dificuldade</p>
+                    <p class="font-bold">Much High</p>
+                </div>
+                <div class="p-3 bg-white/5 rounded">
+                    <p class="text-[10px] text-gray-400">Nós Conectados</p>
+                    <p class="font-bold">1337</p>
+                </div>
+            </div>
+        </div>
 
-    <div class="dock">
-      <div class="dock-item">🎮</div>
-      <div class="dock-item">🔥</div>
-      <div class="dock-item">🕹️</div>
-      <div class="dock-item">🏁</div>
-      <div class="dock-item">⚡</div>
-    </div>
+        <nav class="absolute bottom-0 w-full h-14 glass border-t border-orange-500/30 z-50 flex items-center px-4 justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-orange-500 shadow-[0_0_15px_rgba(255,157,0,0.5)]">
+                    🐕
+                </div>
+                <div id="active-apps" class="flex gap-2">
+                    <!-- Dynamic active apps will show here on mobile -->
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-end pr-2">
+                <span id="clock" class="text-sm font-bold">00:00:00</span>
+                <span class="text-[10px] text-orange-400 font-bold uppercase tracking-widest">Wow Mode Active</span>
+            </div>
+        </nav>
+    </main>
 
-  </div>
+    <script>
+        /* Boot Sequence Logic */
+        const bootLog = document.getElementById('boot-log');
+        const lines = [
+            "Initializing WowKernel v4.20.69...",
+            "Loading privacy modules...",
+            "Connecting to Wownero Network...",
+            "Much security detected...",
+            "Starting GUI...",
+            "Welcome to the such privacy era."
+        ];
 
-  <script>
-    function updateClock() {
-      const now = new Date();
-      const time = now.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
+        async function startBoot() {
+            for(let line of lines) {
+                const p = document.createElement('p');
+                p.textContent = `> ${line}`;
+                bootLog.appendChild(p);
+                await new Promise(r => setTimeout(r, 400 + Math.random() * 600));
+            }
+            setTimeout(() => {
+                document.getElementById('boot-screen').style.display = 'none';
+                document.getElementById('desktop').classList.remove('hidden');
+            }, 1000);
+        }
 
-      document.getElementById('clock').textContent = time;
-    }
+        /* Window Management */
+        function openApp(id) {
+            const app = document.getElementById(`app-${id}`);
+            app.style.display = 'flex';
+            app.style.zIndex = Math.floor(Date.now() / 100000);
+        }
 
-    setInterval(updateClock, 1000);
-    updateClock();
+        function closeApp(id) {
+            document.getElementById(`app-${id}`).style.display = 'none';
+        }
 
-    const particles = document.getElementById('particles');
+        /* Clock Logic */
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-    for (let i = 0; i < 80; i++) {
-      const p = document.createElement('div');
-      p.classList.add('particle');
+        /* Simple Terminal Logic */
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalContent = document.getElementById('terminal-content');
 
-      p.style.left = Math.random() * 100 + '%';
-      p.style.animationDuration = (Math.random() * 10 + 5) + 's';
-      p.style.animationDelay = Math.random() * 5 + 's';
-      p.style.opacity = Math.random();
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = terminalInput.value.toLowerCase();
+                const line = document.createElement('p');
+                line.className = 'text-white';
+                line.textContent = `$ ${cmd}`;
+                terminalContent.insertBefore(line, terminalInput.parentElement);
 
-      particles.appendChild(p);
-    }
+                const response = document.createElement('p');
+                if (cmd === 'help') {
+                    response.textContent = "Available: status, balance, whoami, clear";
+                } else if (cmd === 'whoami') {
+                    response.textContent = "Such User. Very Privacy.";
+                } else if (cmd === 'balance') {
+                    response.textContent = "420.69 WOW (Locked in much cold storage)";
+                } else if (cmd === 'status') {
+                    response.textContent = "Network: Synced | Nodes: 1337 | Such: Wow";
+                } else if (cmd === 'clear') {
+                    terminalContent.innerHTML = '';
+                    terminalContent.appendChild(terminalInput.parentElement);
+                } else {
+                    response.textContent = `Command not found: ${cmd}`;
+                }
+                
+                terminalContent.insertBefore(response, terminalInput.parentElement);
+                terminalInput.value = '';
+                terminalContent.scrollTop = terminalContent.scrollHeight;
+            }
+        });
 
-    const windowEl = document.querySelector('.window');
+        /* Draggable Logic (Simplificada) */
+        let activeWindow = null;
+        let offset = { x: 0, y: 0 };
 
-    let isDragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
+        document.querySelectorAll('.window-header').forEach(header => {
+            header.addEventListener('mousedown', (e) => {
+                activeWindow = header.parentElement;
+                activeWindow.style.zIndex = 1000;
+                offset.x = e.clientX - activeWindow.offsetLeft;
+                offset.y = e.clientY - activeWindow.offsetTop;
+            });
+        });
 
-    const header = document.querySelector('.window-header');
+        window.addEventListener('mousemove', (e) => {
+            if (activeWindow && window.innerWidth > 640) {
+                activeWindow.style.left = (e.clientX - offset.x) + 'px';
+                activeWindow.style.top = (e.clientY - offset.y) + 'px';
+            }
+        });
 
-    header.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      offsetX = e.clientX - windowEl.offsetLeft;
-      offsetY = e.clientY - windowEl.offsetTop;
-    });
+        window.addEventListener('mouseup', () => {
+            activeWindow = null;
+        });
 
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
+        /* Touch support for mobile */
+        document.querySelectorAll('.window-header').forEach(header => {
+            header.addEventListener('touchstart', (e) => {
+                activeWindow = header.parentElement;
+                const touch = e.touches[0];
+                offset.x = touch.clientX - activeWindow.offsetLeft;
+                offset.y = touch.clientY - activeWindow.offsetTop;
+            }, {passive: true});
+        });
 
-      windowEl.style.left = e.clientX - offsetX + 'px';
-      windowEl.style.top = e.clientY - offsetY + 'px';
-    });
-
-    document.addEventListener('mouseup', () => {
-      isDragging = false;
-    });
-  </script>
-
+        window.onload = startBoot;
+    </script>
 </body>
 </html>
-```
