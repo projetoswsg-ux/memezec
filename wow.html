@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wownero Store - Play Games</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --wow-pink: #ff00cc;
+            --wow-yellow: #ffcc00;
+            --play-dark-bg: #121212;
+            --play-card-bg: #1e1e1e;
+        }
+
+        body {
+            background-color: var(--play-dark-bg);
+            color: #e8eaed;
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            overflow: hidden; 
+        }
+
+        .sidebar-item {
+            border-radius: 0 50px 50px 0;
+            transition: all 0.2s;
+            color: #9aa0a6;
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(255, 0, 204, 0.15);
+            color: var(--wow-pink);
+        }
+
+        .game-card-img {
+            aspect-ratio: 1/1;
+            border-radius: 22%;
+            background-color: var(--play-card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-card-img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 0, 204, 0.4);
+        }
+
+        /* Modal / Game Embed Overlay */
+        #game-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            flex-direction: column;
+        }
+
+        #game-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .search-bar {
+            background: #202124;
+            border: 1px solid #3c4043;
+        }
+
+        .category-chip {
+            border: 1px solid #3c4043;
+            color: #bdc1c6;
+            white-space: nowrap;
+        }
+
+        .category-chip.active {
+            background-color: rgba(255, 0, 204, 0.2);
+            border-color: var(--wow-pink);
+            color: var(--wow-pink);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* Loader para o jogo */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--wow-pink);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Estilo da barra de volume/status */
+        .status-pill {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 10px;
+            color: #9aa0a6;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Navbar Superior -->
+    <nav class="flex items-center justify-between px-4 md:px-8 py-3 border-b border-[#3c4043] bg-[#1a1a1a] sticky top-0 z-50">
+        <div class="flex items-center space-x-2 md:space-x-8">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+                <div class="w-8 h-8 rounded-full bg-wownero-yellow flex items-center justify-center border border-wow-pink shadow-[0_0_8px_var(--wow-pink)]">
+                    <span class="text-black font-black text-xs">W</span>
+                </div>
+                <span class="text-xl font-bold text-white tracking-tight">Wownero <span class="text-wow-pink italic">Store</span></span>
+            </div>
+            <div class="hidden md:flex search-bar items-center px-4 py-2 rounded-lg w-[400px]">
+                <i class="fas fa-search text-gray-500 mr-3"></i>
+                <input type="text" placeholder="Pesquisar jogos e apps..." class="bg-transparent border-none focus:outline-none w-full text-sm text-white">
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-bell text-gray-400 hover:text-wow-pink cursor-pointer transition"></i>
+            <div class="w-8 h-8 rounded-full bg-wow-yellow border border-wow-pink overflow-hidden cursor-pointer">
+                <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Wownero" alt="Usuário">
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="hidden md:flex flex-col w-64 bg-[#121212] pt-4 pr-2 border-r border-[#3c4043]">
+            <div class="sidebar-item active px-6 py-3 flex items-center space-x-4 cursor-pointer mb-1">
+                <i class="fas fa-gamepad"></i>
+                <span class="font-medium">Jogos</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 flex items-center space-x-4 cursor-pointer mb-1">
+                <i class="fas fa-th-large"></i>
+                <span>Apps</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 flex items-center space-x-4 cursor-pointer mb-1">
+                <i class="fas fa-crown"></i>
+                <span>Premium</span>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-8">
+            <div class="flex space-x-3 mb-6 overflow-x-auto hide-scrollbar pb-2">
+                <button class="category-chip active px-4 py-1.5 rounded-full text-sm">Para você</button>
+                <button class="category-chip px-4 py-1.5 rounded-full text-sm">Em alta</button>
+                <button class="category-chip px-4 py-1.5 rounded-full text-sm">Ação</button>
+                <button class="category-chip px-4 py-1.5 rounded-full text-sm">Arcade</button>
+                <button class="category-chip px-4 py-1.5 rounded-full text-sm">Offline</button>
+            </div>
+
+            <!-- Banner Destaque Principal -->
+            <div class="relative w-full h-56 md:h-72 rounded-[2rem] overflow-hidden mb-12 bg-gradient-to-br from-[#ff00cc] to-[#330029] cursor-pointer group shadow-2xl" onclick="openGame('MemeZec Master')">
+                <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition duration-500"></div>
+                <div class="relative z-10 h-full flex flex-col justify-center px-10">
+                    <span class="bg-wow-yellow text-black text-[10px] font-black px-2 py-0.5 rounded w-max mb-4 shadow-lg uppercase tracking-wider">Novo Lançamento</span>
+                    <h2 class="text-4xl md:text-6xl font-black italic mb-3 tracking-tighter leading-none">MEMEZEC <br><span class="text-wow-yellow">ARCADE</span></h2>
+                    <p class="text-white/80 max-w-sm mb-6 font-medium">Experimente a nova interface de menu e desafios exclusivos.</p>
+                    <button class="bg-white text-[#ff00cc] font-black py-3 px-10 rounded-2xl w-max shadow-xl hover:scale-105 transition active:scale-95">JOGAR AGORA</button>
+                </div>
+                <div class="absolute right-10 top-1/2 -translate-y-1/2 text-[12rem] text-white/5 rotate-12 group-hover:rotate-6 transition duration-700">
+                    <i class="fas fa-ghost"></i>
+                </div>
+            </div>
+
+            <!-- Grid de Jogos -->
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-white tracking-tight">Recomendados para você</h3>
+                <span class="text-wow-pink text-sm font-bold cursor-pointer hover:underline">Ver todos</span>
+            </div>
+            
+            <div id="game-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-5 md:gap-8">
+                <!-- Gerado por JavaScript -->
+            </div>
+
+            <!-- Seção de Ranking -->
+            <div class="mt-16 mb-10">
+                <h3 class="text-xl font-bold text-white tracking-tight mb-6">Top Rankings</h3>
+                <div id="ranking-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Rankings gerados por JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Navegação Mobile -->
+    <div class="md:hidden bg-[#1a1a1a] border-t border-[#3c4043] flex justify-around py-4 fixed bottom-0 w-full z-50">
+        <div class="flex flex-col items-center text-wow-pink">
+            <i class="fas fa-gamepad text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">Jogos</span>
+        </div>
+        <div class="flex flex-col items-center text-gray-500">
+            <i class="fas fa-search text-xl mb-1"></i>
+            <span class="text-[10px]">Buscar</span>
+        </div>
+        <div class="flex flex-col items-center text-gray-500">
+            <i class="fas fa-user text-xl mb-1"></i>
+            <span class="text-[10px]">Perfil</span>
+        </div>
+    </div>
+
+    <!-- PLAYER DE JOGO (OVERLAY) -->
+    <div id="game-overlay">
+        <!-- Header do Player -->
+        <div class="bg-[#1a1a1a] px-4 py-3 flex items-center justify-between border-b border-[#3c4043] shadow-xl">
+            <div class="flex items-center space-x-4">
+                <button onclick="closeGame()" class="text-gray-400 hover:text-white p-2 transition hover:bg-white/5 rounded-full">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <div class="flex flex-col">
+                    <h2 id="current-game-title" class="font-bold text-white leading-none text-base">Nome do Jogo</h2>
+                    <div class="flex items-center space-x-2 mt-1">
+                        <span class="status-pill">Estável</span>
+                        <span class="status-pill text-wow-pink">Wownero Network</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-5">
+                <button onclick="toggleFullScreen()" class="text-gray-400 hover:text-wow-yellow transition p-2" title="Tela Cheia">
+                    <i class="fas fa-expand text-lg"></i>
+                </button>
+                <div class="w-10 h-10 rounded-full bg-wownero-yellow flex items-center justify-center border border-wow-pink shadow-[0_0_10px_var(--wow-pink)]">
+                    <span class="text-black font-black text-xs">W</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Container do Iframe -->
+        <div id="game-container" class="relative flex-1 bg-black overflow-hidden flex flex-col">
+            <div id="game-loader" class="absolute inset-0 flex flex-col items-center justify-center bg-[#121212] z-50">
+                <div class="loader mb-6"></div>
+                <p class="text-sm text-gray-400 font-medium tracking-widest uppercase">Inicializando Wownero Arcade...</p>
+                <p class="text-[10px] text-gray-600 mt-2">memezec.vercel.app</p>
+            </div>
+            <!-- Iframe com permissões de tela cheia corrigidas -->
+            <iframe 
+                id="game-frame" 
+                src="" 
+                allow="fullscreen; autoplay; gamepad; focus-without-user-activation" 
+                allowfullscreen 
+                class="relative z-10 w-full h-full flex-1">
+            </iframe>
+        </div>
+
+        <!-- Footer do Player Minimalista -->
+        <div class="bg-[#0f0f0f] px-6 py-2 flex items-center justify-between">
+            <p class="text-[9px] text-gray-700 uppercase font-bold tracking-tighter">Powered by Wownero Open Source Entertainment</p>
+            <div class="flex space-x-4 text-gray-600">
+                <i class="fas fa-share-nodes text-[10px] cursor-pointer hover:text-wow-pink"></i>
+                <i class="fas fa-flag text-[10px] cursor-pointer hover:text-red-500"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameData = [
+            { name: "Menu Master", icon: "fa-bars-staggered", color: "bg-wow-pink" },
+            { name: "Meme Dash", icon: "fa-bolt", color: "bg-orange-600" },
+            { name: "Neon Blocks", icon: "fa-cubes", color: "bg-blue-600" },
+            { name: "Doge Runner", icon: "fa-person-running", color: "bg-green-600" },
+            { name: "Wow Clicker", icon: "fa-hand-pointer", color: "bg-yellow-600" },
+            { name: "Shadow Quest", icon: "fa-user-ninja", color: "bg-gray-800" },
+            { name: "Star Wow", icon: "fa-star", color: "bg-indigo-600" },
+            { name: "Turbo Race", icon: "fa-car-side", color: "bg-red-600" },
+            { name: "Logic Wow", icon: "fa-brain", color: "bg-cyan-600" },
+            { name: "Retro Gun", icon: "fa-gun", color: "bg-purple-700" },
+            { name: "Mining Doge", icon: "fa-pickaxe", color: "bg-amber-700" },
+            { name: "Cyber Sudoku", icon: "fa-grid", color: "bg-slate-700" }
+        ];
+
+        const rankings = [
+            { pos: 1, name: "Memezec Arcade", cat: "Ação", rate: 5.0 },
+            { pos: 2, name: "Wownero Clicker", cat: "Casual", rate: 4.8 },
+            { pos: 3, name: "Doge Explorer", cat: "Aventura", rate: 4.7 }
+        ];
+
+        // URL solicitada pelo usuário
+        const gameUrl = "https://memezec.vercel.app/menu.html";
+
+        function renderGrid() {
+            const grid = document.getElementById('game-grid');
+            grid.innerHTML = gameData.map(game => `
+                <div class="flex flex-col group cursor-pointer" onclick="openGame('${game.name}')">
+                    <div class="game-card-img ${game.color} mb-3 shadow-lg group-hover:shadow-[0_0_20px_rgba(255,0,204,0.3)] transition-all duration-300">
+                        <i class="fas ${game.icon} text-white text-3xl opacity-90 group-hover:scale-110 transition-transform"></i>
+                    </div>
+                    <span class="text-[11px] font-bold text-gray-200 truncate px-1 group-hover:text-wow-pink transition-colors">${game.name}</span>
+                    <div class="flex items-center px-1 mt-0.5">
+                        <span class="text-[9px] text-gray-500 font-medium">4.9 ★ • Arcade</span>
+                    </div>
+                </div>
+            `).join('');
+
+            const rankingGrid = document.getElementById('ranking-list');
+            rankingGrid.innerHTML = rankings.map(r => `
+                <div class="flex items-center space-x-4 p-3 rounded-2xl hover:bg-white/5 transition group cursor-pointer" onclick="openGame('${r.name}')">
+                    <span class="text-lg font-black text-gray-600 w-6 group-hover:text-wow-pink transition">${r.pos}</span>
+                    <div class="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center text-wow-pink text-2xl border border-white/5 shadow-inner group-hover:border-wow-pink/30 transition">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="flex flex-col overflow-hidden">
+                        <span class="text-sm font-bold text-white truncate">${r.name}</span>
+                        <span class="text-xs text-gray-500 font-medium">${r.cat} • ${r.rate} ★</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openGame(title) {
+            const overlay = document.getElementById('game-overlay');
+            const frame = document.getElementById('game-frame');
+            const titleEl = document.getElementById('current-game-title');
+            const loader = document.getElementById('game-loader');
+
+            titleEl.innerText = title;
+            loader.style.display = 'flex';
+            frame.src = gameUrl;
+            
+            overlay.style.display = 'flex';
+            
+            // Tratamento de carregamento do iframe
+            frame.onload = () => {
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 800);
+            };
+        }
+
+        function closeGame() {
+            const overlay = document.getElementById('game-overlay');
+            const frame = document.getElementById('game-frame');
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            
+            overlay.style.display = 'none';
+            frame.src = ""; 
+        }
+
+        function toggleFullScreen() {
+            const elem = document.getElementById("game-container");
+            
+            if (!document.fullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => {
+                        console.error(`Erro ao ativar tela cheia: ${err.message}`);
+                    });
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Inicializar aplicação
+        window.onload = renderGrid;
+    </script>
+</body>
+</html>
