@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Crypto Shooter: Bitcoin & Friends</title>
+    <title>WORLD CHAMPIONS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projetoswsg-ux/memezec@main/style.css">
     <style>
@@ -119,13 +119,13 @@
             <iframe data-aa='2435282' src='//acceptable.a-ads.com/2435282/?size=Adaptive'
                             style='border:0; padding:0; width:70%; height:auto; overflow:hidden;display: block;margin: auto'></iframe>  </p>  
     </div>
-    <p class="text-white text-lg font-bold mb-2"> + 3 ⚾ </p>
+    <p class="text-white text-lg font-bold mb-2"> + 3 ⚽ </p>
     <div id="ad-timer" class="text-4xl font-black text-[#f0b90b]">5</div>
 </div>
 
 <div id="game-wrapper">
     <div class="header-ui" id="main-header">
-        <div class="ui-badge">NÍVEL: <span id="ui-current-lvl">1</span></div>
+        <div class="ui-badge">LEVEL: <span id="ui-current-lvl">1</span></div>
         <div class="ui-badge">SCORE: <span id="ui-score">0</span></div>
     </div>
 
@@ -144,19 +144,19 @@
     </div>
 
     <div id="win-screen" class="overlay-screen hidden">
-        <div class="text-7xl mb-4">🚀</div>
-        <h2 class="text-3xl text-[#0ecb81] mb-8">Grande vitória!</h2>
+        <div class="text-7xl mb-4">🥇</div>
+        <h2 class="text-3xl text-[#0ecb81] mb-8">CONGRATULATIONS</h2>
         <div class="flex flex-col gap-4">
-            <button id="next-lvl-btn" onclick="nextLevel()" class="btn-crypto">PRÓXIMO JOGO</button>
-            <button onclick="backToMap()" class="btn-secondary">VER MAPA</button>
+            <button id="next-lvl-btn" onclick="nextLevel()" class="btn-crypto">NEXT MATCH</button>
+            <button onclick="backToMap()" class="btn-secondary">MAP</button>
         </div>
     </div>
 
     <div id="lose-screen" class="overlay-screen hidden">
-        <div class="text-7xl mb-4">📉</div>
-        <h2 class="text-3xl text-[#f6465d] mb-8">VOCÊ ESTÁ DESCLASSIFICADO</h2>
+        <div class="text-7xl mb-4">😓</div>
+        <h2 class="text-3xl text-[#f6465d] mb-8">IT'S OUT</h2>
         <p id="lose-reason" class="text-white/60 mb-4 text-sm uppercase tracking-widest"></p>
-        <button onclick="retryLevel()" class="btn-crypto">VOLTE PARA O CT</button>
+        <button onclick="retryLevel()" class="btn-crypto">TRY AGAIN</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -237,7 +237,7 @@
     ];
 
     /* Lista para o mapa decorativo */
-    const COUNTRIES_LIST = ["Argentina", "França", "Alemanha", "Espanha", "Brasil", "Itália", "Portugal", "Inglaterra", "Holanda", "Bélgica", "Uruguai", "Mundo"];
+    const COUNTRIES_LIST = ["ARGENTINA", "FRANCE", "GERMANY", "SPAIN", "BRAZIL", "ITALY", "PORTUGAL", "ENGLAND", "NETHERLANDS", "BELGIUM", "URUGUAY", "GRAND FINAL"];
     const FLAGS_LIST = ["🇦🇷", "🇫🇷", "🇩🇪", "🇪🇸", "🇧🇷", "🇮🇹", "🇵🇹", "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "🇳🇱", "🇧🇪", "🇺🇾", "🏆"];
 
     function loadResources() {
@@ -435,7 +435,7 @@
     function spawnShot() {
         const activeTypes = [...new Set(grid.flat().filter(f => f).map(f => f.type))];
         if (activeTypes.length === 0 && fallingBubbles.length === 0) { winGame(); return; }
-        if (remainingBalls <= 0) { gameOver("CARTÃO VERMELHO 🟥"); return; }
+        if (remainingBalls <= 0) { gameOver("EXPULSION 🟥"); return; }
         currentBubble = new Bubble(LOGICAL_WIDTH/2, LOGICAL_HEIGHT - 80, nextSymbol);
         const pool = activeTypes.length > 0 ? activeTypes : CRYPTO_CONFIG.map(c => c.symbol);
         nextSymbol = pool[Math.floor(Math.random() * pool.length)];
@@ -463,7 +463,7 @@
             if (timeLeft <= 0) {
                 clearInterval(interval); overlay.classList.add('hidden');
                 remainingBalls += 3; updatePreview();
-                createMilestoneMessage("+3 BOLAS!"); AudioEngine.cashRegister();
+                createMilestoneMessage("+3 BALLS!"); AudioEngine.cashRegister();
             }
         }, 1000);
     }
@@ -514,8 +514,8 @@
                     }
                 }, i * 40);
             });
-            if (matches.length >= 6) createMilestoneMessage("UMA MÁQUINA");
-            else if (matches.length >= 5) createMilestoneMessage("GOOOOLLLLLLL");
+            if (matches.length >= 6) createMilestoneMessage("GOAT");
+            else if (matches.length >= 5) createMilestoneMessage("GOLLL");
             score += matches.length * 10;
             setTimeout(() => {
                 const connected = new Set(); const rootQ = [];
