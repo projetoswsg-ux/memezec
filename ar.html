@@ -2,13 +2,35 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>WebAR - Criatura Real 3D</title>
-    <!-- Bibliotecas de AR, Renderização 3D e o componente de animação extra -->
+    
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     
     <style>
+      /* Garante que o corpo e o HTML não bloqueiem a câmera de fundo */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: transparent !important;
+      }
+      
+      /* Força o elemento de vídeo injetado pelo AR.js a ficar visível */
+      video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        z-index: -2 !important;
+      }
+
       .hud-aviso {
         position: fixed;
         bottom: 20px;
@@ -24,30 +46,28 @@
         border: 1px solid #00ffcc;
         width: 85%;
         box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        pointer-events: none;
       }
     </style>
   </head>
 
-  <body style="margin: 0; overflow: hidden;">
+  <body>
     
     <div class="hud-aviso" id="hud">
-      Sintonizando sensores de GPS... Garanta que você está em um local aberto.
+      Sintonizando sensores de GPS e Câmera...
     </div>
 
     <a-scene
       vr-mode-ui="enabled: false"
       embedded
-      arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true;"
+      arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true; antialias: true;"
     >
-      <!-- Gerenciador de Assets: Carrega o modelo 3D antes do jogo começar -->
       <a-assets>
         <a-asset-item id="modelo-dragao" src="https://stemkoski.github.io/A-Frame-Examples/models/Dragon.glb"></a-asset-item>
       </a-assets>
 
-      <!-- Câmera AR vinculada aos sensores do celular -->
       <a-camera gps-camera rotation-reader></a-camera>
 
-      <!-- A Criatura 3D real -->
       <a-entity 
         id="criatura-3d"
         gltf-model="#modelo-dragao"
@@ -57,30 +77,25 @@
     </a-scene>
 
     <script>
-      // Obtém a posição real do seu celular
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
           
-          // Deslocamento de segurança: coloca a criatura cerca de 6 metros à sua frente
-          // para evitar que você spawne "dentro" dela.
+          // Deslocamento estratégico para a criatura aparecer na sua frente
           const localLat = lat + 0.00006;
           const localLon = lon + 0.00006;
 
           const dragao = document.getElementById('criatura-3d');
-          
-          // Aplica as coordenadas reais ao modelo 3D
           dragao.setAttribute('gps-entity-place', `latitude: ${localLat}; longitude: ${localLon};`);
           
-          // Atualiza a interface na tela
-          document.getElementById('hud').innerHTML = `🐉 Criatura gerada na sua área!<br>Gire 360° devagar para encontrá-la voando por perto.`;
+          document.getElementById('hud').innerHTML = `🐉 Criatura gerada na sua área!<br>Gire 360° devagar para encontrá-la no espaço.`;
         },
         (error) => {
           document.getElementById('hud').style.color = '#ff3333';
-          document.getElementById('hud').innerHTML = `Erro de Conexão GPS: ${error.message}. Ative a localização de alta precisão.`;
+          document.getElementById('hud').innerHTML = `Erro de GPS [${error.code}]: ${error.message}`;
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     </script>
   </body>
