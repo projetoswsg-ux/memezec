@@ -2,10 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>WebAR Experiencia Real</title>
-    <!-- Bibliotecas de AR e renderização 3D estáveis -->
+    <title>WebAR - Criatura Real 3D</title>
+    <!-- Bibliotecas de AR, Renderização 3D e o componente de animação extra -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     
     <style>
       .hud-aviso {
@@ -13,7 +14,7 @@
         bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.85);
         color: #00ffcc;
         padding: 15px;
         border-radius: 10px;
@@ -21,16 +22,16 @@
         text-align: center;
         z-index: 999;
         border: 1px solid #00ffcc;
-        width: 80%;
+        width: 85%;
+        box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
       }
     </style>
   </head>
 
   <body style="margin: 0; overflow: hidden;">
     
-    <!-- Painel na tela para avisar o status do GPS -->
     <div class="hud-aviso" id="hud">
-      Buscando seu GPS... Olhe ao seu redor após aceitar as permissões.
+      Sintonizando sensores de GPS... Garanta que você está em um local aberto.
     </div>
 
     <a-scene
@@ -38,41 +39,46 @@
       embedded
       arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true;"
     >
-      <!-- Câmera que rastreia os sensores físicos do seu celular -->
+      <!-- Gerenciador de Assets: Carrega o modelo 3D antes do jogo começar -->
+      <a-assets>
+        <a-asset-item id="modelo-dragao" src="https://stemkoski.github.io/A-Frame-Examples/models/Dragon.glb"></a-asset-item>
+      </a-assets>
+
+      <!-- Câmera AR vinculada aos sensores do celular -->
       <a-camera gps-camera rotation-reader></a-camera>
 
-      <!-- O Objeto em AR (Injetado via JavaScript na sua posição real) -->
-      <a-entity id="criatura-real"></a-entity>
+      <!-- A Criatura 3D real -->
+      <a-entity 
+        id="criatura-3d"
+        gltf-model="#modelo-dragao"
+        scale="0.5 0.5 0.5"
+        animation-mixer>
+      </a-entity>
     </a-scene>
 
     <script>
-      // Aguarda o navegador obter a sua localização real exata
+      // Obtém a posição real do seu celular
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
           
-          // ATENÇÃO: Se colocarmos o objeto na sua lat/lon exata, você fica "dentro" dele e não vê nada.
-          // Adicionamos um pequeno ajuste de 0.00005 (cerca de 5 metros) para ele spawnar na sua frente.
-          const alvoLat = lat + 0.00005;
-          const alvoLon = lon + 0.00005;
+          // Deslocamento de segurança: coloca a criatura cerca de 6 metros à sua frente
+          // para evitar que você spawne "dentro" dela.
+          const localLat = lat + 0.00006;
+          const localLon = lon + 0.00006;
 
-          const criatura = document.getElementById('criatura-real');
+          const dragao = document.getElementById('criatura-3d');
           
-          // Configura a criatura com a sua localização real corrigida
-          criatura.setAttribute('gps-entity-place', `latitude: ${alvoLat}; longitude: ${alvoLon};`);
+          // Aplica as coordenadas reais ao modelo 3D
+          dragao.setAttribute('gps-entity-place', `latitude: ${localLat}; longitude: ${localLon};`);
           
-          // Define o visual: Um polígono 3D vermelho flutuante que gira sozinho
-          criatura.setAttribute('geometry', 'primitive: octahedron; radius: 1.5');
-          criatura.setAttribute('material', 'color: #ff0055; wireframe: false; emissive: #ff0055');
-          criatura.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear');
-          
-          // Atualiza o texto na tela
-          document.getElementById('hud').innerHTML = `¡Criatura gerada a 5 metros de você!<br>Lat: ${alvoLat.toFixed(5)} | Lon: ${alvoLon.toFixed(5)}<br>Gire o celular devagar para encontrar.`;
+          // Atualiza a interface na tela
+          document.getElementById('hud').innerHTML = `🐉 Criatura gerada na sua área!<br>Gire 360° devagar para encontrá-la voando por perto.`;
         },
         (error) => {
           document.getElementById('hud').style.color = '#ff3333';
-          document.getElementById('hud').innerHTML = `Erro no GPS: ${error.message}. Verifique se ativou a localização do celular e deu permissão ao navegador.`;
+          document.getElementById('hud').innerHTML = `Erro de Conexão GPS: ${error.message}. Ative a localização de alta precisão.`;
         },
         { enableHighAccuracy: true }
       );
