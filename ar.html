@@ -3,21 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <title>WebAR - Criatura Real 3D</title>
+    <title>WebAR - Teste de Emergência (Cilindro)</title>
     
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     
     <style>
-      /* Garante que o corpo e o HTML não bloqueiem a câmera de fundo */
+      /* CSS resistente a telas pretas/azuis em mobile */
       html, body {
         margin: 0;
         padding: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background-color: transparent !important;
+        background-color: #f0f0f0 !important; /* Cor de fundo para saber se a cena carregou */
       }
       
       /* Força o elemento de vídeo injetado pelo AR.js a ficar visível */
@@ -31,71 +30,73 @@
         z-index: -2 !important;
       }
 
-      .hud-aviso {
+      .hud-emergencia {
         position: fixed;
         bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.85);
-        color: #00ffcc;
+        background: rgba(0, 0, 0, 0.9);
+        color: #ff3333; /* Vermelho para alerta */
         padding: 15px;
         border-radius: 10px;
         font-family: sans-serif;
         text-align: center;
         z-index: 999;
-        border: 1px solid #00ffcc;
+        border: 2px solid #ff3333;
         width: 85%;
-        box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-        pointer-events: none;
+        box-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
       }
     </style>
   </head>
 
   <body>
     
-    <div class="hud-aviso" id="hud">
-      Sintonizando sensores de GPS e Câmera...
+    <div class="hud-emergencia" id="hud">
+      Iniciando diagnósticos de Câmera e GPS...<br>
+      Aguarde o feed da câmera aparecer no fundo.
     </div>
 
     <a-scene
       vr-mode-ui="enabled: false"
       embedded
-      arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true; antialias: true;"
+      arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true; antialias: false; precision: medium;"
     >
-      <a-assets>
-        <a-asset-item id="modelo-dragao" src="https://stemkoski.github.io/A-Frame-Examples/models/Dragon.glb"></a-asset-item>
-      </a-assets>
+      <a-camera gps-camera rotation-reader active="true"></a-camera>
 
-      <a-camera gps-camera rotation-reader></a-camera>
-
-      <a-entity 
-        id="criatura-3d"
-        gltf-model="#modelo-dragao"
-        scale="0.5 0.5 0.5"
-        animation-mixer>
-      </a-entity>
+      <a-entity id="alvo-estatico"></a-entity>
     </a-scene>
 
     <script>
+      // Função simplificada para obter o GPS sem timeout agressivo
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
           
-          // Deslocamento estratégico para a criatura aparecer na sua frente
-          const localLat = lat + 0.00006;
-          const localLon = lon + 0.00006;
+          // Deslocamento de teste: coloca o cilindro a cerca de 6 metros na sua frente.
+          // Isso é necessário porque se colocarmos na sua lat/lon exata, 
+          // você ficaria "dentro" do objeto e não veria nada.
+          const alvoLat = lat + 0.00006;
+          const alvoLon = lon + 0.00006;
 
-          const dragao = document.getElementById('criatura-3d');
-          dragao.setAttribute('gps-entity-place', `latitude: ${localLat}; longitude: ${localLon};`);
+          const alvo = document.getElementById('alvo-estatico');
           
-          document.getElementById('hud').innerHTML = `🐉 Criatura gerada na sua área!<br>Gire 360° devagar para encontrá-la no espaço.`;
+          // Configura as coordenadas reais
+          alvo.setAttribute('gps-entity-place', `latitude: ${alvoLat}; longitude: ${alvoLon};`);
+          
+          // Define o visual: Um cilindro estático vermelho, 1.5m de altura.
+          alvo.setAttribute('geometry', 'primitive: cylinder; radius: 1; height: 1.5;');
+          alvo.setAttribute('material', 'color: #ff3333; emissive: #ff3333; opacity: 1.0;');
+          
+          // Atualiza o HUD com a confirmação
+          document.getElementById('hud').style.color = '#00ffcc'; // Verde neon
+          document.getElementById('hud').innerHTML = `✅ GPS ATIVO!<br>Cilindro gerado na sua área.<br>Gire o celular devagar para encontrar o pilar vermelho.`;
         },
         (error) => {
           document.getElementById('hud').style.color = '#ff3333';
-          document.getElementById('hud').innerHTML = `Erro de GPS [${error.code}]: ${error.message}`;
+          document.getElementById('hud').innerHTML = `Erro no GPS [Código ${error.code}]: ${error.message}. Verifique as permissões de localização do celular.`;
         },
-        { enableHighAccuracy: true, timeout: 10000 }
+        { enableHighAccuracy: true, maximumAge: 0 } // Solicita o GPS mais preciso possível
       );
     </script>
   </body>
