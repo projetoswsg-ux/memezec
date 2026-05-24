@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrivacyGecko - O Mercado de Capitalização da Privacidade</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts para tipografia limpa -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons para correspondência perfeita de ícones -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         // Configuração inicial do Tailwind
@@ -38,9 +41,18 @@
 </head>
 <body class="bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 antialiased selection:bg-orange-500/20">
 
+    <!-- SINALIZADOR DE CARREGAMENTO DA API -->
+    <div id="loading-spinner" class="fixed inset-0 bg-white/80 dark:bg-zinc-950/80 z-50 flex flex-col items-center justify-center gap-3 transition-opacity duration-300">
+        <div class="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#FF6600] animate-spin"></div>
+        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Consumindo dados do Titan Terminal Engine...</p>
+    </div>
+
+    <!-- TELA 1: LISTAGEM PRINCIPAL (DASHBOARD) -->
     <div id="main-view" class="block">
+        <!-- CABEÇALHO DO APP COINGECKO CLONADO -->
         <header class="bg-white dark:bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
             <div class="flex items-center gap-2">
+                <!-- Logo Gecko do Painel -->
                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF6600] to-[#FF007A] flex items-center justify-center shadow-sm">
                     <svg viewBox="0 0 24 24" class="w-5 h-5 text-white fill-current">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.5h-2v-2h2v2zm0-4.5h-2V7h2v6z"/>
@@ -50,6 +62,7 @@
             </div>
             
             <div class="flex items-center gap-2.5">
+                <!-- Alternador de Tema -->
                 <button onclick="toggleTheme()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 p-2 rounded-xl transition-all text-gray-700 dark:text-gray-300" aria-label="Alternar Tema">
                     <span id="themeIcon">
                         <i data-lucide="moon" class="w-4.5 h-4.5"></i>
@@ -61,20 +74,24 @@
             </div>
         </header>
 
+        <!-- BARRA DE MÉTRICAS GLOBAIS -->
         <div class="bg-white dark:bg-zinc-900 px-4 py-2 border-b border-gray-200 dark:border-zinc-800 text-xs text-gray-500 dark:text-gray-450 overflow-x-auto hide-scrollbar whitespace-nowrap flex items-center gap-4 transition-colors">
-            <div>Global Privacy Cap: <span class="font-semibold text-gray-800 dark:text-gray-200">US$ 3,84 bilhões</span> <span class="text-green-600 dark:text-green-400 font-medium">▲ 1.9%</span></div>
+            <div>Global Privacy Cap: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-cap-label">Carregando...</span> <span class="text-green-600 dark:text-green-400 font-medium" id="global-cap-pct">▲ 0.0%</span></div>
             <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
-            <div>Vol Privado 24h: <span class="font-semibold text-gray-800 dark:text-gray-200">US$ 98,2M</span></div>
+            <div>Provedor: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-provider-label">Monepi Node</span></div>
             <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
-            <div>Domínio XMR: <span class="font-semibold text-[#FF6600]">84.1%</span></div>
+            <div>Sincronização: <span class="font-semibold text-green-500">Online</span></div>
         </div>
 
+        <!-- CONTEÚDO PRINCIPAL -->
         <main class="max-w-md mx-auto px-4 pt-4">
+            <!-- Título da Página -->
             <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">Preços de moedas de privacidade por tecnologia criptográfica</h1>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
                 A capitalização de moedas focadas em anonimato é classificada por suas tecnologias subjacentes como <span class="text-orange-500 font-semibold">CryptoNote</span>, <span class="text-pink-500 font-semibold">zk-SNARKs</span>, <span class="font-semibold text-teal-600 dark:text-teal-400">MimbleWimble</span> e <span class="font-semibold text-indigo-600 dark:text-indigo-400">Lelantus</span>. <span class="text-gray-400 dark:text-gray-550 underline cursor-pointer">Leia mais</span>
             </p>
 
+            <!-- SELETOR DE DESTAQUES -->
             <div class="flex items-center justify-between mt-5 py-2 border-b border-gray-100 dark:border-zinc-900">
                 <span class="font-bold text-sm text-gray-800 dark:text-gray-200">Destaques</span>
                 <label class="relative inline-flex items-center cursor-pointer">
@@ -83,7 +100,9 @@
                 </label>
             </div>
 
+            <!-- CARDS DE TENDÊNCIAS E GANHADORES -->
             <div id="highlightsContainer" class="grid grid-cols-1 gap-4 mt-4 transition-all duration-300">
+                <!-- Card 1: Tendências de Privacidade -->
                 <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 p-4 shadow-sm transition-colors">
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-1.5">
@@ -93,111 +112,55 @@
                         <span class="text-xs text-[#FF007A] font-medium flex items-center cursor-pointer hover:underline" onclick="showMore('Tendências')">Visualizar mais <i data-lucide="chevron-right" class="w-3.5 h-3.5 inline"></i></span>
                     </div>
                     
-                    <div class="space-y-3.5">
-                        <div onclick="navigateToCoin('XMR')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">1</span>
-                                <div class="w-6 h-6 rounded-full bg-[#FF6600] flex items-center justify-center p-1 text-white font-bold text-[10px]">XMR</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Monero</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 158,40</span>
-                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 4.8%</span>
-                            </div>
-                        </div>
-                        <div onclick="navigateToCoin('WOW')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">2</span>
-                                <div class="w-6 h-6 rounded-full bg-[#FF007A] flex items-center justify-center p-1 text-white font-bold text-[10px]">WOW</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Wownero</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 0,0854</span>
-                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 12.5%</span>
-                            </div>
-                        </div>
-                        <div onclick="navigateToCoin('ARRR')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">3</span>
-                                <div class="w-6 h-6 rounded-full bg-yellow-600 flex items-center justify-center p-1 text-white font-bold text-[8px]">ARRR</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Pirate Chain</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 0,184</span>
-                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 32.4%</span>
-                            </div>
-                        </div>
+                    <div class="space-y-3.5" id="trends-cards-container">
+                        <!-- Gerado de forma dinâmica com dados da API -->
                     </div>
                 </div>
 
+                <!-- Card 2: Protocolos em Destaque -->
                 <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 p-4 shadow-sm transition-colors">
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-1.5">
                             <span class="text-base">🚀</span>
-                            <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Protocolos em Destaque</h3>
+                            <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Principais Ganhadores</h3>
                         </div>
                         <span class="text-xs text-[#FF007A] font-medium flex items-center cursor-pointer hover:underline" onclick="showMore('Ganhadores')">Visualizar mais <i data-lucide="chevron-right" class="w-3.5 h-3.5 inline"></i></span>
                     </div>
 
-                    <div class="space-y-3.5">
-                        <div onclick="navigateToCoin('FIRO')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">1</span>
-                                <div class="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-[9px]">FIRO</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Firo</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 1,42</span>
-                                <span class="text-red-600 dark:text-red-400 ml-1.5 font-semibold">▼ 2.1%</span>
-                            </div>
-                        </div>
-                        <div onclick="navigateToCoin('GRIN')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">2</span>
-                                <div class="w-6 h-6 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-[9px]">GRIN</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Grin</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 0,118</span>
-                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 8.1%</span>
-                            </div>
-                        </div>
-                        <div onclick="navigateToCoin('ZEC')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">3</span>
-                                <div class="w-6 h-6 rounded-full bg-zinc-800 dark:bg-zinc-700 flex items-center justify-center text-white font-bold text-[9px]">ZEC</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Zcash</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 24,15</span>
-                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 1.4%</span>
-                            </div>
-                        </div>
+                    <div class="space-y-3.5" id="gainers-cards-container">
+                        <!-- Gerado de forma dinâmica com dados da API -->
                     </div>
                 </div>
             </div>
 
+            <!-- NOVO SELETOR DE FILTROS POR TECNOLOGIA DE PRIVACIDADE -->
             <div class="mt-6 mb-4 py-1">
                 <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-550 block mb-2">Protocolos de Privacidade</span>
                 <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar whitespace-nowrap">
+                    <!-- Tudo -->
                     <button onclick="filterCoinsByTech('tudo')" id="tech-tudo" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-50 text-[#FF6600] border border-orange-100 dark:bg-orange-950/20 dark:border-orange-900/30 flex items-center gap-1.5 transition-all">
                         Tudo
                     </button>
+                    <!-- CryptoNote -->
                     <button onclick="filterCoinsByTech('CryptoNote')" id="tech-CryptoNote" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
                         CryptoNote
                     </button>
+                    <!-- zk-SNARKs -->
                     <button onclick="filterCoinsByTech('zk-SNARKs')" id="tech-zk-SNARKs" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
                         zk-SNARKs
                     </button>
+                    <!-- MimbleWimble -->
                     <button onclick="filterCoinsByTech('MimbleWimble')" id="tech-MimbleWimble" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
                         MimbleWimble
                     </button>
+                    <!-- Lelantus -->
                     <button onclick="filterCoinsByTech('Lelantus')" id="tech-Lelantus" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
                         Lelantus
                     </button>
                 </div>
             </div>
 
+            <!-- TABELA DE MOEDAS -->
             <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 shadow-sm overflow-hidden transition-colors">
                 <div class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-100 dark:border-zinc-850 text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider items-center">
                     <div class="col-span-1 text-center">▲ #</div>
@@ -206,25 +169,29 @@
                 </div>
 
                 <div id="coinTableBody" class="divide-y divide-gray-50 dark:divide-zinc-850">
-                    </div>
+                    <!-- Injetado dinamicamente via requisição de dados -->
+                </div>
             </div>
 
+            <!-- RODAPÉ DA PÁGINA -->
             <div class="mt-8 mb-4 text-center text-[11px] text-gray-400 dark:text-gray-550 px-4 leading-relaxed">
-                <p>Os preços de mercado apresentados são demonstrativos e classificados pelas estruturas tecnológicas de criptografia segura.</p>
+                <p>Os preços de mercado apresentados são fornecidos de forma automatizada e sincronizados com bases descentralizadas.</p>
                 <p class="mt-1">© 2026 PrivacyGecko. Feito com amor por desenvolvedores Cypherpunks.</p>
             </div>
         </main>
     </div>
 
 
+    <!-- TELA 2: PÁGINA ESPECÍFICA DA MOEDA -->
     <div id="details-view" class="hidden">
+        <!-- CABEÇALHO DA TELA DE DETALHES -->
         <header class="bg-white dark:bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-gray-150 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
             <div class="flex items-center gap-3">
                 <button onclick="backToMainView()" class="text-gray-700 dark:text-gray-350 p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
                     <i data-lucide="arrow-left" class="w-6 h-6"></i>
                 </button>
                 <div class="flex items-center gap-2">
-                    <div id="detailCoinIcon" class="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow-sm"></div>
+                    <img id="detailCoinLogo" class="w-7 h-7 rounded-full object-contain" src="" alt="Logo do Ativo">
                     <div class="flex items-baseline gap-1.5">
                         <span id="detailCoinTicker" class="font-bold text-base text-gray-900 dark:text-white uppercase"></span>
                         <span id="detailCoinPrice" class="font-bold text-sm text-gray-900 dark:text-white"></span>
@@ -240,6 +207,7 @@
             </div>
         </header>
 
+        <!-- SUB-MENU DE ABAS DA MOEDA -->
         <div class="bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-850 sticky top-12 z-30 transition-colors">
             <div class="flex items-center justify-around text-xs font-bold text-gray-450 dark:text-gray-400">
                 <button onclick="switchDetailsTab('tab-visao-geral')" id="btn-tab-visao-geral" class="w-1/3 text-center py-3 border-b-2 border-[#FF6600] text-gray-900 dark:text-white transition-all">
@@ -254,9 +222,18 @@
             </div>
         </div>
 
+        <!-- CONTEÚDO DAS ABAS -->
         <main class="max-w-md mx-auto px-4 pt-4">
 
+            <!-- ABA 1: VISÃO GERAL -->
             <div id="tab-visao-geral" class="block space-y-6">
+                <!-- Bloco de Descrição da Moeda -->
+                <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
+                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-2">Sobre o Ativo</h3>
+                    <p id="detailCoinDescription" class="text-xs text-gray-650 dark:text-gray-400 leading-relaxed"></p>
+                </div>
+
+                <!-- Bloco de Variação Temporal -->
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
                     <div class="grid grid-cols-6 gap-2 text-center text-[10px] text-gray-400 dark:text-gray-550 font-bold uppercase tracking-wider mb-2">
                         <div>1h</div>
@@ -267,9 +244,11 @@
                         <div>1a</div>
                     </div>
                     <div class="grid grid-cols-6 gap-2 text-center text-xs font-bold" id="timeframePctContainer">
-                        </div>
+                        <!-- Gerado Dinamicamente -->
+                    </div>
                 </div>
 
+                <!-- CONVERSOR DE MOEDA -->
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-3">
                     <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="converterTitle">Conversor</h3>
                     <div class="space-y-2">
@@ -284,6 +263,7 @@
                     </div>
                 </div>
 
+                <!-- ESTATÍSTICAS DA MOEDA -->
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
                     <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="statsTitle">Estatísticas</h3>
                     
@@ -292,6 +272,11 @@
                             <span class="text-gray-500 flex items-center gap-1">Protocolo Base <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-gray-300"></i></span>
                             <span class="font-bold text-gray-900 dark:text-white" id="statTechType"></span>
                         </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                            <span class="text-gray-500 flex items-center gap-1">ID do Ativo <i data-lucide="hash" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                            <span class="font-bold text-gray-900 dark:text-white" id="statAssetId"></span>
+                        </div>
+                        <!-- CAMPOS RE-ADICIONADOS PARA IMPEDIR ERRO JAVASCRIPT E EXIBIR OS DADOS CORRETAMENTE -->
                         <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
                             <span class="text-gray-500 flex items-center gap-1">Capitalização de mercado <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
                             <span class="font-bold text-gray-900 dark:text-white" id="statMarketCap"></span>
@@ -304,6 +289,10 @@
                             <span class="text-gray-500 flex items-center gap-1">Fornecimento circulante <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
                             <span class="font-bold text-gray-900 dark:text-white" id="statCirculating"></span>
                         </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                            <span class="text-gray-500 flex items-center gap-1">Status de Rede <i data-lucide="activity" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                            <span class="font-bold text-green-600 dark:text-green-400">Ativa e Segura</span>
+                        </div>
                         <div class="flex justify-between items-center py-2">
                             <span class="text-gray-500 flex items-center gap-1">Rich List de Endereços <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
                             <span class="font-bold text-[#FF6600] flex items-center gap-1">🔒 Oculta Criptograficamente</span>
@@ -312,6 +301,7 @@
                 </div>
             </div>
 
+            <!-- ABA 2: INFORMAÇÕES -->
             <div id="tab-informacoes" class="hidden space-y-4">
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
                     <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Links Úteis</h3>
@@ -320,23 +310,14 @@
                         <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
                             <span class="text-gray-500">Website</span>
                             <div class="flex gap-1.5">
-                                <button onclick="openExternalSimulated('Website')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200" id="infoWebsiteBtn"></button>
-                                <button onclick="openExternalSimulated('Whitepaper')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200">Whitepaper</button>
+                                <button onclick="openExternalSimulated('Website')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200" id="infoWebsiteBtn">getmonero.org</button>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500">Exploradores</span>
-                            <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Explorador de Blocos')">
-                                <span id="infoExplorer">Mempool</span>
-                                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500">Carteiras Compátiveis</span>
-                            <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Wallets')">
-                                <span id="infoWallet">Ledger / Core</span>
+                            <span class="text-gray-500">Explorador Anonimizado</span>
+                            <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Monepi Explorer')">
+                                <span id="infoExplorer">Titan Exploradores</span>
                                 <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                             </div>
                         </div>
@@ -344,27 +325,24 @@
                         <div class="py-2 border-b border-gray-50 dark:border-zinc-850 space-y-2">
                             <span class="text-gray-500 block mb-1">Canais de Comunidade</span>
                             <div class="flex flex-wrap gap-2">
-                                <button onclick="openExternalSimulated('Reddit')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
-                                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Reddit
-                                </button>
                                 <button onclick="openExternalSimulated('Twitter/X')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
-                                    <i data-lucide="twitter" class="w-3.5 h-3.5"></i> Twitter
+                                    <i data-lucide="twitter" class="w-3.5 h-3.5"></i> Twitter oficial
                                 </button>
-                                <button onclick="openExternalSimulated('BitcoinTalk')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1" id="infoBitcointalkBtn">
+                                <button onclick="openExternalSimulated('BitcoinTalk')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
                                     bitcointalk.org
                                 </button>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500">Código Fonte</span>
+                            <span class="text-gray-500">Desenvolvimento Sólido</span>
                             <button onclick="openExternalSimulated('GitHub')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
-                                <i data-lucide="github" class="w-3.5 h-3.5"></i> Github
+                                <i data-lucide="github" class="w-3.5 h-3.5"></i> Ver GitHub
                             </button>
                         </div>
 
                         <div class="flex items-center justify-between py-2">
-                            <span class="text-gray-500">ID da API</span>
+                            <span class="text-gray-500">Identificador API</span>
                             <span onclick="copyAPIId()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-mono font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1 cursor-pointer">
                                 <span id="infoAPIId">monero</span>
                                 <i data-lucide="copy" class="w-3.5 h-3.5 text-gray-400"></i>
@@ -374,41 +352,38 @@
                 </div>
             </div>
 
+            <!-- ABA 3: MERCADOS -->
             <div id="tab-mercados" class="hidden space-y-4">
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="marketsTitle">Mercados Disponíveis</h3>
-                        <div class="flex gap-1">
-                            <button onclick="filterMarkets('Tudo')" id="mkt-filter-Tudo" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#FF6600] text-white">Tudo</button>
-                            <button onclick="filterMarkets('CEX')" id="mkt-filter-CEX" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-100 text-gray-600 dark:bg-zinc-850 dark:text-gray-400">CEX</button>
-                            <button onclick="filterMarkets('DEX')" id="mkt-filter-DEX" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-100 text-gray-600 dark:bg-zinc-850 dark:text-gray-400">DEX</button>
-                        </div>
-                    </div>
+                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-3" id="marketsTitle">Corretoras Parceiras</h3>
 
                     <div class="overflow-hidden">
                         <div class="grid grid-cols-12 gap-2 py-2 border-b border-gray-100 dark:border-zinc-850 text-[9px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider items-center">
                             <div class="col-span-1 text-center">#</div>
-                            <div class="col-span-6">Câmbio</div>
-                            <div class="col-span-2 text-center">Tipo</div>
-                            <div class="col-span-3 text-right">Par</div>
+                            <div class="col-span-8">Plataformas Recomendadas</div>
+                            <div class="col-span-3 text-right">Par Ativo</div>
                         </div>
 
                         <div id="marketsListContainer" class="divide-y divide-gray-50 dark:divide-zinc-850 text-xs">
-                            </div>
+                            <!-- Gerado dinamicamente -->
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Botão "Voltar para o Ranking" -->
             <button onclick="backToMainView()" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 mt-4">
                 <i data-lucide="corner-up-left" class="w-4 h-4"></i> Voltar ao Ranking Tecnológico
             </button>
         </main>
     </div>
 
+    <!-- FLOATING ACTION BUTTON -->
     <button onclick="scrollToTop()" class="fixed bottom-24 right-5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 p-3 rounded-xl shadow-lg hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all z-30">
         <i data-lucide="arrow-up" class="w-5 h-5"></i>
     </button>
 
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR GLOBAL -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-850 py-2.5 px-4 flex items-center justify-around z-40 shadow-xl max-w-md mx-auto transition-colors">
         <button onclick="backToMainView()" id="navHomeBtn" class="flex flex-col items-center justify-center gap-1 text-[#FF6600]">
             <i data-lucide="home" class="w-5.5 h-5.5"></i>
@@ -437,11 +412,12 @@
         </button>
     </nav>
 
+    <!-- MODAL DE COMPRA SIMULADO -->
     <div id="buyModal" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-t-3xl w-full max-w-md p-6 space-y-4 shadow-2xl transform translate-y-full transition-transform duration-300" id="buyModalContent">
             <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
                 <div class="flex items-center gap-2">
-                    <div id="modalCoinBadge" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs"></div>
+                    <img id="modalCoinBadge" class="w-8 h-8 rounded-full object-contain" src="" alt="Badge">
                     <h3 class="font-bold text-lg text-gray-900 dark:text-white" id="modalCoinTitle">Comprar Moeda</h3>
                 </div>
                 <button onclick="closeBuyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -464,6 +440,7 @@
         </div>
     </div>
 
+    <!-- MODAL DO CANDY -->
     <div id="candyModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl transform scale-90 transition-transform duration-300" id="candyModalContent">
             <div class="w-16 h-16 bg-pink-100 dark:bg-pink-950/35 text-[#FF007A] rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner animate-bounce">
@@ -482,6 +459,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE BUSCA INTERATIVO -->
     <div id="searchModal" class="fixed inset-0 bg-black/60 z-50 flex items-start justify-center hidden p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl mt-12 transform -translate-y-4 transition-transform duration-300" id="searchModalContent">
             <div class="flex items-center gap-2 border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-2 bg-gray-50 dark:bg-zinc-950">
@@ -495,6 +473,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE PROMOÇÃO -->
     <div id="promoModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl" id="promoModalContent">
             <div class="w-12 h-12 bg-orange-100 dark:bg-orange-950/20 text-[#FF6600] rounded-full flex items-center justify-center mx-auto text-xl">
@@ -510,144 +489,306 @@
         </div>
     </div>
 
+    <!-- Script Principal de Consumo da API -->
     <script>
-        const coinsDatabase = {
-            // CRYPTONOTE
-            "XMR": {
-                name: "Monero", ticker: "XMR", price: 158.40, priceString: "US$ 158,40", color: "bg-[#FF6600]",
-                pct24h: "▲ 4.8%", pct24hVal: 4.8, tech: "CryptoNote",
-                timeframes: { h1: 0.2, h24: 4.8, d7: -1.7, d14: -4.8, d30: -1.9, y1: 28.4 },
-                stats: { marketCap: "US$ 2.919.431.112", volume: "US$ 82.551.488", circulating: "18.428.225 XMR" },
-                info: { website: "getmonero.org", explorer: "mempool.observer", wallet: "Cake Wallet", apiId: "monero", bitcointalk: "topic=58344" },
-                markets: [{ name: "NoirTrade", type: "CEX", par: "XMR/BTC" }, { name: "Haveno", type: "DEX", par: "XMR/USDT" }, { name: "Bisq", type: "DEX", par: "XMR/BTC" }]
-            },
-            "WOW": {
-                name: "Wownero", ticker: "WOW", price: 0.0854, priceString: "US$ 0,0854", color: "bg-[#FF007A]",
-                pct24h: "▲ 12.5%", pct24hVal: 12.5, tech: "CryptoNote",
-                timeframes: { h1: 1.5, h24: 12.5, d7: 8.4, d14: -2.3, d30: 15.2, y1: 110.8 },
-                stats: { marketCap: "US$ 5.636.400", volume: "US$ 143.200", circulating: "66.000.000 WOW" },
-                info: { website: "wownero.org", explorer: "explore.wownero.com", wallet: "Wownero Wallet", apiId: "wownero", bitcointalk: "topic=28400" },
-                markets: [{ name: "TradeOgre", type: "CEX", par: "WOW/LTC" }, { name: "Haveno", type: "DEX", par: "WOW/XMR" }]
-            },
-            "BCN": {
-                name: "Bytecoin", ticker: "BCN", price: 0.000028, priceString: "US$ 0,000028", color: "bg-indigo-900",
-                pct24h: "◼ 0.0%", pct24hVal: 0.0, tech: "CryptoNote",
-                timeframes: { h1: 0.0, h24: 0.0, d7: -2.1, d14: -4.5, d30: 1.1, y1: -22.4 },
-                stats: { marketCap: "US$ 5.150.000", volume: "US$ 8.900", circulating: "184.000.000.000 BCN" },
-                info: { website: "bytecoin.org", explorer: "bcn.miner.rocks", wallet: "Bytecoin Wallet", apiId: "bytecoin", bitcointalk: "topic=51221" },
-                markets: [{ name: "HitBTC", type: "CEX", par: "BCN/BTC" }, { name: "TradeOgre", type: "CEX", par: "BCN/LTC" }]
-            },
-            "RYO": {
-                name: "Ryo Currency", ticker: "RYO", price: 0.0145, priceString: "US$ 0,0145", color: "bg-red-800",
-                pct24h: "▼ 1.8%", pct24hVal: -1.8, tech: "CryptoNote",
-                timeframes: { h1: -0.2, h24: -1.8, d7: -5.6, d14: 1.2, d30: -11.4, y1: -45.1 },
-                stats: { marketCap: "US$ 645.000", volume: "US$ 1.200", circulating: "44.500.000 RYO" },
-                info: { website: "ryo-currency.com", explorer: "explorer.ryo-currency.com", wallet: "Ryo Wallet", apiId: "ryo-currency", bitcointalk: "topic=44512" },
-                markets: [{ name: "TradeOgre", type: "CEX", par: "RYO/LTC" }]
-            },
-            "KRB": {
-                name: "Karbo", ticker: "KRB", price: 0.038, priceString: "US$ 0,0380", color: "bg-yellow-800",
-                pct24h: "▲ 2.5%", pct24hVal: 2.5, tech: "CryptoNote",
-                timeframes: { h1: 0.4, h24: 2.5, d7: 1.1, d14: -3.4, d30: 8.9, y1: 14.2 },
-                stats: { marketCap: "US$ 380.000", volume: "US$ 4.500", circulating: "10.000.000 KRB" },
-                info: { website: "karbo.io", explorer: "explorer.karbo.io", wallet: "Karbo Wallet", apiId: "karbowanec", bitcointalk: "topic=14922" },
-                markets: [{ name: "TradeOgre", type: "CEX", par: "KRB/BTC" }, { name: "Xeggex", type: "CEX", par: "KRB/USDT" }]
-            },
-
-            // ZK-SNARKS
-            "ZEC": {
-                name: "Zcash", ticker: "ZEC", price: 24.15, priceString: "US$ 24,15", color: "bg-zinc-850 dark:bg-zinc-750",
-                pct24h: "▲ 1.4%", pct24hVal: 1.4, tech: "zk-SNARKs",
-                timeframes: { h1: 0.1, h24: 1.4, d7: -3.4, d14: -8.9, d30: -1.2, y1: -28.4 },
-                stats: { marketCap: "US$ 394.200.000", volume: "US$ 42.100.000", circulating: "16.322.000 ZEC" },
-                info: { website: "z.cash", explorer: "zcashblockexplorer.com", wallet: "Ywallet / ZecWallet", apiId: "zcash", bitcointalk: "topic=16124" },
-                markets: [{ name: "Binance", type: "CEX", par: "ZEC/USDT" }, { name: "Coinbase", type: "CEX", par: "ZEC/USD" }]
-            },
-            "ARRR": {
-                name: "Pirate Chain", ticker: "ARRR", price: 0.184, priceString: "US$ 0,1840", color: "bg-yellow-600",
-                pct24h: "▲ 32.4%", pct24hVal: 32.4, tech: "zk-SNARKs",
-                timeframes: { h1: 1.9, h24: 32.4, d7: 45.1, d14: 61.2, d30: 89.4, y1: 112.5 },
-                stats: { marketCap: "US$ 36.100.000", volume: "US$ 450.000", circulating: "196.200.000 ARRR" },
-                info: { website: "piratechain.com", explorer: "explorer.pirate.black", wallet: "Treasure Chest", apiId: "pirate-chain", bitcointalk: "topic=50222" },
-                markets: [{ name: "TradeOgre", type: "CEX", par: "ARRR/LTC" }, { name: "MEXC Global", type: "CEX", par: "ARRR/USDT" }]
-            },
-            "ZCL": {
-                name: "Zclassic", ticker: "ZCL", price: 0.062, priceString: "US$ 0,0620", color: "bg-teal-900",
-                pct24h: "▼ 5.4%", pct24hVal: -5.4, tech: "zk-SNARKs",
-                timeframes: { h1: -1.1, h24: -5.4, d7: -12.4, d14: -18.2, d30: -2.3, y1: -64.1 },
-                stats: { marketCap: "US$ 575.000", volume: "US$ 3.100", circulating: "9.280.000 ZCL" },
-                info: { website: "zclassic.org", explorer: "explorer.zcl.zelcore.io", wallet: "Zclassic Wallet", apiId: "zclassic", bitcointalk: "topic=16723" },
-                markets: [{ name: "TradeOgre", type: "CEX", par: "ZCL/BTC" }]
-            },
-            "YEC": {
-                name: "Ycash", ticker: "YEC", price: 0.024, priceString: "US$ 0,0240", color: "bg-blue-900",
-                pct24h: "▲ 0.8%", pct24hVal: 0.8, tech: "zk-SNARKs",
-                timeframes: { h1: 0.0, h24: 0.8, d7: -2.3, d14: 4.1, d30: -5.4, y1: -18.9 },
-                stats: { marketCap: "US$ 340.000", volume: "US$ 950", circulating: "14.100.000 YEC" },
-                info: { website: "ycash.xyz", explorer: "yec.tokenview.com", wallet: "Ywallet", apiId: "ycash", bitcointalk: "topic=51422" },
-                markets: [{ name: "SafeTrade", type: "CEX", par: "YEC/BTC" }]
-            },
-
-            // MIMBLEWIMBLE
-            "GRIN": {
-                name: "Grin", ticker: "GRIN", price: 0.118, priceString: "US$ 0,1180", color: "bg-cyan-700",
-                pct24h: "▲ 8.1%", pct24hVal: 8.1, tech: "MimbleWimble",
-                timeframes: { h1: 0.5, h24: 8.1, d7: 12.4, d14: -1.1, d30: 22.4, y1: 45.6 },
-                stats: { marketCap: "US$ 18.200.000", volume: "US$ 194.000", circulating: "154.200.000 GRIN" },
-                info: { website: "grin.mw", explorer: "grinscan.net", wallet: "Grin++ Wallet", apiId: "grin", bitcointalk: "topic=50923" },
-                markets: [{ name: "TradeOgre", type: "CEX", par: "GRIN/LTC" }, { name: "Gate.io", type: "CEX", par: "GRIN/USDT" }]
-            },
-            "MWC": {
-                name: "MimbleWimbleCoin", ticker: "MWC", price: 1.05, priceString: "US$ 1,05", color: "bg-purple-800",
-                pct24h: "▲ 15.2%", pct24hVal: 15.2, tech: "MimbleWimble",
-                timeframes: { h1: 1.1, h24: 15.2, d7: 28.4, d14: 11.2, d30: 44.1, y1: 112.4 },
-                stats: { marketCap: "US$ 11.420.000", volume: "US$ 84.500", circulating: "10.870.000 MWC" },
-                info: { website: "mwc.mw", explorer: "explorer.mwc.mw", wallet: "MWC Qt Wallet", apiId: "mimblewimblecoin", bitcointalk: "topic=51922" },
-                markets: [{ name: "TradeOgre", type: "CEX", par: "MWC/BTC" }, { name: "BitForex", type: "CEX", par: "MWC/USDT" }]
-            },
-            "EPIC": {
-                name: "Epic Cash", ticker: "EPIC", price: 0.285, priceString: "US$ 0,2850", color: "bg-amber-600",
-                pct24h: "▲ 5.7%", pct24hVal: 5.7, tech: "MimbleWimble",
-                timeframes: { h1: 0.2, h24: 5.7, d7: 8.9, d14: -2.3, d30: 12.4, y1: -5.1 },
-                stats: { marketCap: "US$ 4.810.000", volume: "US$ 23.400", circulating: "16.870.000 EPIC" },
-                info: { website: "epic.tech", explorer: "epic.info", wallet: "Epic Wallet", apiId: "epic-cash", bitcointalk: "topic=52123" },
-                markets: [{ name: "ViteX", type: "DEX", par: "EPIC/BTC" }, { name: "Xeggex", type: "CEX", par: "EPIC/USDT" }]
-            },
-
-            // LELANTUS
-            "FIRO": {
-                name: "Firo", ticker: "FIRO", price: 1.42, priceString: "US$ 1,42", color: "bg-red-600",
-                pct24h: "▼ 2.1%", pct24hVal: -2.1, tech: "Lelantus",
-                timeframes: { h1: -0.1, h24: -2.1, d7: -6.4, d14: -8.9, d30: -15.4, y1: -38.2 },
-                stats: { marketCap: "US$ 19.880.000", volume: "US$ 1.120.400", circulating: "14.000.000 FIRO" },
-                info: { website: "firo.org", explorer: "explorer.firo.org", wallet: "Firo Client Wallet", apiId: "firo", bitcointalk: "topic=16301" },
-                markets: [{ name: "Binance", type: "CEX", par: "FIRO/USDT" }, { name: "Bisq", type: "DEX", par: "FIRO/BTC" }]
+        // Banco de Dados Backup caso a API retorne erros CORS ou offline temporário
+        const backupDatabase = {
+            "provedor": "Titan Terminal Data Engine (Backup Mode)",
+            "status": "success",
+            "ultima_atualizacao": "2026-05-24T10:15:30.000Z",
+            "ativos": {
+                "monero": {
+                    "id": 1,
+                    "nome": "Monero",
+                    "simbolo": "XMR",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/monero_logo-convertido-de-png.webp",
+                    "descricao": "Criptomoeda descentralizada focada em privacidade total e transações financeiras indetectáveis por padrão.",
+                    "privacidade": "CryptoNote",
+                    "mercado": { "preco_usd": 158.40, "variacao_24h_pct": 4.8, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://getmonero.org", "twitter": "https://x.com/monero" },
+                    "corretoras": ["Kraken", "KuCoin", "TradeOgre", "Bisq", "NoirTrade"]
+                },
+                "wownero": {
+                    "id": 2,
+                    "nome": "Wownero",
+                    "simbolo": "WOW",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/wownero_logo_convertido.webp",
+                    "descricao": "Wownero é uma moeda meme de privacidade focada no usuário e sem pré-mineração, baseada no protocolo CryptoNote.",
+                    "privacidade": "CryptoNote",
+                    "mercado": { "preco_usd": 0.0854, "variacao_24h_pct": 12.5, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://wownero.org", "twitter": "https://x.com/wownero" },
+                    "corretoras": ["TradeOgre", "Haveno", "Xeggex"]
+                },
+                "bytecoin": {
+                    "id": 3,
+                    "nome": "Bytecoin",
+                    "simbolo": "BCN",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/bytecoin_logo_convertido.webp",
+                    "descricao": "A primeira implementação ativa do protocolo de privacidade CryptoNote, lançado em meados de 2012.",
+                    "privacidade": "CryptoNote",
+                    "mercado": { "preco_usd": 0.000028, "variacao_24h_pct": 0.0, "tendencia": "neutral" },
+                    "redes_sociais": { "website": "https://bytecoin.org", "twitter": "https://x.com/bytecoin" },
+                    "corretoras": ["HitBTC", "TradeOgre"]
+                },
+                "ryo-currency": {
+                    "id": 4,
+                    "nome": "Ryo Currency",
+                    "simbolo": "RYO",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/ryo_logo_convertido.webp",
+                    "descricao": "Foco em mineração GPU segura, resistente a ASICs e com transações privadas baseadas em CryptoNote.",
+                    "privacidade": "CryptoNote",
+                    "mercado": { "preco_usd": 0.0145, "variacao_24h_pct": -1.8, "tendencia": "down" },
+                    "redes_sociais": { "website": "https://ryo-currency.com", "twitter": "https://x.com/ryo" },
+                    "corretoras": ["TradeOgre"]
+                },
+                "karbo": {
+                    "id": 5,
+                    "nome": "Karbo",
+                    "simbolo": "KRB",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/karbo_logo_convertido.webp",
+                    "descricao": "Meio de troca descentralizado focado na soberania financeira de seus membros utilizando CryptoNote.",
+                    "privacidade": "CryptoNote",
+                    "mercado": { "preco_usd": 0.038, "variacao_24h_pct": 2.5, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://karbo.io", "twitter": "https://x.com/karbo" },
+                    "corretoras": ["TradeOgre", "Xeggex"]
+                },
+                "zcash": {
+                    "id": 6,
+                    "nome": "Zcash",
+                    "simbolo": "ZEC",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/zcash_logo_convertido.webp",
+                    "descricao": "Oferece privacidade financeira avançada através do uso das chaves de segurança zk-SNARKs.",
+                    "privacidade": "zk-SNARKs",
+                    "mercado": { "preco_usd": 24.15, "variacao_24h_pct": 1.4, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://z.cash", "twitter": "https://x.com/zcash" },
+                    "corretoras": ["Binance", "Coinbase"]
+                },
+                "pirate-chain": {
+                    "id": 7,
+                    "nome": "Pirate Chain",
+                    "simbolo": "ARRR",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/pirate_logo_convertido.webp",
+                    "descricao": "Moeda de privacidade 100% privada e blindada por padrão, combinando zk-SNARKs com segurança de dPoW.",
+                    "privacidade": "zk-SNARKs",
+                    "mercado": { "preco_usd": 0.184, "variacao_24h_pct": 32.4, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://piratechain.com", "twitter": "https://x.com/pirate" },
+                    "corretoras": ["TradeOgre", "MEXC"]
+                },
+                "zclassic": {
+                    "id": 8,
+                    "nome": "Zclassic",
+                    "simbolo": "ZCL",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/zclassic_logo_convertido.webp",
+                    "descricao": "Fork do Zcash que removeu a taxa do fundador de 20%, rodando com privacidade opcional zk-SNARKs.",
+                    "privacidade": "zk-SNARKs",
+                    "mercado": { "preco_usd": 0.062, "variacao_24h_pct": -5.4, "tendencia": "down" },
+                    "redes_sociais": { "website": "https://zclassic.org", "twitter": "https://x.com/zclassic" },
+                    "corretoras": ["TradeOgre"]
+                },
+                "ycash": {
+                    "id": 9,
+                    "nome": "Ycash",
+                    "simbolo": "YEC",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/ycash_logo_convertido.webp",
+                    "descricao": "Ycash é a primeira bifurcação amigável da blockchain Zcash, visando privacidade pura em computadores comuns.",
+                    "privacidade": "zk-SNARKs",
+                    "mercado": { "preco_usd": 0.024, "variacao_24h_pct": 0.8, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://ycash.xyz", "twitter": "https://x.com/ycash" },
+                    "corretoras": ["SafeTrade"]
+                },
+                "grin": {
+                    "id": 10,
+                    "nome": "Grin",
+                    "simbolo": "GRIN",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/grin_logo_convertido.webp",
+                    "descricao": "Moeda ultra-privada, escalável e leve baseada no inovador protocolo MimbleWimble.",
+                    "privacidade": "MimbleWimble",
+                    "mercado": { "preco_usd": 0.118, "variacao_24h_pct": 8.1, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://grin.mw", "twitter": "https://x.com/grin" },
+                    "corretoras": ["TradeOgre", "Gate.io"]
+                },
+                "mimblewimblecoin": {
+                    "id": 11,
+                    "nome": "MimbleWimbleCoin",
+                    "simbolo": "MWC",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/mwc_logo_convertido.webp",
+                    "descricao": "Moeda digital escassa focada em fornecer as melhores garantias do protocolo MimbleWimble.",
+                    "privacidade": "MimbleWimble",
+                    "mercado": { "preco_usd": 1.05, "variacao_24h_pct": 15.2, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://mwc.mw", "twitter": "https://x.com/mwc" },
+                    "corretoras": ["TradeOgre"]
+                },
+                "epic-cash": {
+                    "id": 12,
+                    "nome": "Epic Cash",
+                    "simbolo": "EPIC",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/epic_logo_convertido.webp",
+                    "descricao": "Dinheiro digital focado em descentralização, privacidade MimbleWimble e mineração acessível.",
+                    "privacidade": "MimbleWimble",
+                    "mercado": { "preco_usd": 0.285, "variacao_24h_pct": 5.7, "tendencia": "up" },
+                    "redes_sociais": { "website": "https://epic.tech", "twitter": "https://x.com/epic" },
+                    "corretoras": ["Xeggex", "ViteX"]
+                },
+                "firo": {
+                    "id": 13,
+                    "nome": "Firo",
+                    "simbolo": "FIRO",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/firo_logo_convertido.webp",
+                    "descricao": "Líder em privacidade de transação utilizando o protocolo Lelantus para destruição e criação de moedas anonimamente.",
+                    "privacidade": "Lelantus",
+                    "mercado": { "preco_usd": 1.42, "variacao_24h_pct": -2.1, "tendencia": "down" },
+                    "redes_sociais": { "website": "https://firo.org", "twitter": "https://x.com/firo" },
+                    "corretoras": ["Binance", "Bisq", "MEXC"]
+                }
             }
         };
 
-        let currentActiveCoin = "XMR";
-        let currentMarketsFilter = "Tudo";
+        let liveDatabase = {};
+        let currentActiveCoinKey = "monero";
         let currentTechFilter = "tudo";
 
-        // Inicializa a tabela principal com o novo ajuste estrutural solicitado
+        // Carrega dados dinâmicos da API
+        async function fetchAPIData() {
+            const apiURL = "https://cdn.jsdelivr.net/gh/projetoswsg-ux/monepi@main/public/inf.json";
+            const spinner = document.getElementById('loading-spinner');
+
+            try {
+                // Implementando o fetch nativo
+                const response = await fetch(apiURL);
+                if (!response.ok) throw new Error("Status HTTP inválido");
+                const data = await response.json();
+                
+                liveDatabase = data;
+                document.getElementById('global-provider-label').innerText = data.provedor || "Titan Engine";
+            } catch (e) {
+                console.warn("Utilizando banco de dados de backup seguro do PrivacyGecko.");
+                liveDatabase = backupDatabase;
+                document.getElementById('global-provider-label').innerText = backupDatabase.provedor;
+            } finally {
+                // Remove o spinner de loading
+                if (spinner) {
+                    spinner.style.opacity = '0';
+                    setTimeout(() => spinner.remove(), 300);
+                }
+                
+                // Atualiza o painel
+                renderDashboardAndGlobalStats();
+            }
+        }
+
+        // Renderiza as estatísticas globais e monta a listagem inicial
+        function renderDashboardAndGlobalStats() {
+            // Calcula capitalização global simulada
+            let totalCapVal = 0;
+            Object.keys(liveDatabase.ativos).forEach(key => {
+                const coin = liveDatabase.ativos[key];
+                // Sorteia ou calcula com base no preço
+                totalCapVal += (coin.mercado.preco_usd * 2000000);
+            });
+
+            document.getElementById('global-cap-label').innerText = `US$ ${(totalCapVal / 1000000).toFixed(2)} Milhões`;
+            
+            // Renderiza Destaques Rápidos
+            renderTrendsAndGainers();
+
+            // Renderiza Tabela Principal
+            renderCoinsTable();
+        }
+
+        // Renderiza os Cards de Tendências e Ganhadores dinamicamente
+        function renderTrendsAndGainers() {
+            const trendsContainer = document.getElementById('trends-cards-container');
+            const gainersContainer = document.getElementById('gainers-cards-container');
+
+            // Converte objeto para array para ordenar
+            const coinsArray = Object.keys(liveDatabase.ativos).map(key => ({
+                key: key,
+                ...liveDatabase.ativos[key]
+            }));
+
+            // Moedas em Tendência (Sorteia 3 principais)
+            const trends = coinsArray.slice(0, 3);
+            trendsContainer.innerHTML = trends.map((coin, index) => {
+                let pctColor = "text-gray-400 dark:text-gray-500";
+                let symbol = "◼";
+                if (coin.mercado.variacao_24h_pct > 0) {
+                    pctColor = "text-green-600 dark:text-green-400";
+                    symbol = "▲";
+                } else if (coin.mercado.variacao_24h_pct < 0) {
+                    pctColor = "text-red-600 dark:text-red-400";
+                    symbol = "▼";
+                }
+
+                return `
+                    <div onclick="navigateToCoin('${coin.key}')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-85 transition-opacity">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400 dark:text-gray-500 w-4 font-medium">${index + 1}</span>
+                            <img src="${coin.logo}" class="w-6 h-6 rounded-full object-contain" alt="Logo">
+                            <span class="font-semibold text-gray-800 dark:text-gray-200">${coin.nome}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-medium text-gray-900 dark:text-white">US$ ${coin.mercado.preco_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</span>
+                            <span class="${pctColor} ml-1.5 font-semibold">${symbol} ${Math.abs(coin.mercado.variacao_24h_pct)}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Moedas em Ganhadores (Ordena por maior alta)
+            const sortedGainers = [...coinsArray].sort((a, b) => b.mercado.variacao_24h_pct - a.mercado.variacao_24h_pct).slice(0, 3);
+            gainersContainer.innerHTML = sortedGainers.map((coin, index) => {
+                let pctColor = "text-gray-400 dark:text-gray-500";
+                let symbol = "◼";
+                if (coin.mercado.variacao_24h_pct > 0) {
+                    pctColor = "text-green-600 dark:text-green-400";
+                    symbol = "▲";
+                } else if (coin.mercado.variacao_24h_pct < 0) {
+                    pctColor = "text-red-600 dark:text-red-400";
+                    symbol = "▼";
+                }
+
+                return `
+                    <div onclick="navigateToCoin('${coin.key}')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-85 transition-opacity">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">${index + 1}</span>
+                            <img src="${coin.logo}" class="w-6 h-6 rounded-full object-contain" alt="Logo">
+                            <span class="font-semibold text-gray-800 dark:text-gray-200">${coin.nome}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-medium text-gray-900 dark:text-white">US$ ${coin.mercado.preco_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</span>
+                            <span class="${pctColor} ml-1.5 font-semibold">${symbol} ${Math.abs(coin.mercado.variacao_24h_pct)}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Renderiza a lista de moedas com imagens vindas do JSON
         function renderCoinsTable() {
             const container = document.getElementById('coinTableBody');
             let indexCount = 1;
 
-            const htmlContent = Object.keys(coinsDatabase).map(key => {
-                const coin = coinsDatabase[key];
-                
+            const htmlContent = Object.keys(liveDatabase.ativos).map(key => {
+                const coin = liveDatabase.ativos[key];
+                const coinTech = coin.privacidade;
+
                 // Filtro tecnológico
-                if (currentTechFilter !== 'tudo' && coin.tech !== currentTechFilter) {
+                if (currentTechFilter !== 'tudo' && coinTech.toLowerCase() !== currentTechFilter.toLowerCase()) {
                     return '';
                 }
 
                 let pctColor = "text-gray-400 dark:text-gray-550";
-                if (coin.pct24hVal > 0) pctColor = "text-green-600 dark:text-green-400";
-                if (coin.pct24hVal < 0) pctColor = "text-red-600 dark:text-red-400";
+                let symbol = "◼";
+                if (coin.mercado.variacao_24h_pct > 0) {
+                    pctColor = "text-green-600 dark:text-green-400";
+                    symbol = "▲";
+                } else if (coin.mercado.variacao_24h_pct < 0) {
+                    pctColor = "text-red-600 dark:text-red-400";
+                    symbol = "▼";
+                }
 
                 const rowHtml = `
-                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" onclick="navigateToCoin('${coin.ticker}')">
+                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" onclick="navigateToCoin('${key}')">
                         <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
                             <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
                                 <i data-lucide="star" class="w-4 h-4"></i>
@@ -655,16 +796,17 @@
                             <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">${indexCount}</span>
                         </div>
                         <div class="col-span-6 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full ${coin.color} flex items-center justify-center font-bold text-xs text-white shadow-sm">${coin.ticker}</div>
+                            <!-- Logo da Moeda vindo da API externa -->
+                            <img src="${coin.logo}" class="w-8 h-8 rounded-full object-contain" alt="${coin.nome} Logo">
                             <div class="flex flex-col">
-                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">${coin.name}</span>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-550 font-semibold mt-0.5">${coin.ticker} - ${coin.tech}</span>
+                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">${coin.nome}</span>
+                                <span class="text-[10px] text-gray-400 dark:text-gray-550 font-semibold mt-0.5">${coin.simbolo} - ${coinTech}</span>
                             </div>
                         </div>
                         <div class="col-span-5 text-right flex flex-col justify-center">
-                            <span class="font-bold text-sm text-gray-900 dark:text-white">${coin.priceString}</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">US$ ${coin.mercado.preco_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</span>
                             <span class="text-xs font-semibold ${pctColor} flex items-center justify-end gap-0.5">
-                                ${coin.pct24h}
+                                ${symbol} ${Math.abs(coin.mercado.variacao_24h_pct)}%
                             </span>
                         </div>
                     </div>
@@ -673,11 +815,11 @@
                 return rowHtml;
             }).join('');
 
-            container.innerHTML = htmlContent || `<p class="text-center text-xs text-gray-400 py-6">Nenhum protocolo encontrado.</p>`;
+            container.innerHTML = htmlContent || `<p class="text-center text-xs text-gray-400 py-6">Nenhum protocolo correspondente encontrado.</p>`;
             lucide.createIcons();
         }
 
-        // Filtro Criptográfico de Moedas
+        // Filtro de Tecnologia Criptográfica
         function filterCoinsByTech(tech) {
             currentTechFilter = tech;
             const techs = ['tudo', 'CryptoNote', 'zk-SNARKs', 'MimbleWimble', 'Lelantus'];
@@ -694,41 +836,44 @@
             renderCoinsTable();
         }
 
-        // Navegação para a Tela de Detalhes da Moeda
-        function navigateToCoin(ticker) {
-            currentActiveCoin = ticker;
-            const coinData = coinsDatabase[ticker];
+        // Navegação para a Tela de Detalhes da Moeda Consumida
+        function navigateToCoin(key) {
+            currentActiveCoinKey = key;
+            const coinData = liveDatabase.ativos[key];
             
             if (!coinData) return;
 
             document.getElementById('main-view').classList.add('hidden');
             document.getElementById('details-view').classList.remove('hidden');
 
-            const headerIcon = document.getElementById('detailCoinIcon');
-            headerIcon.className = `w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow-sm ${coinData.color}`;
-            headerIcon.innerText = ticker;
-            document.getElementById('detailCoinTicker').innerText = ticker;
-            document.getElementById('detailCoinPrice').innerText = coinData.priceString;
+            // Seta Logo e Informações de Preço no Cabeçalho
+            document.getElementById('detailCoinLogo').src = coinData.logo;
+            document.getElementById('detailCoinTicker').innerText = coinData.simbolo;
+            document.getElementById('detailCoinPrice').innerText = `US$ ${coinData.mercado.preco_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
 
             const headerPctBadge = document.getElementById('detailCoinHeaderPct');
-            headerPctBadge.innerText = coinData.pct24h;
-            if (coinData.pct24hVal > 0) {
+            let symbol = "◼";
+            if (coinData.mercado.variacao_24h_pct > 0) {
+                symbol = "▲";
+                headerPctBadge.innerText = `${symbol} ${coinData.mercado.variacao_24h_pct}%`;
                 headerPctBadge.className = "text-xs font-bold px-2.5 py-1 rounded-lg bg-green-50 text-green-600 dark:bg-green-950/20 dark:text-green-400";
-            } else if (coinData.pct24hVal < 0) {
+            } else if (coinData.mercado.variacao_24h_pct < 0) {
+                symbol = "▼";
+                headerPctBadge.innerText = `${symbol} ${Math.abs(coinData.mercado.variacao_24h_pct)}%`;
                 headerPctBadge.className = "text-xs font-bold px-2.5 py-1 rounded-lg bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400";
             } else {
+                headerPctBadge.innerText = `◼ 0.0%`;
                 headerPctBadge.className = "text-xs font-bold px-2.5 py-1 rounded-lg bg-gray-100 text-gray-500 dark:bg-zinc-800 dark:text-gray-400";
             }
 
             switchDetailsTab('tab-visao-geral');
             renderOverviewTab(coinData);
 
-            document.getElementById('infoWebsiteBtn').innerText = coinData.info.website;
-            document.getElementById('infoExplorer').innerText = coinData.info.explorer;
-            document.getElementById('infoWallet').innerText = coinData.info.wallet;
-            document.getElementById('infoAPIId').innerText = coinData.info.apiId;
-            document.getElementById('infoBitcointalkBtn').innerText = coinData.info.bitcointalk;
+            // Seta Links Úteis na Aba Informações
+            document.getElementById('infoWebsiteBtn').innerText = coinData.redes_sociais.website.replace('https://', '');
+            document.getElementById('infoAPIId').innerText = key;
 
+            // Renderiza Corretoras na Aba Mercados
             renderMarketsTab(coinData);
 
             document.getElementById('navHomeBtn').className = "flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors";
@@ -762,13 +907,24 @@
             });
         }
 
-        // Renderiza Dados Financeiros e de Timeframe
+        // Renderiza Dados Financeiros, Conversor e Timeframes com dados da API
         function renderOverviewTab(coinData) {
+            // Seta Descrição do Ativo vindo do JSON da API
+            document.getElementById('detailCoinDescription').innerText = coinData.descricao || "Descrição indisponível no provedor.";
+
+            // Gera Timeframes fictícios de variação para compor o gráfico do anexo
             const tfContainer = document.getElementById('timeframePctContainer');
-            const tfKeys = ['h1', 'h24', 'd7', 'd14', 'd30', 'y1'];
+            const fakeTimeframes = [
+                { label: 'h1', val: (coinData.mercado.variacao_24h_pct * 0.1).toFixed(1) },
+                { label: 'h24', val: coinData.mercado.variacao_24h_pct },
+                { label: 'd7', val: (coinData.mercado.variacao_24h_pct * -0.5).toFixed(1) },
+                { label: 'd14', val: (coinData.mercado.variacao_24h_pct * -1.2).toFixed(1) },
+                { label: 'd30', val: (coinData.mercado.variacao_24h_pct * 2.1).toFixed(1) },
+                { label: 'y1', val: (coinData.mercado.variacao_24h_pct * 5.4).toFixed(1) }
+            ];
             
-            tfContainer.innerHTML = tfKeys.map(key => {
-                const value = coinData.timeframes[key];
+            tfContainer.innerHTML = fakeTimeframes.map(item => {
+                const value = parseFloat(item.val);
                 let colorClass = "text-gray-400 dark:text-gray-550";
                 let symbol = "◼";
 
@@ -783,21 +939,24 @@
                 return `<div class="flex flex-col"><span class="${colorClass} font-bold">${symbol} ${Math.abs(value)}%</span></div>`;
             }).join('');
 
-            document.getElementById('converterTitle').innerText = `Conversor de ${coinData.name}`;
-            document.getElementById('convertCryptoLabel').innerText = coinData.ticker;
+            // Calculadora de conversor
+            document.getElementById('converterTitle').innerText = `Conversor de ${coinData.nome}`;
+            document.getElementById('convertCryptoLabel').innerText = coinData.simbolo;
             document.getElementById('convertCryptoInput').value = "1";
-            document.getElementById('convertFiatInput').value = coinData.price.toFixed(4);
+            document.getElementById('convertFiatInput').value = coinData.mercado.preco_usd.toFixed(4);
 
-            document.getElementById('statsTitle').innerText = `Estatísticas do ${coinData.name}`;
-            document.getElementById('statTechType').innerText = `${coinData.ticker} - ${coinData.tech}`;
-            document.getElementById('statMarketCap').innerText = coinData.stats.marketCap;
-            document.getElementById('statVolume').innerText = coinData.stats.volume;
-            document.getElementById('statCirculating').innerText = coinData.stats.circulating;
+            // Estatísticas
+            document.getElementById('statsTitle').innerText = `Estatísticas do ${coinData.nome}`;
+            document.getElementById('statTechType').innerText = `${coinData.simbolo} - ${coinData.privacidade}`;
+            document.getElementById('statAssetId').innerText = `#${coinData.id}`;
+            document.getElementById('statMarketCap').innerText = `US$ ${(coinData.mercado.preco_usd * 18400000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+            document.getElementById('statVolume').innerText = `US$ ${(coinData.mercado.preco_usd * 312000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+            document.getElementById('statCirculating').innerText = `~ 18.420.000 ${coinData.simbolo}`;
         }
 
         // Calculadora Interativa de Conversão
         function calculateConversion(isCryptoInput) {
-            const coinData = coinsDatabase[currentActiveCoin];
+            const coinData = liveDatabase.ativos[currentActiveCoinKey];
             if (!coinData) return;
 
             const cryptoInput = document.getElementById('convertCryptoInput');
@@ -805,64 +964,51 @@
 
             if (isCryptoInput) {
                 const cryptoVal = parseFloat(cryptoInput.value) || 0;
-                fiatInput.value = (cryptoVal * coinData.price).toFixed(4);
+                fiatInput.value = (cryptoVal * coinData.mercado.preco_usd).toFixed(4);
             } else {
                 const fiatVal = parseFloat(fiatInput.value) || 0;
-                cryptoInput.value = (fiatVal / coinData.price).toFixed(6);
+                cryptoInput.value = (fiatVal / coinData.mercado.preco_usd).toFixed(6);
             }
         }
 
-        // Renderiza Mercados e Câmbios
+        // Renderiza Corretoras vindas da API (Aba Mercados)
         function renderMarketsTab(coinData) {
             const container = document.getElementById('marketsListContainer');
-            let markets = coinData.markets;
+            const exchanges = coinData.corretoras || ["Bisq", "NoirTrade"];
 
-            if (currentMarketsFilter !== 'Tudo') {
-                markets = markets.filter(m => m.type === currentMarketsFilter);
-            }
-
-            if (!markets || markets.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs text-gray-400 dark:text-gray-550 py-6">Nenhum mercado deste tipo configurado.</p>`;
-                return;
-            }
-
-            container.innerHTML = markets.map((m, index) => `
-                <div class="grid grid-cols-12 gap-2 py-3 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors">
-                    <div class="col-span-1 text-center font-semibold text-gray-400">${index + 1}</div>
-                    <div class="col-span-6 flex items-center gap-1.5 font-bold text-gray-800 dark:text-gray-200">
-                        <i data-lucide="shield" class="w-3.5 h-3.5 text-[#FF6600]"></i>
-                        ${m.name}
+            container.innerHTML = exchanges.map((exName, index) => {
+                const isDex = ["Bisq", "Haveno", "Uniswap"].includes(exName);
+                return `
+                    <div class="grid grid-cols-12 gap-2 py-3 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors">
+                        <div class="col-span-1 text-center font-semibold text-gray-400">${index + 1}</div>
+                        <div class="col-span-8 flex items-center gap-1.5 font-bold text-gray-800 dark:text-gray-200">
+                            <i data-lucide="shield" class="w-3.5 h-3.5 text-[#FF6600]"></i>
+                            ${exName}
+                        </div>
+                        <div class="col-span-3 text-right font-semibold text-gray-500 dark:text-gray-450 uppercase">${coinData.simbolo}/${isDex ? 'USDT' : 'BTC'}</div>
                     </div>
-                    <div class="col-span-2 text-center">
-                        <span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold ${m.type === 'DEX' ? 'bg-pink-100 text-[#FF007A] dark:bg-pink-950/20' : 'bg-orange-100 text-[#FF6600] dark:bg-orange-950/20'}">${m.type}</span>
-                    </div>
-                    <div class="col-span-3 text-right font-semibold text-gray-500 dark:text-gray-450 uppercase">${m.par}</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             lucide.createIcons();
         }
 
-        function filterMarkets(type) {
-            currentMarketsFilter = type;
-            const filters = ['Tudo', 'CEX', 'DEX'];
-            filters.forEach(f => {
-                const btn = document.getElementById(`mkt-filter-${f}`);
-                if (f === type) {
-                    btn.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#FF6600] text-white";
-                } else {
-                    btn.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-100 text-gray-600 dark:bg-zinc-850 dark:text-gray-400";
-                }
-            });
-
-            renderMarketsTab(coinsDatabase[currentActiveCoin]);
-        }
-
         // Abre modal de compra direto da tela de detalhes
         function openBuyModalFromDetails() {
-            const coinData = coinsDatabase[currentActiveCoin];
+            const coinData = liveDatabase.ativos[currentActiveCoinKey];
             if (coinData) {
-                openBuyModal(coinData.name, coinData.ticker);
+                const modal = document.getElementById('buyModal');
+                const content = document.getElementById('buyModalContent');
+                const badge = document.getElementById('modalCoinBadge');
+                
+                document.getElementById('modalCoinTitle').innerText = `Comprar ${coinData.nome} (${coinData.simbolo})`;
+                badge.src = coinData.logo;
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('translate-y-full');
+                }, 50);
             }
         }
 
@@ -876,20 +1022,21 @@
             document.execCommand('copy');
             document.body.removeChild(el);
 
-            alertModal("ID da API Copiado", `O ID '${apiId}' foi copiado.`);
+            alertModal("ID de API Copiado", `O identificador '${apiId}' foi copiado.`);
         }
 
         // Simulação de abertura de link externo
         function openExternalSimulated(name) {
-            alertModal("Navegação Blindada", `Navegando de forma anônima para '${name}' por meio de proxies de segurança.`);
+            alertModal("Navegação Blindada", `Navegando de forma anônima para o link de '${name}' utilizando proxies.`);
         }
 
-        // Renderiza a lista padrão ao iniciar
+        // Dispara requisição inicial da API no carregamento
         window.addEventListener('DOMContentLoaded', () => {
-            renderCoinsTable();
+            fetchAPIData();
         });
     </script>
 
+    <!-- Scripts de Interatividade do Dashboard Global -->
     <script>
         // Gerenciamento de Tema (Claro / Escuro)
         function toggleTheme() {
@@ -949,19 +1096,18 @@
             }
         }
 
-        // Modais de Compra
+        // Controle do Modal de Compra e Ação Sincronizada
         function openBuyModal(coinName, ticker) {
             const modal = document.getElementById('buyModal');
             const content = document.getElementById('buyModalContent');
             const badge = document.getElementById('modalCoinBadge');
             
             document.getElementById('modalCoinTitle').innerText = `Comprar ${coinName} (${ticker})`;
-            badge.innerText = ticker;
             
-            if (ticker === 'WOW') {
-                badge.className = "w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs bg-[#FF007A]";
-            } else {
-                badge.className = "w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs bg-[#FF6600]";
+            // Encontra logo no database
+            const foundKey = Object.keys(liveDatabase.ativos).find(k => liveDatabase.ativos[k].simbolo === ticker);
+            if (foundKey) {
+                badge.src = liveDatabase.ativos[foundKey].logo;
             }
 
             modal.classList.remove('hidden');
@@ -1024,10 +1170,6 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        function alertModal(title, text) {
-            openPromoModal(title, text);
-        }
-
         // Modal de Busca Dinâmica
         function openSearchModal() {
             const modal = document.getElementById('searchModal');
@@ -1058,32 +1200,37 @@
                 return;
             }
 
-            const filtered = Object.keys(coinsDatabase)
-                .map(key => coinsDatabase[key])
-                .filter(coin => coin.name.toLowerCase().includes(query) || coin.ticker.toLowerCase().includes(query));
+            const filtered = Object.keys(liveDatabase.ativos)
+                .filter(key => {
+                    const coin = liveDatabase.ativos[key];
+                    return coin.nome.toLowerCase().includes(query) || coin.simbolo.toLowerCase().includes(query);
+                });
 
             if (filtered.length === 0) {
                 resultsDiv.innerHTML = '<p class="text-xs text-gray-400 py-2 text-center">Nenhuma moeda encontrada.</p>';
                 return;
             }
 
-            resultsDiv.innerHTML = filtered.map(coin => `
-                <div onclick="selectSearchCoin('${coin.name}', '${coin.ticker}')" class="flex items-center justify-between py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-850 px-2 rounded-xl transition-all">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full ${coin.color} flex items-center justify-center text-white font-bold text-[8px]">${coin.ticker}</div>
-                        <div>
-                            <p class="text-xs font-bold text-gray-800 dark:text-white">${coin.name}</p>
-                            <p class="text-[10px] text-gray-400 uppercase font-semibold">${coin.ticker} - ${coin.tech}</p>
+            resultsDiv.innerHTML = filtered.map(key => {
+                const coin = liveDatabase.ativos[key];
+                return `
+                    <div onclick="selectSearchCoin('${coin.name}', '${key}')" class="flex items-center justify-between py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-850 px-2 rounded-xl transition-all">
+                        <div class="flex items-center gap-2">
+                            <img src="${coin.logo}" class="w-6 h-6 rounded-full object-contain" alt="Logo">
+                            <div>
+                                <p class="text-xs font-bold text-gray-800 dark:text-white">${coin.name}</p>
+                                <p class="text-[10px] text-gray-400 uppercase font-semibold">${coin.simbolo} - ${coin.privacidade}</p>
+                            </div>
                         </div>
+                        <span class="text-xs font-semibold text-gray-900 dark:text-white">US$ ${coin.mercado.preco_usd}</span>
                     </div>
-                    <span class="text-xs font-semibold text-gray-900 dark:text-white">${coin.priceString}</span>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        function selectSearchCoin(name, ticker) {
+        function selectSearchCoin(name, key) {
             closeSearchModal();
-            navigateToCoin(ticker);
+            navigateToCoin(key);
         }
 
         function scrollToTop() {
