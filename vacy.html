@@ -648,33 +648,33 @@
         let currentTechFilter = "tudo";
 
         // Carrega dados dinâmicos da API
-        async function fetchAPIData() {
-            const apiURL = "https://cdn.jsdelivr.net/gh/projetoswsg-ux/monepi@main/public/inf.json";
-            const spinner = document.getElementById('loading-spinner');
+async function fetchAPIData() {
+    const apiURL = "https://cdn.jsdelivr.net/gh/projetoswsg-ux/monepi@main/public/inf.json";
+    const spinner = document.getElementById('loading-spinner');
 
-            try {
-                // Implementando o fetch nativo
-                const response = await fetch(apiURL);
-                if (!response.ok) throw new Error("Status HTTP inválido");
-                const data = await response.json();
-                
-                liveDatabase = data;
-                document.getElementById('global-provider-label').innerText = data.provedor || "Titan Engine";
-            } catch (e) {
-                console.warn("Utilizando banco de dados de backup seguro do PrivacyGecko.");
-                liveDatabase = backupDatabase;
-                document.getElementById('global-provider-label').innerText = backupDatabase.provedor;
-            } finally {
-                // Remove o spinner de loading
-                if (spinner) {
-                    spinner.style.opacity = '0';
-                    setTimeout(() => spinner.remove(), 300);
-                }
-                
-                // Atualiza o painel
-                renderDashboardAndGlobalStats();
-            }
+    try {
+        const response = await fetch(apiURL);
+        if (!response.ok) throw new Error("Status HTTP inválido");
+        const data = await response.json();
+        
+        liveDatabase = data;
+        document.getElementById('global-provider-label').innerText = data.provedor || "Titan Engine";
+    } catch (e) {
+        console.warn("Utilizando banco de dados de backup seguro do PrivacyGecko.");
+        liveDatabase = backupDatabase;
+        document.getElementById('global-provider-label').innerText = backupDatabase.provedor;
+    } finally {
+        // CORREÇÃO: Apenas esconde adicionando a classe hidden do Tailwind
+        // Isso evita deletar o nó do DOM e quebrar as próximas requisições
+        if (spinner) {
+            spinner.style.opacity = '0';
+            setTimeout(() => spinner.classList.add('hidden'), 300);
         }
+        
+        // Atualiza o painel
+        renderDashboardAndGlobalStats();
+    }
+}
 
         // Renderiza as estatísticas globais e monta a listagem inicial
         function renderDashboardAndGlobalStats() {
