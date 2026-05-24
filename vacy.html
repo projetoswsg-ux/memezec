@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrivacyGecko - O Mercado de Capitalização da Privacidade</title>
+    <title>PriPeng - O Mercado de Capitalização da Privacidade</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts para tipografia limpa -->
@@ -49,16 +49,12 @@
 
     <!-- TELA 1: LISTAGEM PRINCIPAL (DASHBOARD) -->
     <div id="main-view" class="block">
-        <!-- CABEÇALHO DO APP COINGECKO CLONADO -->
+        <!-- CABEÇALHO DO APP COINGECKO CLONADO COM O NOVO LOGO ENVIADO -->
         <header class="bg-white dark:bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
             <div class="flex items-center gap-2">
-                <!-- Logo Gecko do Painel -->
-                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF6600] to-[#FF007A] flex items-center justify-center shadow-sm">
-                    <svg viewBox="0 0 24 24" class="w-5 h-5 text-white fill-current">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.5h-2v-2h2v2zm0-4.5h-2V7h2v6z"/>
-                    </svg>
-                </div>
-                <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">privacy<span class="text-[#FF6600]">gecko</span></span>
+                <!-- Logotipo Enviado pelo Usuário -->
+                <img src="https://i.postimg.cc/q7qN5pJp/Picsart-26-05-24-17-40-22-677.png" class="w-8 h-8 rounded-lg object-cover shadow-sm" alt="PrivacyGecko Logo">
+                <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Pri<span class="text-[#FF6600]">Peng</span></span>
             </div>
             
             <div class="flex items-center gap-2.5">
@@ -579,7 +575,7 @@
                     "nome": "Zclassic",
                     "simbolo": "ZCL",
                     "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/zclassic_logo_convertido.webp",
-                    "descricao": "Fork do Zcash que removeu a taxa do fundador de 20%, rodando com privacidade opcional zk-SNARKs.",
+                    "descricao": "Fork do Zcash que removeu a taxa do fundador de 20%, rodando with privacidade opcional zk-SNARKs.",
                     "privacidade": "zk-SNARKs",
                     "mercado": { "preco_usd": 0.062, "variacao_24h_pct": -5.4, "tendencia": "down" },
                     "redes_sociais": { "website": "https://zclassic.org", "twitter": "https://x.com/zclassic" },
@@ -600,7 +596,7 @@
                     "id": 10,
                     "nome": "Grin",
                     "simbolo": "GRIN",
-                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/grin-convertido-de-png.webp",
+                    "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/grin_logo_convertido.webp",
                     "descricao": "Moeda ultra-privada, escalável e leve baseada no inovador protocolo MimbleWimble.",
                     "privacidade": "MimbleWimble",
                     "mercado": { "preco_usd": 0.118, "variacao_24h_pct": 8.1, "tendencia": "up" },
@@ -648,33 +644,33 @@
         let currentTechFilter = "tudo";
 
         // Carrega dados dinâmicos da API
-async function fetchAPIData() {
-    const apiURL = "https://cdn.jsdelivr.net/gh/projetoswsg-ux/monepi@main/public/inf.json";
-    const spinner = document.getElementById('loading-spinner');
+        async function fetchAPIData() {
+            const apiURL = "https://cdn.jsdelivr.net/gh/projetoswsg-ux/monepi@main/public/inf.json";
+            const spinner = document.getElementById('loading-spinner');
 
-    try {
-        const response = await fetch(apiURL);
-        if (!response.ok) throw new Error("Status HTTP inválido");
-        const data = await response.json();
-        
-        liveDatabase = data;
-        document.getElementById('global-provider-label').innerText = data.provedor || "Titan Engine";
-    } catch (e) {
-        console.warn("Utilizando banco de dados de backup seguro do PrivacyGecko.");
-        liveDatabase = backupDatabase;
-        document.getElementById('global-provider-label').innerText = backupDatabase.provedor;
-    } finally {
-        // CORREÇÃO: Apenas esconde adicionando a classe hidden do Tailwind
-        // Isso evita deletar o nó do DOM e quebrar as próximas requisições
-        if (spinner) {
-            spinner.style.opacity = '0';
-            setTimeout(() => spinner.classList.add('hidden'), 300);
+            try {
+                // Implementando o fetch nativo
+                const response = await fetch(apiURL);
+                if (!response.ok) throw new Error("Status HTTP inválido");
+                const data = await response.json();
+                
+                liveDatabase = data;
+                document.getElementById('global-provider-label').innerText = data.provedor || "Titan Engine";
+            } catch (e) {
+                console.warn("Utilizando banco de dados de backup seguro do PrivacyGecko.");
+                liveDatabase = backupDatabase;
+                document.getElementById('global-provider-label').innerText = backupDatabase.provedor;
+            } finally {
+                // Apenas esconde o spinner em vez de deletar para evitar erros em chamadas recorrentes
+                if (spinner) {
+                    spinner.style.opacity = '0';
+                    setTimeout(() => spinner.classList.add('hidden'), 300);
+                }
+                
+                // Atualiza o painel
+                renderDashboardAndGlobalStats();
+            }
         }
-        
-        // Atualiza o painel
-        renderDashboardAndGlobalStats();
-    }
-}
 
         // Renderiza as estatísticas globais e monta a listagem inicial
         function renderDashboardAndGlobalStats() {
@@ -682,7 +678,6 @@ async function fetchAPIData() {
             let totalCapVal = 0;
             Object.keys(liveDatabase.ativos).forEach(key => {
                 const coin = liveDatabase.ativos[key];
-                // Sorteia ou calcula com base no preço
                 totalCapVal += (coin.mercado.preco_usd * 2000000);
             });
 
@@ -709,7 +704,7 @@ async function fetchAPIData() {
             // Moedas em Tendência (Sorteia 3 principais)
             const trends = coinsArray.slice(0, 3);
             trendsContainer.innerHTML = trends.map((coin, index) => {
-                let pctColor = "text-gray-400 dark:text-gray-500";
+                let pctColor = "text-gray-400 dark:text-gray-550";
                 let symbol = "◼";
                 if (coin.mercado.variacao_24h_pct > 0) {
                     pctColor = "text-green-600 dark:text-green-400";
@@ -737,7 +732,7 @@ async function fetchAPIData() {
             // Moedas em Ganhadores (Ordena por maior alta)
             const sortedGainers = [...coinsArray].sort((a, b) => b.mercado.variacao_24h_pct - a.mercado.variacao_24h_pct).slice(0, 3);
             gainersContainer.innerHTML = sortedGainers.map((coin, index) => {
-                let pctColor = "text-gray-400 dark:text-gray-500";
+                let pctColor = "text-gray-400 dark:text-gray-550";
                 let symbol = "◼";
                 if (coin.mercado.variacao_24h_pct > 0) {
                     pctColor = "text-green-600 dark:text-green-400";
@@ -902,7 +897,7 @@ async function fetchAPIData() {
                 } else {
                     view.classList.add('hidden');
                     view.classList.remove('block');
-                    button.className = "w-1/3 text-center py-3 border-b-2 border-transparent text-gray-400 dark:text-gray-550 hover:text-gray-600 transition-all";
+                    button.className = "w-1/3 text-center py-3 border-b-2 border-transparent text-gray-400 dark:text-gray-550 hover:text-gray-650 transition-all";
                 }
             });
         }
@@ -1033,6 +1028,11 @@ async function fetchAPIData() {
         // Dispara requisição inicial da API no carregamento
         window.addEventListener('DOMContentLoaded', () => {
             fetchAPIData();
+            
+            // Ativa o Polling (atualiza em background a cada 30 segundos) de forma limpa e segura
+            setInterval(() => {
+                fetchAPIData();
+            }, 30000);
         });
     </script>
 
