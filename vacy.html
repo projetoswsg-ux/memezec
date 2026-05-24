@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrivacyGecko - O Mercado de Capitalização da Privacidade</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts para tipografia limpa -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons para correspondência perfeita de ícones -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         // Configuração inicial do Tailwind
@@ -41,12 +38,9 @@
 </head>
 <body class="bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 antialiased selection:bg-orange-500/20">
 
-    <!-- TELA 1: LISTAGEM PRINCIPAL (DASHBOARD) -->
     <div id="main-view" class="block">
-        <!-- CABEÇALHO DO APP COINGECKO CLONADO -->
         <header class="bg-white dark:bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
             <div class="flex items-center gap-2">
-                <!-- Logo Customizado -->
                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF6600] to-[#FF007A] flex items-center justify-center shadow-sm">
                     <svg viewBox="0 0 24 24" class="w-5 h-5 text-white fill-current">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.5h-2v-2h2v2zm0-4.5h-2V7h2v6z"/>
@@ -56,7 +50,6 @@
             </div>
             
             <div class="flex items-center gap-2.5">
-                <!-- Alternador de Tema -->
                 <button onclick="toggleTheme()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 p-2 rounded-xl transition-all text-gray-700 dark:text-gray-300" aria-label="Alternar Tema">
                     <span id="themeIcon">
                         <i data-lucide="moon" class="w-4.5 h-4.5"></i>
@@ -68,24 +61,20 @@
             </div>
         </header>
 
-        <!-- BARRA DE MÉTRICAS GLOBAIS -->
         <div class="bg-white dark:bg-zinc-900 px-4 py-2 border-b border-gray-200 dark:border-zinc-800 text-xs text-gray-500 dark:text-gray-450 overflow-x-auto hide-scrollbar whitespace-nowrap flex items-center gap-4 transition-colors">
-            <div>Capitalização de mercado: <span class="font-semibold text-gray-800 dark:text-gray-200">US$ 4,12 bilhões</span> <span class="text-green-600 dark:text-green-400 font-medium">▲ 3.4%</span></div>
+            <div>Global Privacy Cap: <span class="font-semibold text-gray-800 dark:text-gray-200">US$ 3,84 bilhões</span> <span class="text-green-600 dark:text-green-400 font-medium">▲ 1.9%</span></div>
             <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
-            <div>Vol 24h: <span class="font-semibold text-gray-800 dark:text-gray-200">US$ 184,5M</span></div>
+            <div>Vol Privado 24h: <span class="font-semibold text-gray-800 dark:text-gray-200">US$ 98,2M</span></div>
             <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
-            <div>Domínio XMR: <span class="font-semibold text-[#FF6600]">82.4%</span></div>
+            <div>Domínio XMR: <span class="font-semibold text-[#FF6600]">84.1%</span></div>
         </div>
 
-        <!-- CONTEÚDO PRINCIPAL -->
         <main class="max-w-md mx-auto px-4 pt-4">
-            <!-- Título da Página -->
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">Preços de moedas de privacidade por capitalização de mercado</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">Preços de moedas de privacidade por tecnologia criptográfica</h1>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
-                A capitalização global de mercado para moedas focadas em anonimato no dia de hoje é de US$ 4,12 bilhões, uma diferença de <span class="text-green-600 dark:text-green-400 font-semibold">▲ 3.4%</span> nas últimas 24 horas. <span class="text-gray-400 dark:text-gray-500 underline cursor-pointer">Leia mais</span>
+                A capitalização de moedas focadas em anonimato é classificada por suas tecnologias subjacentes como <span class="text-orange-500 font-semibold">CryptoNote</span>, <span class="text-pink-500 font-semibold">zk-SNARKs</span>, <span class="font-semibold text-teal-600 dark:text-teal-400">MimbleWimble</span> e <span class="font-semibold text-indigo-600 dark:text-indigo-400">Lelantus</span>. <span class="text-gray-400 dark:text-gray-550 underline cursor-pointer">Leia mais</span>
             </p>
 
-            <!-- SELETOR DE DESTAQUES -->
             <div class="flex items-center justify-between mt-5 py-2 border-b border-gray-100 dark:border-zinc-900">
                 <span class="font-bold text-sm text-gray-800 dark:text-gray-200">Destaques</span>
                 <label class="relative inline-flex items-center cursor-pointer">
@@ -94,14 +83,12 @@
                 </label>
             </div>
 
-            <!-- CARDS DE TENDÊNCIAS E GANHADORES -->
             <div id="highlightsContainer" class="grid grid-cols-1 gap-4 mt-4 transition-all duration-300">
-                <!-- Card 1: Tendências -->
                 <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 p-4 shadow-sm transition-colors">
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-1.5">
                             <span class="text-base">🔥</span>
-                            <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Tendências</h3>
+                            <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Tendências de Privacidade</h3>
                         </div>
                         <span class="text-xs text-[#FF007A] font-medium flex items-center cursor-pointer hover:underline" onclick="showMore('Tendências')">Visualizar mais <i data-lucide="chevron-right" class="w-3.5 h-3.5 inline"></i></span>
                     </div>
@@ -109,7 +96,7 @@
                     <div class="space-y-3.5">
                         <div onclick="navigateToCoin('XMR')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-500 w-4 font-medium">1</span>
+                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">1</span>
                                 <div class="w-6 h-6 rounded-full bg-[#FF6600] flex items-center justify-center p-1 text-white font-bold text-[10px]">XMR</div>
                                 <span class="font-semibold text-gray-800 dark:text-gray-200">Monero</span>
                             </div>
@@ -120,7 +107,7 @@
                         </div>
                         <div onclick="navigateToCoin('WOW')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-500 w-4 font-medium">2</span>
+                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">2</span>
                                 <div class="w-6 h-6 rounded-full bg-[#FF007A] flex items-center justify-center p-1 text-white font-bold text-[10px]">WOW</div>
                                 <span class="font-semibold text-gray-800 dark:text-gray-200">Wownero</span>
                             </div>
@@ -129,46 +116,10 @@
                                 <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 12.5%</span>
                             </div>
                         </div>
-                        <div onclick="navigateToCoin('FIRO')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-500 w-4 font-medium">3</span>
-                                <div class="w-6 h-6 rounded-full bg-gray-800 dark:bg-zinc-700 flex items-center justify-center p-1 text-white font-bold text-[10px]">FIRO</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Firo</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 1,42</span>
-                                <span class="text-red-600 dark:text-red-400 ml-1.5 font-semibold">▼ 2.1%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 2: Principais Ganhadores -->
-                <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 p-4 shadow-sm transition-colors">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-base">🚀</span>
-                            <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Principais Ganhadores</h3>
-                        </div>
-                        <span class="text-xs text-[#FF007A] font-medium flex items-center cursor-pointer hover:underline" onclick="showMore('Ganhadores')">Visualizar mais <i data-lucide="chevron-right" class="w-3.5 h-3.5 inline"></i></span>
-                    </div>
-
-                    <div class="space-y-3.5">
-                        <div onclick="navigateToCoin('RAIL')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-500 w-4 font-medium">1</span>
-                                <div class="w-6 h-6 rounded-full bg-black dark:bg-zinc-850 flex items-center justify-center text-white font-bold text-[9px] border border-zinc-700">RAIL</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Railgun</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 3,57</span>
-                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 50.1%</span>
-                            </div>
-                        </div>
                         <div onclick="navigateToCoin('ARRR')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-500 w-4 font-medium">2</span>
-                                <div class="w-6 h-6 rounded-full bg-yellow-600 flex items-center justify-center text-white font-bold text-[8px]">ARRR</div>
+                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">3</span>
+                                <div class="w-6 h-6 rounded-full bg-yellow-600 flex items-center justify-center p-1 text-white font-bold text-[8px]">ARRR</div>
                                 <span class="font-semibold text-gray-800 dark:text-gray-200">Pirate Chain</span>
                             </div>
                             <div class="text-right">
@@ -176,210 +127,104 @@
                                 <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 32.4%</span>
                             </div>
                         </div>
-                        <div onclick="navigateToCoin('ZEPH')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 p-4 shadow-sm transition-colors">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-base">🚀</span>
+                            <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Protocolos em Destaque</h3>
+                        </div>
+                        <span class="text-xs text-[#FF007A] font-medium flex items-center cursor-pointer hover:underline" onclick="showMore('Ganhadores')">Visualizar mais <i data-lucide="chevron-right" class="w-3.5 h-3.5 inline"></i></span>
+                    </div>
+
+                    <div class="space-y-3.5">
+                        <div onclick="navigateToCoin('FIRO')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-500 w-4 font-medium">3</span>
-                                <div class="w-6 h-6 rounded-full bg-teal-800 flex items-center justify-center text-white font-bold text-[9px]">ZEPH</div>
-                                <span class="font-semibold text-gray-800 dark:text-gray-200">Zephyr Protocol</span>
+                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">1</span>
+                                <div class="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-[9px]">FIRO</div>
+                                <span class="font-semibold text-gray-800 dark:text-gray-200">Firo</span>
                             </div>
                             <div class="text-right">
-                                <span class="font-medium text-gray-900 dark:text-white">US$ 2,12</span>
-                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 18.7%</span>
+                                <span class="font-medium text-gray-900 dark:text-white">US$ 1,42</span>
+                                <span class="text-red-600 dark:text-red-400 ml-1.5 font-semibold">▼ 2.1%</span>
+                            </div>
+                        </div>
+                        <div onclick="navigateToCoin('GRIN')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">2</span>
+                                <div class="w-6 h-6 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-[9px]">GRIN</div>
+                                <span class="font-semibold text-gray-800 dark:text-gray-200">Grin</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-medium text-gray-900 dark:text-white">US$ 0,118</span>
+                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 8.1%</span>
+                            </div>
+                        </div>
+                        <div onclick="navigateToCoin('ZEC')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-80">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">3</span>
+                                <div class="w-6 h-6 rounded-full bg-zinc-800 dark:bg-zinc-700 flex items-center justify-center text-white font-bold text-[9px]">ZEC</div>
+                                <span class="font-semibold text-gray-800 dark:text-gray-200">Zcash</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-medium text-gray-900 dark:text-white">US$ 24,15</span>
+                                <span class="text-green-600 dark:text-green-400 ml-1.5 font-semibold">▲ 1.4%</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- FILTROS ESTILO PILL -->
-            <div class="flex items-center justify-between mt-6 mb-4 overflow-x-auto hide-scrollbar whitespace-nowrap py-1">
-                <div class="flex items-center gap-2" id="filterContainer">
-                    <button onclick="filterCoins('tudo')" id="filter-tudo" class="px-4 py-2 rounded-xl text-xs font-bold bg-orange-50 text-[#FF6600] border border-orange-100 dark:bg-orange-950/20 dark:border-orange-900/30 flex items-center gap-1.5 transition-all">
-                        <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+            <div class="mt-6 mb-4 py-1">
+                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-550 block mb-2">Protocolos de Privacidade</span>
+                <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar whitespace-nowrap">
+                    <button onclick="filterCoinsByTech('tudo')" id="tech-tudo" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-50 text-[#FF6600] border border-orange-100 dark:bg-orange-950/20 dark:border-orange-900/30 flex items-center gap-1.5 transition-all">
                         Tudo
                     </button>
-                    <button onclick="filterCoins('destaques')" id="filter-destaques" class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
-                        <i data-lucide="list" class="w-3.5 h-3.5"></i>
-                        Destaques
+                    <button onclick="filterCoinsByTech('CryptoNote')" id="tech-CryptoNote" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
+                        CryptoNote
                     </button>
-                    <button onclick="filterCoins('base')" id="filter-base" class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
-                        <i data-lucide="database" class="w-3.5 h-3.5"></i>
-                        Base Monero
+                    <button onclick="filterCoinsByTech('zk-SNARKs')" id="tech-zk-SNARKs" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
+                        zk-SNARKs
+                    </button>
+                    <button onclick="filterCoinsByTech('MimbleWimble')" id="tech-MimbleWimble" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
+                        MimbleWimble
+                    </button>
+                    <button onclick="filterCoinsByTech('Lelantus')" id="tech-Lelantus" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">
+                        Lelantus
                     </button>
                 </div>
-                <button class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 p-2.5 rounded-xl transition-all">
-                    <i data-lucide="sparkles" class="w-4 h-4 text-gray-600 dark:text-gray-400"></i>
-                </button>
             </div>
 
-            <!-- TABELA DE MOEDAS -->
             <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 shadow-sm overflow-hidden transition-colors">
                 <div class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-100 dark:border-zinc-850 text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider items-center">
                     <div class="col-span-1 text-center">▲ #</div>
-                    <div class="col-span-5">Moeda</div>
-                    <div class="col-span-6 text-right">Preço / Var. 24h</div>
+                    <div class="col-span-6">Moeda / Tecnologia</div>
+                    <div class="col-span-5 text-right">Preço / Var. 24h</div>
                 </div>
 
                 <div id="coinTableBody" class="divide-y divide-gray-50 dark:divide-zinc-850">
-                    <!-- Coin 1 (Monero) -->
-                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" data-category="base" onclick="navigateToCoin('XMR')">
-                        <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
-                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
-                                <i data-lucide="star" class="w-4 h-4"></i>
-                            </button>
-                            <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">1</span>
-                        </div>
-                        <div class="col-span-6 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-[#FF6600] flex items-center justify-center font-bold text-xs text-white shadow-sm">XMR</div>
-                            <div class="flex flex-col">
-                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">Monero</span>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-550 uppercase font-medium">XMR</span>
-                            </div>
-                        </div>
-                        <div class="col-span-5 text-right flex flex-col justify-center">
-                            <span class="font-bold text-sm text-gray-900 dark:text-white">US$ 158,40</span>
-                            <span class="text-xs font-semibold text-green-600 dark:text-green-400 flex items-center justify-end gap-0.5">
-                                ▲ 4.8%
-                            </span>
-                        </div>
                     </div>
-
-                    <!-- Coin 2 (Wownero) -->
-                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" data-category="destaques" onclick="navigateToCoin('WOW')">
-                        <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
-                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
-                                <i data-lucide="star" class="w-4 h-4"></i>
-                            </button>
-                            <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">2</span>
-                        </div>
-                        <div class="col-span-6 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-[#FF007A] flex items-center justify-center font-bold text-xs text-white shadow-sm">WOW</div>
-                            <div class="flex flex-col">
-                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">Wownero</span>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-550 uppercase font-medium">WOW</span>
-                            </div>
-                        </div>
-                        <div class="col-span-5 text-right flex flex-col justify-center">
-                            <span class="font-bold text-sm text-gray-900 dark:text-white">US$ 0,0854</span>
-                            <span class="text-xs font-semibold text-green-600 dark:text-green-400 flex items-center justify-end gap-0.5">
-                                ▲ 12.5%
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Coin 3 (Railgun) -->
-                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" data-category="destaques" onclick="navigateToCoin('RAIL')">
-                        <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
-                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
-                                <i data-lucide="star" class="w-4 h-4"></i>
-                            </button>
-                            <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">3</span>
-                        </div>
-                        <div class="col-span-6 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-black dark:bg-zinc-800 border dark:border-zinc-700 flex items-center justify-center font-bold text-[10px] text-white shadow-sm">RAIL</div>
-                            <div class="flex flex-col">
-                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">Railgun</span>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-550 uppercase font-medium">RAIL</span>
-                            </div>
-                        </div>
-                        <div class="col-span-5 text-right flex flex-col justify-center">
-                            <span class="font-bold text-sm text-gray-900 dark:text-white">US$ 3,57</span>
-                            <span class="text-xs font-semibold text-green-600 dark:text-green-400 flex items-center justify-end gap-0.5">
-                                ▲ 50.1%
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Coin 4 (Zephyr) -->
-                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" data-category="base" onclick="navigateToCoin('ZEPH')">
-                        <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
-                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
-                                <i data-lucide="star" class="w-4 h-4"></i>
-                            </button>
-                            <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">4</span>
-                        </div>
-                        <div class="col-span-6 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-teal-800 flex items-center justify-center font-bold text-[10px] text-white shadow-sm">ZEPH</div>
-                            <div class="flex flex-col">
-                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">Zephyr</span>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-550 uppercase font-medium">ZEPH</span>
-                            </div>
-                        </div>
-                        <div class="col-span-5 text-right flex flex-col justify-center">
-                            <span class="font-bold text-sm text-gray-900 dark:text-white">US$ 2,12</span>
-                            <span class="text-xs font-semibold text-green-600 dark:text-green-400 flex items-center justify-end gap-0.5">
-                                ▲ 18.7%
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Coin 5 (Firo) -->
-                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" data-category="base" onclick="navigateToCoin('FIRO')">
-                        <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
-                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
-                                <i data-lucide="star" class="w-4 h-4"></i>
-                            </button>
-                            <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">5</span>
-                        </div>
-                        <div class="col-span-6 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-xs text-white shadow-sm">FIRO</div>
-                            <div class="flex flex-col">
-                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">Firo</span>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-550 uppercase font-medium">FIRO</span>
-                            </div>
-                        </div>
-                        <div class="col-span-5 text-right flex flex-col justify-center">
-                            <span class="font-bold text-sm text-gray-900 dark:text-white">US$ 1,42</span>
-                            <span class="text-xs font-semibold text-red-600 dark:text-red-400 flex items-center justify-end gap-0.5">
-                                ▼ 2.1%
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Coin 6 (zUSD) -->
-                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" data-category="base" onclick="navigateToCoin('ZUSD')">
-                        <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
-                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
-                                <i data-lucide="star" class="w-4 h-4"></i>
-                            </button>
-                            <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">6</span>
-                        </div>
-                        <div class="col-span-6 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-bold text-[9px] text-white shadow-sm">ZUSD</div>
-                            <div class="flex flex-col">
-                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">zUSD Stable</span>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-550 uppercase font-medium">ZUSD</span>
-                            </div>
-                        </div>
-                        <div class="col-span-5 text-right flex flex-col justify-center">
-                            <span class="font-bold text-sm text-gray-900 dark:text-white">US$ 1,00</span>
-                            <span class="text-xs font-semibold text-gray-450 dark:text-gray-500 flex items-center justify-end gap-0.5">
-                                ◼ 0.0%
-                            </span>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <!-- RODAPÉ DA PÁGINA -->
             <div class="mt-8 mb-4 text-center text-[11px] text-gray-400 dark:text-gray-550 px-4 leading-relaxed">
-                <p>Os preços de mercado apresentados são meramente demonstrativos de moedas voltadas para a privacidade criptográfica.</p>
-                <p class="mt-1">© 2026 PrivacyGecko. Feito com amor pela comunidade Cypherpunk.</p>
+                <p>Os preços de mercado apresentados são demonstrativos e classificados pelas estruturas tecnológicas de criptografia segura.</p>
+                <p class="mt-1">© 2026 PrivacyGecko. Feito com amor por desenvolvedores Cypherpunks.</p>
             </div>
         </main>
     </div>
 
 
-    <!-- TELA 2: PÁGINA ESPECÍFICA DA MOEDA (DETAILS VIEW - IGUAL COINGECKO) -->
     <div id="details-view" class="hidden">
-        <!-- CABEÇALHO DA TELA DE DETALHES -->
         <header class="bg-white dark:bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-gray-150 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
             <div class="flex items-center gap-3">
                 <button onclick="backToMainView()" class="text-gray-700 dark:text-gray-350 p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
                     <i data-lucide="arrow-left" class="w-6 h-6"></i>
                 </button>
                 <div class="flex items-center gap-2">
-                    <div id="detailCoinIcon" class="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm"></div>
+                    <div id="detailCoinIcon" class="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow-sm"></div>
                     <div class="flex items-baseline gap-1.5">
                         <span id="detailCoinTicker" class="font-bold text-base text-gray-900 dark:text-white uppercase"></span>
                         <span id="detailCoinPrice" class="font-bold text-sm text-gray-900 dark:text-white"></span>
@@ -388,16 +233,13 @@
             </div>
             
             <div class="flex items-center gap-2">
-                <!-- Porcentagem de Variação Geral -->
                 <span id="detailCoinHeaderPct" class="text-xs font-bold px-2 py-1 rounded-lg"></span>
-                <!-- Botão Comprar (Laranja Monero) -->
                 <button onclick="openBuyModalFromDetails()" class="bg-[#FF6600] hover:bg-[#e05900] text-white font-bold text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-sm">
                     Comprar
                 </button>
             </div>
         </header>
 
-        <!-- SUB-MENU DE ABAS DA MOEDA (Visão Geral / Informações / Mercados) -->
         <div class="bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-850 sticky top-12 z-30 transition-colors">
             <div class="flex items-center justify-around text-xs font-bold text-gray-450 dark:text-gray-400">
                 <button onclick="switchDetailsTab('tab-visao-geral')" id="btn-tab-visao-geral" class="w-1/3 text-center py-3 border-b-2 border-[#FF6600] text-gray-900 dark:text-white transition-all">
@@ -412,14 +254,11 @@
             </div>
         </div>
 
-        <!-- CONTEÚDO DAS ABAS -->
         <main class="max-w-md mx-auto px-4 pt-4">
 
-            <!-- ABA 1: VISÃO GERAL -->
             <div id="tab-visao-geral" class="block space-y-6">
-                <!-- Bloco de Variação Temporal (1h, 24h, 7d, etc.) -->
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
-                    <div class="grid grid-cols-6 gap-2 text-center text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-2">
+                    <div class="grid grid-cols-6 gap-2 text-center text-[10px] text-gray-400 dark:text-gray-550 font-bold uppercase tracking-wider mb-2">
                         <div>1h</div>
                         <div>24h</div>
                         <div>7d</div>
@@ -428,20 +267,16 @@
                         <div>1a</div>
                     </div>
                     <div class="grid grid-cols-6 gap-2 text-center text-xs font-bold" id="timeframePctContainer">
-                        <!-- Gerado Dinamicamente -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- CONVERSOR DE MOEDA (Design Idêntico ao CoinGecko em anexo) -->
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-3">
                     <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="converterTitle">Conversor</h3>
                     <div class="space-y-2">
-                        <!-- Campo 1 (Moeda Cripto) -->
                         <div class="flex items-center justify-between border border-gray-150 dark:border-zinc-800 rounded-xl p-3 bg-gray-50 dark:bg-zinc-950">
                             <input type="number" id="convertCryptoInput" oninput="calculateConversion(true)" class="bg-transparent outline-none w-2/3 text-base font-semibold text-gray-950 dark:text-white" value="1">
-                            <span id="convertCryptoLabel" class="font-bold text-xs text-gray-400 dark:text-gray-500 uppercase">XMR</span>
+                            <span id="convertCryptoLabel" class="font-bold text-xs text-gray-400 dark:text-gray-550 uppercase">XMR</span>
                         </div>
-                        <!-- Campo 2 (USD) -->
                         <div class="flex items-center justify-between border border-gray-150 dark:border-zinc-800 rounded-xl p-3 bg-gray-50 dark:bg-zinc-950">
                             <input type="number" id="convertFiatInput" oninput="calculateConversion(false)" class="bg-transparent outline-none w-2/3 text-base font-semibold text-gray-950 dark:text-white">
                             <span class="font-bold text-xs text-gray-400 dark:text-gray-550 flex items-center gap-1">USD <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
@@ -449,18 +284,17 @@
                     </div>
                 </div>
 
-                <!-- ESTATÍSTICAS DA MOEDA -->
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
                     <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="statsTitle">Estatísticas</h3>
                     
                     <div class="space-y-3 text-xs">
                         <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500 flex items-center gap-1">Capitalização de mercado <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-gray-900 dark:text-white" id="statMarketCap"></span>
+                            <span class="text-gray-500 flex items-center gap-1">Protocolo Base <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                            <span class="font-bold text-gray-900 dark:text-white" id="statTechType"></span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500 flex items-center gap-1">Avaliação totalmente diluída <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-gray-900 dark:text-white" id="statDiluted"></span>
+                            <span class="text-gray-500 flex items-center gap-1">Capitalização de mercado <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                            <span class="font-bold text-gray-900 dark:text-white" id="statMarketCap"></span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
                             <span class="text-gray-500 flex items-center gap-1">Volume de negociação de 24h <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
@@ -472,20 +306,17 @@
                         </div>
                         <div class="flex justify-between items-center py-2">
                             <span class="text-gray-500 flex items-center gap-1">Rich List de Endereços <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-[#FF6600] flex items-center gap-1">🔒 Oculta por Criptografia</span>
+                            <span class="font-bold text-[#FF6600] flex items-center gap-1">🔒 Oculta Criptograficamente</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA 2: INFORMAÇÕES (Links Oficiais e Exploradores) -->
             <div id="tab-informacoes" class="hidden space-y-4">
-                <!-- Informações e Botões Rápidos de Ação -->
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
                     <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Links Úteis</h3>
                     
                     <div class="space-y-4 text-xs">
-                        <!-- Website e Whitepaper -->
                         <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
                             <span class="text-gray-500">Website</span>
                             <div class="flex gap-1.5">
@@ -494,27 +325,24 @@
                             </div>
                         </div>
 
-                        <!-- Exploradores -->
                         <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
                             <span class="text-gray-500">Exploradores</span>
-                            <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Explorador Mempool')">
+                            <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Explorador de Blocos')">
                                 <span id="infoExplorer">Mempool</span>
                                 <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                             </div>
                         </div>
 
-                        <!-- Carteiras -->
                         <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500">Carteiras</span>
-                            <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Hardware Wallets')">
-                                <span id="infoWallet">Ledger / Trezor</span>
+                            <span class="text-gray-500">Carteiras Compátiveis</span>
+                            <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Wallets')">
+                                <span id="infoWallet">Ledger / Core</span>
                                 <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                             </div>
                         </div>
 
-                        <!-- Comunidade -->
                         <div class="py-2 border-b border-gray-50 dark:border-zinc-850 space-y-2">
-                            <span class="text-gray-500 block mb-1">Comunidade</span>
+                            <span class="text-gray-500 block mb-1">Canais de Comunidade</span>
                             <div class="flex flex-wrap gap-2">
                                 <button onclick="openExternalSimulated('Reddit')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
                                     <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Reddit
@@ -528,15 +356,13 @@
                             </div>
                         </div>
 
-                        <!-- Código Fonte -->
                         <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500">Código fonte</span>
+                            <span class="text-gray-500">Código Fonte</span>
                             <button onclick="openExternalSimulated('GitHub')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
                                 <i data-lucide="github" class="w-3.5 h-3.5"></i> Github
                             </button>
                         </div>
 
-                        <!-- API ID -->
                         <div class="flex items-center justify-between py-2">
                             <span class="text-gray-500">ID da API</span>
                             <span onclick="copyAPIId()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-mono font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1 cursor-pointer">
@@ -548,12 +374,10 @@
                 </div>
             </div>
 
-            <!-- ABA 3: MERCADOS (Onde comprar preservando a identidade das moedas) -->
             <div id="tab-mercados" class="hidden space-y-4">
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="marketsTitle">Mercados Disponíveis</h3>
-                        <!-- Pílulas de Classificação (Tudo, CEX, DEX) -->
                         <div class="flex gap-1">
                             <button onclick="filterMarkets('Tudo')" id="mkt-filter-Tudo" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#FF6600] text-white">Tudo</button>
                             <button onclick="filterMarkets('CEX')" id="mkt-filter-CEX" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-100 text-gray-600 dark:bg-zinc-850 dark:text-gray-400">CEX</button>
@@ -561,7 +385,6 @@
                         </div>
                     </div>
 
-                    <!-- Tabela de Câmbios de Criptomoeda -->
                     <div class="overflow-hidden">
                         <div class="grid grid-cols-12 gap-2 py-2 border-b border-gray-100 dark:border-zinc-850 text-[9px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider items-center">
                             <div class="col-span-1 text-center">#</div>
@@ -570,61 +393,50 @@
                             <div class="col-span-3 text-right">Par</div>
                         </div>
 
-                        <!-- Câmbio Rows dinâmicos -->
                         <div id="marketsListContainer" class="divide-y divide-gray-50 dark:divide-zinc-850 text-xs">
-                            <!-- Gerado dinamicamente -->
-                        </div>
+                            </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Botão "Voltar para o Ranking" -->
             <button onclick="backToMainView()" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 mt-4">
-                <i data-lucide="corner-up-left" class="w-4 h-4"></i> Voltar para o Ranking Geral
+                <i data-lucide="corner-up-left" class="w-4 h-4"></i> Voltar ao Ranking Tecnológico
             </button>
         </main>
     </div>
 
-    <!-- FLOATING ACTION BUTTON (Rolar para Cima) -->
     <button onclick="scrollToTop()" class="fixed bottom-24 right-5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 p-3 rounded-xl shadow-lg hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all z-30">
         <i data-lucide="arrow-up" class="w-5 h-5"></i>
     </button>
 
-    <!-- BARRA DE NAVEGAÇÃO INFERIOR GLOBAL -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-850 py-2.5 px-4 flex items-center justify-around z-40 shadow-xl max-w-md mx-auto transition-colors">
-        <!-- Home / Página Inicial (Ativo) -->
         <button onclick="backToMainView()" id="navHomeBtn" class="flex flex-col items-center justify-center gap-1 text-[#FF6600]">
             <i data-lucide="home" class="w-5.5 h-5.5"></i>
             <span class="text-[10px] font-semibold">Página inicial</span>
         </button>
 
-        <!-- Portfólio -->
         <button onclick="openPromoModal('Portfólio')" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF007A] transition-colors">
             <i data-lucide="star" class="w-5.5 h-5.5"></i>
             <span class="text-[10px] font-medium">Portfólio</span>
         </button>
 
-        <!-- Pesquisar -->
         <button onclick="openSearchModal()" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors">
             <i data-lucide="search" class="w-5.5 h-5.5"></i>
             <span class="text-[10px] font-medium">Pesquisar</span>
         </button>
 
-        <!-- Candy (Rosa Wownero Doce) -->
         <button onclick="collectCandy()" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF007A] transition-colors relative">
             <i data-lucide="candy" class="w-5.5 h-5.5"></i>
             <span class="text-[10px] font-medium">Candy</span>
             <span class="absolute top-0 right-1 w-2 h-2 rounded-full bg-[#FF007A] animate-ping"></span>
         </button>
 
-        <!-- Menu -->
         <button onclick="openPromoModal('Menu Geral')" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors">
             <i data-lucide="menu" class="w-5.5 h-5.5"></i>
             <span class="text-[10px] font-medium">Menu</span>
         </button>
     </nav>
 
-    <!-- MODAL DE COMPRA SIMULADO -->
     <div id="buyModal" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-t-3xl w-full max-w-md p-6 space-y-4 shadow-2xl transform translate-y-full transition-transform duration-300" id="buyModalContent">
             <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
@@ -652,7 +464,6 @@
         </div>
     </div>
 
-    <!-- MODAL DO CANDY / DIÁRIO -->
     <div id="candyModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl transform scale-90 transition-transform duration-300" id="candyModalContent">
             <div class="w-16 h-16 bg-pink-100 dark:bg-pink-950/35 text-[#FF007A] rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner animate-bounce">
@@ -671,12 +482,11 @@
         </div>
     </div>
 
-    <!-- MODAL DE BUSCA INTERATIVO -->
     <div id="searchModal" class="fixed inset-0 bg-black/60 z-50 flex items-start justify-center hidden p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl mt-12 transform -translate-y-4 transition-transform duration-300" id="searchModalContent">
             <div class="flex items-center gap-2 border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-2 bg-gray-50 dark:bg-zinc-950">
                 <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
-                <input type="text" id="searchInput" oninput="liveSearch()" placeholder="Pesquise por Monero, WOW, RAIL..." class="bg-transparent outline-none w-full text-sm text-gray-800 dark:text-gray-200">
+                <input type="text" id="searchInput" oninput="liveSearch()" placeholder="Pesquise por Monero, WOW, GRIN, FIRO..." class="bg-transparent outline-none w-full text-sm text-gray-800 dark:text-gray-200">
                 <button onclick="closeSearchModal()" class="text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">Fechar</button>
             </div>
             <div class="max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-zinc-850" id="searchResults">
@@ -685,7 +495,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE PROMOÇÃO / INDISPONIBILIDADE (Geral) -->
     <div id="promoModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl" id="promoModalContent">
             <div class="w-12 h-12 bg-orange-100 dark:bg-orange-950/20 text-[#FF6600] rounded-full flex items-center justify-center mx-auto text-xl">
@@ -701,182 +510,189 @@
         </div>
     </div>
 
-    <!-- Banco de dados simulado de cada moeda com todas as abas e informações -->
     <script>
         const coinsDatabase = {
+            // CRYPTONOTE
             "XMR": {
-                name: "Monero",
-                ticker: "XMR",
-                price: 158.40,
-                priceString: "US$ 158,40",
-                color: "bg-[#FF6600]",
-                pct24h: "▲ 4.8%",
-                pct24hVal: 4.8,
+                name: "Monero", ticker: "XMR", price: 158.40, priceString: "US$ 158,40", color: "bg-[#FF6600]",
+                pct24h: "▲ 4.8%", pct24hVal: 4.8, tech: "CryptoNote",
                 timeframes: { h1: 0.2, h24: 4.8, d7: -1.7, d14: -4.8, d30: -1.9, y1: 28.4 },
-                stats: {
-                    marketCap: "US$ 2.919.431.112",
-                    diluted: "US$ 2.919.431.112",
-                    volume: "US$ 82.551.488",
-                    circulating: "18.428.225 XMR"
-                },
-                info: {
-                    website: "getmonero.org",
-                    explorer: "mempool.observer",
-                    wallet: "Cake Wallet / GUI Wallet",
-                    apiId: "monero",
-                    bitcointalk: "bitcointalk.org/index.php?topic=58344"
-                },
-                markets: [
-                    { name: "NoirTrade", type: "CEX", par: "XMR/BTC" },
-                    { name: "Haveno Exchange", type: "DEX", par: "XMR/USDT" },
-                    { name: "Bisq", type: "DEX", par: "XMR/BTC" },
-                    { name: "MEXC Global", type: "CEX", par: "XMR/USDT" },
-                    { name: "TradeOgre", type: "CEX", par: "XMR/LTC" }
-                ]
+                stats: { marketCap: "US$ 2.919.431.112", volume: "US$ 82.551.488", circulating: "18.428.225 XMR" },
+                info: { website: "getmonero.org", explorer: "mempool.observer", wallet: "Cake Wallet", apiId: "monero", bitcointalk: "topic=58344" },
+                markets: [{ name: "NoirTrade", type: "CEX", par: "XMR/BTC" }, { name: "Haveno", type: "DEX", par: "XMR/USDT" }, { name: "Bisq", type: "DEX", par: "XMR/BTC" }]
             },
             "WOW": {
-                name: "Wownero",
-                ticker: "WOW",
-                price: 0.0854,
-                priceString: "US$ 0,0854",
-                color: "bg-[#FF007A]",
-                pct24h: "▲ 12.5%",
-                pct24hVal: 12.5,
+                name: "Wownero", ticker: "WOW", price: 0.0854, priceString: "US$ 0,0854", color: "bg-[#FF007A]",
+                pct24h: "▲ 12.5%", pct24hVal: 12.5, tech: "CryptoNote",
                 timeframes: { h1: 1.5, h24: 12.5, d7: 8.4, d14: -2.3, d30: 15.2, y1: 110.8 },
-                stats: {
-                    marketCap: "US$ 5.636.400",
-                    diluted: "US$ 15.713.600",
-                    volume: "US$ 143.200",
-                    circulating: "66.000.000 WOW"
-                },
-                info: {
-                    website: "wownero.org",
-                    explorer: "explore.wownero.com",
-                    wallet: "Wownero Wallet",
-                    apiId: "wownero",
-                    bitcointalk: "bitcointalk.org/index.php?topic=284"
-                },
-                markets: [
-                    { name: "TradeOgre", type: "CEX", par: "WOW/LTC" },
-                    { name: "Haveno Exchange", type: "DEX", par: "WOW/XMR" },
-                    { name: "Xeggex", type: "CEX", par: "WOW/USDT" }
-                ]
+                stats: { marketCap: "US$ 5.636.400", volume: "US$ 143.200", circulating: "66.000.000 WOW" },
+                info: { website: "wownero.org", explorer: "explore.wownero.com", wallet: "Wownero Wallet", apiId: "wownero", bitcointalk: "topic=28400" },
+                markets: [{ name: "TradeOgre", type: "CEX", par: "WOW/LTC" }, { name: "Haveno", type: "DEX", par: "WOW/XMR" }]
             },
-            "RAIL": {
-                name: "Railgun",
-                ticker: "RAIL",
-                price: 3.57,
-                priceString: "US$ 3,57",
-                color: "bg-black dark:bg-zinc-800 border dark:border-zinc-700",
-                pct24h: "▲ 50.1%",
-                pct24hVal: 50.1,
-                timeframes: { h1: 2.1, h24: 50.1, d7: 64.3, d14: 88.4, d30: 120.5, y1: 420.9 },
-                stats: {
-                    marketCap: "US$ 205.275.000",
-                    diluted: "US$ 357.000.000",
-                    volume: "US$ 18.230.500",
-                    circulating: "57.500.000 RAIL"
-                },
-                info: {
-                    website: "railgun.org",
-                    explorer: "etherscan.io (Privacy Layer)",
-                    wallet: "Railway Wallet",
-                    apiId: "railgun",
-                    bitcointalk: "bitcointalk.org/index.php?topic=7712"
-                },
-                markets: [
-                    { name: "Uniswap V3", type: "DEX", par: "RAIL/WETH" },
-                    { name: "Coinbase Exchange", type: "CEX", par: "RAIL/USD" },
-                    { name: "Gate.io", type: "CEX", par: "RAIL/USDT" }
-                ]
+            "BCN": {
+                name: "Bytecoin", ticker: "BCN", price: 0.000028, priceString: "US$ 0,000028", color: "bg-indigo-900",
+                pct24h: "◼ 0.0%", pct24hVal: 0.0, tech: "CryptoNote",
+                timeframes: { h1: 0.0, h24: 0.0, d7: -2.1, d14: -4.5, d30: 1.1, y1: -22.4 },
+                stats: { marketCap: "US$ 5.150.000", volume: "US$ 8.900", circulating: "184.000.000.000 BCN" },
+                info: { website: "bytecoin.org", explorer: "bcn.miner.rocks", wallet: "Bytecoin Wallet", apiId: "bytecoin", bitcointalk: "topic=51221" },
+                markets: [{ name: "HitBTC", type: "CEX", par: "BCN/BTC" }, { name: "TradeOgre", type: "CEX", par: "BCN/LTC" }]
             },
-            "ZEPH": {
-                name: "Zephyr Protocol",
-                ticker: "ZEPH",
-                price: 2.12,
-                priceString: "US$ 2,12",
-                color: "bg-teal-800",
-                pct24h: "▲ 18.7%",
-                pct24hVal: 18.7,
-                timeframes: { h1: -0.4, h24: 18.7, d7: -5.4, d14: 12.3, d30: -8.1, y1: -45.6 },
-                stats: {
-                    marketCap: "US$ 12.720.000",
-                    diluted: "US$ 21.200.000",
-                    volume: "US$ 894.000",
-                    circulating: "6.000.000 ZEPH"
-                },
-                info: {
-                    website: "zephyrprotocol.com",
-                    explorer: "explorer.zephyr.com",
-                    wallet: "Zephyr Web Wallet",
-                    apiId: "zephyr-protocol",
-                    bitcointalk: "bitcointalk.org/index.php?topic=9924"
-                },
-                markets: [
-                    { name: "Xeggex", type: "CEX", par: "ZEPH/USDT" },
-                    { name: "Haveno Exchange", type: "DEX", par: "ZEPH/XMR" },
-                    { name: "MEXC Global", type: "CEX", par: "ZEPH/USDT" }
-                ]
+            "RYO": {
+                name: "Ryo Currency", ticker: "RYO", price: 0.0145, priceString: "US$ 0,0145", color: "bg-red-800",
+                pct24h: "▼ 1.8%", pct24hVal: -1.8, tech: "CryptoNote",
+                timeframes: { h1: -0.2, h24: -1.8, d7: -5.6, d14: 1.2, d30: -11.4, y1: -45.1 },
+                stats: { marketCap: "US$ 645.000", volume: "US$ 1.200", circulating: "44.500.000 RYO" },
+                info: { website: "ryo-currency.com", explorer: "explorer.ryo-currency.com", wallet: "Ryo Wallet", apiId: "ryo-currency", bitcointalk: "topic=44512" },
+                markets: [{ name: "TradeOgre", type: "CEX", par: "RYO/LTC" }]
             },
+            "KRB": {
+                name: "Karbo", ticker: "KRB", price: 0.038, priceString: "US$ 0,0380", color: "bg-yellow-800",
+                pct24h: "▲ 2.5%", pct24hVal: 2.5, tech: "CryptoNote",
+                timeframes: { h1: 0.4, h24: 2.5, d7: 1.1, d14: -3.4, d30: 8.9, y1: 14.2 },
+                stats: { marketCap: "US$ 380.000", volume: "US$ 4.500", circulating: "10.000.000 KRB" },
+                info: { website: "karbo.io", explorer: "explorer.karbo.io", wallet: "Karbo Wallet", apiId: "karbowanec", bitcointalk: "topic=14922" },
+                markets: [{ name: "TradeOgre", type: "CEX", par: "KRB/BTC" }, { name: "Xeggex", type: "CEX", par: "KRB/USDT" }]
+            },
+
+            // ZK-SNARKS
+            "ZEC": {
+                name: "Zcash", ticker: "ZEC", price: 24.15, priceString: "US$ 24,15", color: "bg-zinc-850 dark:bg-zinc-750",
+                pct24h: "▲ 1.4%", pct24hVal: 1.4, tech: "zk-SNARKs",
+                timeframes: { h1: 0.1, h24: 1.4, d7: -3.4, d14: -8.9, d30: -1.2, y1: -28.4 },
+                stats: { marketCap: "US$ 394.200.000", volume: "US$ 42.100.000", circulating: "16.322.000 ZEC" },
+                info: { website: "z.cash", explorer: "zcashblockexplorer.com", wallet: "Ywallet / ZecWallet", apiId: "zcash", bitcointalk: "topic=16124" },
+                markets: [{ name: "Binance", type: "CEX", par: "ZEC/USDT" }, { name: "Coinbase", type: "CEX", par: "ZEC/USD" }]
+            },
+            "ARRR": {
+                name: "Pirate Chain", ticker: "ARRR", price: 0.184, priceString: "US$ 0,1840", color: "bg-yellow-600",
+                pct24h: "▲ 32.4%", pct24hVal: 32.4, tech: "zk-SNARKs",
+                timeframes: { h1: 1.9, h24: 32.4, d7: 45.1, d14: 61.2, d30: 89.4, y1: 112.5 },
+                stats: { marketCap: "US$ 36.100.000", volume: "US$ 450.000", circulating: "196.200.000 ARRR" },
+                info: { website: "piratechain.com", explorer: "explorer.pirate.black", wallet: "Treasure Chest", apiId: "pirate-chain", bitcointalk: "topic=50222" },
+                markets: [{ name: "TradeOgre", type: "CEX", par: "ARRR/LTC" }, { name: "MEXC Global", type: "CEX", par: "ARRR/USDT" }]
+            },
+            "ZCL": {
+                name: "Zclassic", ticker: "ZCL", price: 0.062, priceString: "US$ 0,0620", color: "bg-teal-900",
+                pct24h: "▼ 5.4%", pct24hVal: -5.4, tech: "zk-SNARKs",
+                timeframes: { h1: -1.1, h24: -5.4, d7: -12.4, d14: -18.2, d30: -2.3, y1: -64.1 },
+                stats: { marketCap: "US$ 575.000", volume: "US$ 3.100", circulating: "9.280.000 ZCL" },
+                info: { website: "zclassic.org", explorer: "explorer.zcl.zelcore.io", wallet: "Zclassic Wallet", apiId: "zclassic", bitcointalk: "topic=16723" },
+                markets: [{ name: "TradeOgre", type: "CEX", par: "ZCL/BTC" }]
+            },
+            "YEC": {
+                name: "Ycash", ticker: "YEC", price: 0.024, priceString: "US$ 0,0240", color: "bg-blue-900",
+                pct24h: "▲ 0.8%", pct24hVal: 0.8, tech: "zk-SNARKs",
+                timeframes: { h1: 0.0, h24: 0.8, d7: -2.3, d14: 4.1, d30: -5.4, y1: -18.9 },
+                stats: { marketCap: "US$ 340.000", volume: "US$ 950", circulating: "14.100.000 YEC" },
+                info: { website: "ycash.xyz", explorer: "yec.tokenview.com", wallet: "Ywallet", apiId: "ycash", bitcointalk: "topic=51422" },
+                markets: [{ name: "SafeTrade", type: "CEX", par: "YEC/BTC" }]
+            },
+
+            // MIMBLEWIMBLE
+            "GRIN": {
+                name: "Grin", ticker: "GRIN", price: 0.118, priceString: "US$ 0,1180", color: "bg-cyan-700",
+                pct24h: "▲ 8.1%", pct24hVal: 8.1, tech: "MimbleWimble",
+                timeframes: { h1: 0.5, h24: 8.1, d7: 12.4, d14: -1.1, d30: 22.4, y1: 45.6 },
+                stats: { marketCap: "US$ 18.200.000", volume: "US$ 194.000", circulating: "154.200.000 GRIN" },
+                info: { website: "grin.mw", explorer: "grinscan.net", wallet: "Grin++ Wallet", apiId: "grin", bitcointalk: "topic=50923" },
+                markets: [{ name: "TradeOgre", type: "CEX", par: "GRIN/LTC" }, { name: "Gate.io", type: "CEX", par: "GRIN/USDT" }]
+            },
+            "MWC": {
+                name: "MimbleWimbleCoin", ticker: "MWC", price: 1.05, priceString: "US$ 1,05", color: "bg-purple-800",
+                pct24h: "▲ 15.2%", pct24hVal: 15.2, tech: "MimbleWimble",
+                timeframes: { h1: 1.1, h24: 15.2, d7: 28.4, d14: 11.2, d30: 44.1, y1: 112.4 },
+                stats: { marketCap: "US$ 11.420.000", volume: "US$ 84.500", circulating: "10.870.000 MWC" },
+                info: { website: "mwc.mw", explorer: "explorer.mwc.mw", wallet: "MWC Qt Wallet", apiId: "mimblewimblecoin", bitcointalk: "topic=51922" },
+                markets: [{ name: "TradeOgre", type: "CEX", par: "MWC/BTC" }, { name: "BitForex", type: "CEX", par: "MWC/USDT" }]
+            },
+            "EPIC": {
+                name: "Epic Cash", ticker: "EPIC", price: 0.285, priceString: "US$ 0,2850", color: "bg-amber-600",
+                pct24h: "▲ 5.7%", pct24hVal: 5.7, tech: "MimbleWimble",
+                timeframes: { h1: 0.2, h24: 5.7, d7: 8.9, d14: -2.3, d30: 12.4, y1: -5.1 },
+                stats: { marketCap: "US$ 4.810.000", volume: "US$ 23.400", circulating: "16.870.000 EPIC" },
+                info: { website: "epic.tech", explorer: "epic.info", wallet: "Epic Wallet", apiId: "epic-cash", bitcointalk: "topic=52123" },
+                markets: [{ name: "ViteX", type: "DEX", par: "EPIC/BTC" }, { name: "Xeggex", type: "CEX", par: "EPIC/USDT" }]
+            },
+
+            // LELANTUS
             "FIRO": {
-                name: "Firo",
-                ticker: "FIRO",
-                price: 1.42,
-                priceString: "US$ 1,42",
-                color: "bg-red-600",
-                pct24h: "▼ 2.1%",
-                pct24hVal: -2.1,
+                name: "Firo", ticker: "FIRO", price: 1.42, priceString: "US$ 1,42", color: "bg-red-600",
+                pct24h: "▼ 2.1%", pct24hVal: -2.1, tech: "Lelantus",
                 timeframes: { h1: -0.1, h24: -2.1, d7: -6.4, d14: -8.9, d30: -15.4, y1: -38.2 },
-                stats: {
-                    marketCap: "US$ 19.880.000",
-                    diluted: "US$ 29.820.000",
-                    volume: "US$ 1.120.400",
-                    circulating: "14.000.000 FIRO"
-                },
-                info: {
-                    website: "firo.org",
-                    explorer: "explorer.firo.org",
-                    wallet: "Firo Client Wallet",
-                    apiId: "firo",
-                    bitcointalk: "bitcointalk.org/index.php?topic=163"
-                },
-                markets: [
-                    { name: "Binance", type: "CEX", par: "FIRO/USDT" },
-                    { name: "Bisq", type: "DEX", par: "FIRO/BTC" },
-                    { name: "MEXC Global", type: "CEX", par: "FIRO/USDT" }
-                ]
-            },
-            "ZUSD": {
-                name: "zUSD Stable",
-                ticker: "ZUSD",
-                price: 1.00,
-                priceString: "US$ 1,00",
-                color: "bg-gray-500",
-                pct24h: "◼ 0.0%",
-                pct24hVal: 0.0,
-                timeframes: { h1: 0.0, h24: 0.0, d7: 0.0, d14: 0.1, d30: -0.1, y1: 0.0 },
-                stats: {
-                    marketCap: "US$ 45.000.000",
-                    diluted: "US$ 45.000.000",
-                    volume: "US$ 3.240.000",
-                    circulating: "45.000.000 zUSD"
-                },
-                info: {
-                    website: "zephyrprotocol.com (Stable)",
-                    explorer: "explorer.zephyr.com",
-                    wallet: "Zephyr Web Wallet",
-                    apiId: "zusd-stable",
-                    bitcointalk: "bitcointalk.org/index.php?topic=9924"
-                },
-                markets: [
-                    { name: "Haveno Exchange", type: "DEX", par: "zUSD/ZEPH" },
-                    { name: "Xeggex", type: "CEX", par: "zUSD/USDT" }
-                ]
+                stats: { marketCap: "US$ 19.880.000", volume: "US$ 1.120.400", circulating: "14.000.000 FIRO" },
+                info: { website: "firo.org", explorer: "explorer.firo.org", wallet: "Firo Client Wallet", apiId: "firo", bitcointalk: "topic=16301" },
+                markets: [{ name: "Binance", type: "CEX", par: "FIRO/USDT" }, { name: "Bisq", type: "DEX", par: "FIRO/BTC" }]
             }
         };
 
         let currentActiveCoin = "XMR";
         let currentMarketsFilter = "Tudo";
+        let currentTechFilter = "tudo";
+
+        // Inicializa a tabela principal com o novo ajuste estrutural solicitado
+        function renderCoinsTable() {
+            const container = document.getElementById('coinTableBody');
+            let indexCount = 1;
+
+            const htmlContent = Object.keys(coinsDatabase).map(key => {
+                const coin = coinsDatabase[key];
+                
+                // Filtro tecnológico
+                if (currentTechFilter !== 'tudo' && coin.tech !== currentTechFilter) {
+                    return '';
+                }
+
+                let pctColor = "text-gray-400 dark:text-gray-550";
+                if (coin.pct24hVal > 0) pctColor = "text-green-600 dark:text-green-400";
+                if (coin.pct24hVal < 0) pctColor = "text-red-600 dark:text-red-400";
+
+                const rowHtml = `
+                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" onclick="navigateToCoin('${coin.ticker}')">
+                        <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
+                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
+                                <i data-lucide="star" class="w-4 h-4"></i>
+                            </button>
+                            <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">${indexCount}</span>
+                        </div>
+                        <div class="col-span-6 flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full ${coin.color} flex items-center justify-center font-bold text-xs text-white shadow-sm">${coin.ticker}</div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">${coin.name}</span>
+                                <span class="text-[10px] text-gray-400 dark:text-gray-550 font-semibold mt-0.5">${coin.ticker} - ${coin.tech}</span>
+                            </div>
+                        </div>
+                        <div class="col-span-5 text-right flex flex-col justify-center">
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">${coin.priceString}</span>
+                            <span class="text-xs font-semibold ${pctColor} flex items-center justify-end gap-0.5">
+                                ${coin.pct24h}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                indexCount++;
+                return rowHtml;
+            }).join('');
+
+            container.innerHTML = htmlContent || `<p class="text-center text-xs text-gray-400 py-6">Nenhum protocolo encontrado.</p>`;
+            lucide.createIcons();
+        }
+
+        // Filtro Criptográfico de Moedas
+        function filterCoinsByTech(tech) {
+            currentTechFilter = tech;
+            const techs = ['tudo', 'CryptoNote', 'zk-SNARKs', 'MimbleWimble', 'Lelantus'];
+            
+            techs.forEach(t => {
+                const element = document.getElementById(`tech-${t}`);
+                if (t === tech) {
+                    element.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-50 text-[#FF6600] border border-orange-100 dark:bg-orange-950/20 dark:border-orange-900/30 flex items-center gap-1.5 transition-all";
+                } else {
+                    element.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all";
+                }
+            });
+
+            renderCoinsTable();
+        }
 
         // Navegação para a Tela de Detalhes da Moeda
         function navigateToCoin(ticker) {
@@ -885,18 +701,15 @@
             
             if (!coinData) return;
 
-            // Transição de Telas
             document.getElementById('main-view').classList.add('hidden');
             document.getElementById('details-view').classList.remove('hidden');
 
-            // Preenche Informações do Cabeçalho
             const headerIcon = document.getElementById('detailCoinIcon');
-            headerIcon.className = `w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm ${coinData.color}`;
+            headerIcon.className = `w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow-sm ${coinData.color}`;
             headerIcon.innerText = ticker;
             document.getElementById('detailCoinTicker').innerText = ticker;
             document.getElementById('detailCoinPrice').innerText = coinData.priceString;
 
-            // Formatação do Badge de Variação de Cabeçalho baseado em nossa regra
             const headerPctBadge = document.getElementById('detailCoinHeaderPct');
             headerPctBadge.innerText = coinData.pct24h;
             if (coinData.pct24hVal > 0) {
@@ -907,26 +720,19 @@
                 headerPctBadge.className = "text-xs font-bold px-2.5 py-1 rounded-lg bg-gray-100 text-gray-500 dark:bg-zinc-800 dark:text-gray-400";
             }
 
-            // Ativa Visão Geral por padrão ao abrir
             switchDetailsTab('tab-visao-geral');
-
-            // Renderiza Dados de Visão Geral (Aba 1)
             renderOverviewTab(coinData);
 
-            // Preenche Dados de Informações (Aba 2)
             document.getElementById('infoWebsiteBtn').innerText = coinData.info.website;
             document.getElementById('infoExplorer').innerText = coinData.info.explorer;
             document.getElementById('infoWallet').innerText = coinData.info.wallet;
             document.getElementById('infoAPIId').innerText = coinData.info.apiId;
             document.getElementById('infoBitcointalkBtn').innerText = coinData.info.bitcointalk;
 
-            // Renderiza Mercados (Aba 3)
             renderMarketsTab(coinData);
 
-            // Ajusta o botão Home na navegação de volta para "neutro" ou ativa dinamicamente
             document.getElementById('navHomeBtn').className = "flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors";
             
-            // Recria ícones dinâmicos do Lucide
             lucide.createIcons();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -935,8 +741,6 @@
         function backToMainView() {
             document.getElementById('main-view').classList.remove('hidden');
             document.getElementById('details-view').classList.add('hidden');
-            
-            // Define o botão Home de volta ao estado Ativo (Laranja Monero)
             document.getElementById('navHomeBtn').className = "flex flex-col items-center justify-center gap-1 text-[#FF6600]";
         }
 
@@ -953,20 +757,19 @@
                 } else {
                     view.classList.add('hidden');
                     view.classList.remove('block');
-                    button.className = "w-1/3 text-center py-3 border-b-2 border-transparent text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-all";
+                    button.className = "w-1/3 text-center py-3 border-b-2 border-transparent text-gray-400 dark:text-gray-550 hover:text-gray-600 transition-all";
                 }
             });
         }
 
-        // Renderiza Dados Financeiros e de Timeframe (Aba 1)
+        // Renderiza Dados Financeiros e de Timeframe
         function renderOverviewTab(coinData) {
-            // Container de Timeframes
             const tfContainer = document.getElementById('timeframePctContainer');
             const tfKeys = ['h1', 'h24', 'd7', 'd14', 'd30', 'y1'];
             
             tfContainer.innerHTML = tfKeys.map(key => {
                 const value = coinData.timeframes[key];
-                let colorClass = "text-gray-400 dark:text-gray-500";
+                let colorClass = "text-gray-400 dark:text-gray-550";
                 let symbol = "◼";
 
                 if (value > 0) {
@@ -977,23 +780,17 @@
                     symbol = "▼";
                 }
 
-                return `
-                    <div class="flex flex-col">
-                        <span class="${colorClass} font-bold">${symbol} ${Math.abs(value)}%</span>
-                    </div>
-                `;
+                return `<div class="flex flex-col"><span class="${colorClass} font-bold">${symbol} ${Math.abs(value)}%</span></div>`;
             }).join('');
 
-            // Títulos e inputs da calculadora
             document.getElementById('converterTitle').innerText = `Conversor de ${coinData.name}`;
             document.getElementById('convertCryptoLabel').innerText = coinData.ticker;
             document.getElementById('convertCryptoInput').value = "1";
             document.getElementById('convertFiatInput').value = coinData.price.toFixed(4);
 
-            // Preenche Estatísticas Gerais
             document.getElementById('statsTitle').innerText = `Estatísticas do ${coinData.name}`;
+            document.getElementById('statTechType').innerText = `${coinData.ticker} - ${coinData.tech}`;
             document.getElementById('statMarketCap').innerText = coinData.stats.marketCap;
-            document.getElementById('statDiluted').innerText = coinData.stats.diluted;
             document.getElementById('statVolume').innerText = coinData.stats.volume;
             document.getElementById('statCirculating').innerText = coinData.stats.circulating;
         }
@@ -1015,7 +812,7 @@
             }
         }
 
-        // Renderiza Mercados e Câmbios (Aba 3)
+        // Renderiza Mercados e Câmbios
         function renderMarketsTab(coinData) {
             const container = document.getElementById('marketsListContainer');
             let markets = coinData.markets;
@@ -1024,8 +821,8 @@
                 markets = markets.filter(m => m.type === currentMarketsFilter);
             }
 
-            if (markets.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs text-gray-400 dark:text-gray-500 py-6">Nenhum mercado deste tipo configurado.</p>`;
+            if (!markets || markets.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-gray-400 dark:text-gray-550 py-6">Nenhum mercado deste tipo configurado.</p>`;
                 return;
             }
 
@@ -1072,7 +869,6 @@
         // Simulação de Copiar ID da API
         function copyAPIId() {
             const apiId = document.getElementById('infoAPIId').innerText;
-            // Clipboard fallback para iFrame
             const el = document.createElement('textarea');
             el.value = apiId;
             document.body.appendChild(el);
@@ -1080,16 +876,20 @@
             document.execCommand('copy');
             document.body.removeChild(el);
 
-            alertModal("ID da API Copiado", `O ID '${apiId}' foi copiado para a área de transferência.`);
+            alertModal("ID da API Copiado", `O ID '${apiId}' foi copiado.`);
         }
 
         // Simulação de abertura de link externo
         function openExternalSimulated(name) {
-            alertModal("Navegação Blindada", `Para manter o anonimato da sua sessão de pesquisa, a conexão com o link externo de '${name}' foi direcionada por meio de proxies de privacidade integrados.`);
+            alertModal("Navegação Blindada", `Navegando de forma anônima para '${name}' por meio de proxies de segurança.`);
         }
+
+        // Renderiza a lista padrão ao iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCoinsTable();
+        });
     </script>
 
-    <!-- Scripts de Interatividade do Dashboard Global -->
     <script>
         // Gerenciamento de Tema (Claro / Escuro)
         function toggleTheme() {
@@ -1149,29 +949,6 @@
             }
         }
 
-        // Filtro de Categorias
-        function filterCoins(category) {
-            const buttons = ['tudo', 'destaques', 'base'];
-            buttons.forEach(btn => {
-                const element = document.getElementById(`filter-${btn}`);
-                if (btn === category) {
-                    element.className = "px-4 py-2 rounded-xl text-xs font-bold bg-orange-50 text-[#FF6600] border border-orange-100 dark:bg-orange-950/20 dark:border-orange-900/30 flex items-center gap-1.5 transition-all";
-                } else {
-                    element.className = "px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all";
-                }
-            });
-
-            const rows = document.querySelectorAll('.coin-row');
-            rows.forEach(row => {
-                const rowCat = row.getAttribute('data-category');
-                if (category === 'tudo' || rowCat === category) {
-                    row.style.display = 'grid';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
         // Modais de Compra
         function openBuyModal(coinName, ticker) {
             const modal = document.getElementById('buyModal');
@@ -1205,7 +982,7 @@
         function simulatedBuyAction() {
             closeBuyModal();
             setTimeout(() => {
-                alertModal("Ligação Protegida", "Simulando ligação de segurança anónima via Web3. Conexão encriptada estabelecida com sucesso!");
+                alertModal("Conexão Criptografada", "Conexão de segurança com carteira non-custodial estabelecida com sucesso!");
             }, 350);
         }
 
@@ -1271,16 +1048,7 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // Lista de busca ativa
-        const searchDatabase = [
-            { name: "Monero", ticker: "XMR", price: "US$ 158,40", color: "bg-[#FF6600]" },
-            { name: "Wownero", ticker: "WOW", price: "US$ 0,0854", color: "bg-[#FF007A]" },
-            { name: "Railgun", ticker: "RAIL", price: "US$ 3,57", color: "bg-black dark:bg-zinc-800" },
-            { name: "Zephyr Protocol", ticker: "ZEPH", price: "US$ 2,12", color: "bg-teal-800" },
-            { name: "Firo", ticker: "FIRO", price: "US$ 1,42", color: "bg-red-600" },
-            { name: "Pirate Chain", ticker: "ARRR", price: "US$ 0,184", color: "bg-yellow-600" }
-        ];
-
+        // Lista de busca ativa sincronizada com o novo formato
         function liveSearch() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const resultsDiv = document.getElementById('searchResults');
@@ -1290,25 +1058,25 @@
                 return;
             }
 
-            const filtered = searchDatabase.filter(coin => 
-                coin.name.toLowerCase().includes(query) || coin.ticker.toLowerCase().includes(query)
-            );
+            const filtered = Object.keys(coinsDatabase)
+                .map(key => coinsDatabase[key])
+                .filter(coin => coin.name.toLowerCase().includes(query) || coin.ticker.toLowerCase().includes(query));
 
             if (filtered.length === 0) {
-                resultsDiv.innerHTML = '<p class="text-xs text-gray-400 py-2 text-center">Nenhuma moeda de privacidade encontrada.</p>';
+                resultsDiv.innerHTML = '<p class="text-xs text-gray-400 py-2 text-center">Nenhuma moeda encontrada.</p>';
                 return;
             }
 
             resultsDiv.innerHTML = filtered.map(coin => `
                 <div onclick="selectSearchCoin('${coin.name}', '${coin.ticker}')" class="flex items-center justify-between py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-850 px-2 rounded-xl transition-all">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full ${coin.color} flex items-center justify-center text-white font-bold text-[9px]">${coin.ticker}</div>
+                        <div class="w-6 h-6 rounded-full ${coin.color} flex items-center justify-center text-white font-bold text-[8px]">${coin.ticker}</div>
                         <div>
                             <p class="text-xs font-bold text-gray-800 dark:text-white">${coin.name}</p>
-                            <p class="text-[9px] text-gray-400 uppercase">${coin.ticker}</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-semibold">${coin.ticker} - ${coin.tech}</p>
                         </div>
                     </div>
-                    <span class="text-xs font-semibold text-gray-900 dark:text-white">${coin.price}</span>
+                    <span class="text-xs font-semibold text-gray-900 dark:text-white">${coin.priceString}</span>
                 </div>
             `).join('');
         }
@@ -1323,7 +1091,7 @@
         }
 
         function showMore(category) {
-            openPromoModal(`Tendências em Privacidade`, `As estatísticas completas de ${category} e histórico dinâmico de blocos estão prontas para download seguro.`);
+            openPromoModal(`Tendências de Tecnologia`, `As estatísticas completas e histórico dinâmico de blocos estão prontas para download seguro.`);
         }
     </script>
 </body>
