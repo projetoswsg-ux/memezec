@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PriPeng - O Mercado de Capitalização da Privacidade</title>
+    <title>PrivacyGecko - O Mercado de Capitalização da Privacidade</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts para tipografia limpa -->
@@ -39,7 +39,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 antialiased selection:bg-orange-500/20">
+<body class="bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 antialiased selection:bg-orange-500/20 animate-fade-in">
 
     <!-- SINALIZADOR DE CARREGAMENTO DA API -->
     <div id="loading-spinner" class="fixed inset-0 bg-white/80 dark:bg-zinc-950/80 z-50 flex flex-col items-center justify-center gap-3 transition-opacity duration-300">
@@ -49,12 +49,12 @@
 
     <!-- TELA 1: LISTAGEM PRINCIPAL (DASHBOARD) -->
     <div id="main-view" class="block">
-        <!-- CABEÇALHO DO APP COINGECKO CLONADO COM O NOVO LOGO ENVIADO -->
+        <!-- CABEÇALHO DO APP COINGECKO CLONADO COM O LOGO PERSONALIZADO -->
         <header class="bg-white dark:bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
             <div class="flex items-center gap-2">
                 <!-- Logotipo Enviado pelo Usuário -->
                 <img src="https://i.postimg.cc/q7qN5pJp/Picsart-26-05-24-17-40-22-677.png" class="w-8 h-8 rounded-lg object-cover shadow-sm" alt="PrivacyGecko Logo">
-                <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Pri<span class="text-[#FF6600]">Peng</span></span>
+                <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">privacy<span class="text-[#FF6600]">gecko</span></span>
             </div>
             
             <div class="flex items-center gap-2.5">
@@ -71,7 +71,7 @@
         </header>
 
         <!-- BARRA DE MÉTRICAS GLOBAIS -->
-        <div class="bg-white dark:bg-zinc-900 px-4 py-2 border-b border-gray-200 dark:border-zinc-800 text-xs text-gray-500 dark:text-gray-450 overflow-x-auto hide-scrollbar whitespace-nowrap flex items-center gap-4 transition-colors">
+        <div class="bg-white dark:bg-zinc-900 px-4 py-2 border-b border-gray-150 dark:border-zinc-800 text-xs text-gray-500 dark:text-gray-450 overflow-x-auto hide-scrollbar whitespace-nowrap flex items-center gap-4 transition-colors">
             <div>Global Privacy Cap: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-cap-label">Carregando...</span> <span class="text-green-600 dark:text-green-400 font-medium" id="global-cap-pct">▲ 0.0%</span></div>
             <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
             <div>Provedor: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-provider-label">Monepi Node</span></div>
@@ -83,7 +83,7 @@
         <main class="max-w-md mx-auto px-4 pt-4">
             <!-- Título da Página -->
             <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">Preços de moedas de privacidade por tecnologia criptográfica</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
+            <p class="text-xs text-gray-550 dark:text-gray-400 mt-1.5 leading-relaxed">
                 A capitalização de moedas focadas em anonimato é classificada por suas tecnologias subjacentes como <span class="text-orange-500 font-semibold">CryptoNote</span>, <span class="text-pink-500 font-semibold">zk-SNARKs</span>, <span class="font-semibold text-teal-600 dark:text-teal-400">MimbleWimble</span> e <span class="font-semibold text-indigo-600 dark:text-indigo-400">Lelantus</span>. <span class="text-gray-400 dark:text-gray-550 underline cursor-pointer">Leia mais</span>
             </p>
 
@@ -156,15 +156,15 @@
                 </div>
             </div>
 
-            <!-- TABELA DE MOEDAS -->
-            <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 shadow-sm overflow-hidden transition-colors">
-                <div class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-100 dark:border-zinc-850 text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider items-center">
+            <!-- TABELA DE MOEDAS (AJUSTE: SEM CONTÊINER E SEM BORDA COMO NO ANEXO) -->
+            <div class="w-full bg-transparent transition-colors mt-2">
+                <div class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-150 dark:border-zinc-800 text-[11px] font-bold text-gray-450 dark:text-gray-500 uppercase tracking-wider items-center">
                     <div class="col-span-1 text-center">▲ #</div>
                     <div class="col-span-6">Moeda / Tecnologia</div>
                     <div class="col-span-5 text-right">Preço / Var. 24h</div>
                 </div>
 
-                <div id="coinTableBody" class="divide-y divide-gray-50 dark:divide-zinc-850">
+                <div id="coinTableBody" class="divide-y divide-gray-150 dark:divide-zinc-800/80">
                     <!-- Injetado dinamicamente via requisição de dados -->
                 </div>
             </div>
@@ -272,7 +272,6 @@
                             <span class="text-gray-500 flex items-center gap-1">ID do Ativo <i data-lucide="hash" class="w-3.5 h-3.5 text-gray-300"></i></span>
                             <span class="font-bold text-gray-900 dark:text-white" id="statAssetId"></span>
                         </div>
-                        <!-- CAMPOS RE-ADICIONADOS PARA IMPEDIR ERRO JAVASCRIPT E EXIBIR OS DADOS CORRETAMENTE -->
                         <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
                             <span class="text-gray-500 flex items-center gap-1">Capitalização de mercado <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
                             <span class="font-bold text-gray-900 dark:text-white" id="statMarketCap"></span>
@@ -520,7 +519,7 @@
                     "nome": "Bytecoin",
                     "simbolo": "BCN",
                     "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/bytecoin_logo_convertido.webp",
-                    "descricao": "A primeira implementação ativa do protocolo de privacidade CryptoNote, lançado em meados de 2012.",
+                    "descricao": "A primeira implementação activa do protocolo de privacidade CryptoNote, lançado em meados de 2012.",
                     "privacidade": "CryptoNote",
                     "mercado": { "preco_usd": 0.000028, "variacao_24h_pct": 0.0, "tendencia": "neutral" },
                     "redes_sociais": { "website": "https://bytecoin.org", "twitter": "https://x.com/bytecoin" },
@@ -575,7 +574,7 @@
                     "nome": "Zclassic",
                     "simbolo": "ZCL",
                     "logo": "https://cdn.jsdelivr.net/gh/projetoswsg-ux/center@main/logo/zclassic_logo_convertido.webp",
-                    "descricao": "Fork do Zcash que removeu a taxa do fundador de 20%, rodando with privacidade opcional zk-SNARKs.",
+                    "descricao": "Fork do Zcash que removeu a taxa do fundador de 20%, rodando com privacidade opcional zk-SNARKs.",
                     "privacidade": "zk-SNARKs",
                     "mercado": { "preco_usd": 0.062, "variacao_24h_pct": -5.4, "tendencia": "down" },
                     "redes_sociais": { "website": "https://zclassic.org", "twitter": "https://x.com/zclassic" },
@@ -745,7 +744,7 @@
                 return `
                     <div onclick="navigateToCoin('${coin.key}')" class="flex items-center justify-between text-xs cursor-pointer hover:opacity-85 transition-opacity">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-400 dark:text-gray-550 w-4 font-medium">${index + 1}</span>
+                            <span class="text-xs text-gray-400 dark:text-gray-555 w-4 font-medium">${index + 1}</span>
                             <img src="${coin.logo}" class="w-6 h-6 rounded-full object-contain" alt="Logo">
                             <span class="font-semibold text-gray-800 dark:text-gray-200">${coin.nome}</span>
                         </div>
@@ -783,7 +782,7 @@
                 }
 
                 const rowHtml = `
-                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-50 dark:hover:bg-zinc-850 transition-colors coin-row cursor-pointer" onclick="navigateToCoin('${key}')">
+                    <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-100/50 dark:hover:bg-zinc-900/40 transition-colors coin-row cursor-pointer" onclick="navigateToCoin('${key}')">
                         <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
                             <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
                                 <i data-lucide="star" class="w-4 h-4"></i>
@@ -1115,6 +1114,12 @@
                 modal.classList.remove('opacity-0');
                 content.classList.remove('translate-y-full');
             }, 50);
+        }
+
+        // Clique no botão inferior para mudar de abas ou recarregar
+        function selectHomeTab() {
+            backToMainView();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function closeBuyModal() {
