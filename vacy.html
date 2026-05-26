@@ -39,7 +39,7 @@
         }
     </style>
 </head>
-<body class="bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 antialiased selection:bg-orange-500/20 animate-fade-in">
+<body class="bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 lg:pb-12 antialiased selection:bg-orange-500/20 animate-fade-in">
 
     <!-- SINALIZADOR DE CARREGAMENTO DA API -->
     <div id="loading-spinner" class="fixed inset-0 bg-white/80 dark:bg-zinc-950/80 z-50 flex flex-col items-center justify-center gap-3 transition-opacity duration-300">
@@ -49,55 +49,78 @@
 
     <!-- TELA 1: LISTAGEM PRINCIPAL (DASHBOARD) -->
     <div id="main-view" class="block">
-        <!-- CABEÇALHO DO APP COINGECKO CLONADO COM O LOGO PERSONALIZADO -->
-        <header class="bg-white dark:bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
-            <div class="flex items-center gap-2">
-                <!-- Logotipo Enviado pelo Usuário -->
-                <img src="https://i.postimg.cc/q7qN5pJp/Picsart-26-05-24-17-40-22-677.png" class="w-8 h-8 rounded-lg object-cover shadow-sm" alt="PrivacyGecko Logo">
-                <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Pri<span class="text-[#FF6600]">Peng</span></span>
-            </div>
-            
-            <div class="flex items-center gap-2.5">
-                <!-- Alternador de Tema -->
-                <button onclick="toggleTheme()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 p-2 rounded-xl transition-all text-gray-700 dark:text-gray-300" aria-label="Alternar Tema">
-                    <span id="themeIcon">
-                        <i data-lucide="moon" class="w-4.5 h-4.5"></i>
-                    </span>
-                </button>
-                <button onclick="openPromoModal()" class="bg-[#FF6600] hover:bg-[#e05900] text-white font-semibold text-xs px-4 py-2 rounded-lg transition-colors shadow-sm">
-                    Usar App
-                </button>
+        <!-- CABEÇALHO DO APP ADAPTADO PARA DESKTOP & MOBILE -->
+        <header class="bg-white dark:bg-zinc-900 px-4 lg:px-8 py-3.5 flex items-center justify-between border-b border-gray-100 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
+            <div class="flex items-center gap-6 max-w-7xl mx-auto w-full justify-between">
+                <div class="flex items-center gap-2">
+                    <!-- Logotipo Enviado pelo Usuário -->
+                    <img src="https://i.postimg.cc/q7qN5pJp/Picsart-26-05-24-17-40-22-677.png" class="w-8 h-8 rounded-lg object-cover shadow-sm" alt="PrivacyGecko Logo">
+                    <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">privacy<span class="text-[#FF6600]">gecko</span></span>
+                </div>
+
+                <!-- Menu de Navegação Horizontal - Visível apenas em Telas Desktop (lg) -->
+                <div class="hidden lg:flex items-center gap-6 text-sm font-semibold text-gray-600 dark:text-gray-305">
+                    <button onclick="selectHomeTab()" class="hover:text-[#FF6600] text-[#FF6600] transition-colors flex items-center gap-1">
+                        <i data-lucide="home" class="w-4 h-4"></i> Página inicial
+                    </button>
+                    <button onclick="openPromoModal('Portfólio')" class="hover:text-[#FF007A] transition-colors flex items-center gap-1">
+                        <i data-lucide="star" class="w-4 h-4"></i> Portfólio
+                    </button>
+                    <button onclick="openSearchModal()" class="hover:text-[#FF6600] transition-colors flex items-center gap-1">
+                        <i data-lucide="search" class="w-4 h-4"></i> Pesquisar
+                    </button>
+                    <button onclick="collectCandy()" class="hover:text-[#FF007A] transition-colors flex items-center gap-1 relative">
+                        <i data-lucide="candy" class="w-4 h-4"></i> Candy
+                        <span class="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-[#FF007A] animate-ping"></span>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-2.5">
+                    <!-- Alternador de Tema -->
+                    <button onclick="toggleTheme()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 p-2 rounded-xl transition-all text-gray-700 dark:text-gray-300" aria-label="Alternar Tema">
+                        <span id="themeIcon">
+                            <i data-lucide="moon" class="w-4.5 h-4.5"></i>
+                        </span>
+                    </button>
+                    <button onclick="openPromoModal()" class="bg-[#FF6600] hover:bg-[#e05900] text-white font-semibold text-xs px-4 py-2 rounded-lg transition-colors shadow-sm">
+                        Usar App
+                    </button>
+                </div>
             </div>
         </header>
 
-        <!-- BARRA DE MÉTRICAS GLOBAIS -->
-        <div class="bg-white dark:bg-zinc-900 px-4 py-2 border-b border-gray-150 dark:border-zinc-800 text-xs text-gray-500 dark:text-gray-450 overflow-x-auto hide-scrollbar whitespace-nowrap flex items-center gap-4 transition-colors">
-            <div>Global Privacy Cap: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-cap-label">Carregando...</span> <span class="text-green-600 dark:text-green-400 font-medium" id="global-cap-pct">▲ 0.0%</span></div>
-            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
-            <div>Provedor: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-provider-label">Monepi Node</span></div>
-            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
-            <div>Sincronização: <span class="font-semibold text-green-500">Online</span></div>
+        <!-- BARRA DE MÉTRICAS GLOBAIS ADAPTADA -->
+        <div class="bg-white dark:bg-zinc-900 border-b border-gray-150 dark:border-zinc-800 transition-colors">
+            <div class="max-w-7xl mx-auto px-4 lg:px-8 py-2 text-xs text-gray-500 dark:text-gray-450 overflow-x-auto hide-scrollbar whitespace-nowrap flex items-center gap-4">
+                <div>Global Privacy Cap: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-cap-label">Carregando...</span> <span class="text-green-600 dark:text-green-400 font-medium" id="global-cap-pct">▲ 0.0%</span></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
+                <div>Provedor: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-provider-label">Monepi Node</span></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
+                <div>Sincronização: <span class="font-semibold text-green-500">Online</span></div>
+            </div>
         </div>
 
         <!-- CONTEÚDO PRINCIPAL -->
-        <main class="max-w-md mx-auto px-4 pt-4">
-            <!-- Título da Página -->
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">Preços de moedas de privacidade por tecnologia criptográfica</h1>
-            <p class="text-xs text-gray-550 dark:text-gray-400 mt-1.5 leading-relaxed">
-                A capitalização de moedas focadas em anonimato é classificada por suas tecnologias subjacentes como <span class="text-orange-500 font-semibold">CryptoNote</span>, <span class="text-pink-500 font-semibold">zk-SNARKs</span>, <span class="font-semibold text-teal-600 dark:text-teal-400">MimbleWimble</span> e <span class="font-semibold text-indigo-600 dark:text-indigo-400">Lelantus</span>. <span class="text-gray-400 dark:text-gray-550 underline cursor-pointer">Leia mais</span>
-            </p>
+        <main class="max-w-7xl mx-auto px-4 lg:px-8 pt-6">
+            <!-- Título da Página e Descrição -->
+            <div class="mb-6">
+                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white leading-tight">Preços de moedas de privacidade por tecnologia criptográfica</h1>
+                <p class="text-xs lg:text-sm text-gray-550 dark:text-gray-400 mt-1.5 leading-relaxed max-w-3xl">
+                    A capitalização de moedas focadas em anonimato é classificada por suas tecnologias subjacentes como <span class="text-orange-500 font-semibold">CryptoNote</span>, <span class="text-pink-500 font-semibold">zk-SNARKs</span>, <span class="font-semibold text-teal-600 dark:text-teal-400">MimbleWimble</span> e <span class="font-semibold text-indigo-600 dark:text-indigo-400">Lelantus</span>. <span class="text-gray-400 dark:text-gray-550 underline cursor-pointer">Leia mais</span>
+                </p>
+            </div>
 
             <!-- SELETOR DE DESTAQUES -->
-            <div class="flex items-center justify-between mt-5 py-2 border-b border-gray-100 dark:border-zinc-900">
-                <span class="font-bold text-sm text-gray-800 dark:text-gray-200">Destaques</span>
+            <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-zinc-900">
+                <span class="font-bold text-sm text-gray-800 dark:text-gray-200">Destaques rápidos</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="toggleDestaques" class="sr-only peer" checked onchange="toggleHighlights()">
                     <div class="w-11 h-6 bg-gray-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-zinc-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF6600]"></div>
                 </label>
             </div>
 
-            <!-- CARDS DE TENDÊNCIAS E GANHADORES -->
-            <div id="highlightsContainer" class="grid grid-cols-1 gap-4 mt-4 transition-all duration-300">
+            <!-- CARDS DE TENDÊNCIAS E GANHADORES (Grid Responsiva: Mobile empilhada, Desktop lado a lado) -->
+            <div id="highlightsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 transition-all duration-300">
                 <!-- Card 1: Tendências de Privacidade -->
                 <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 p-4 shadow-sm transition-colors">
                     <div class="flex items-center justify-between mb-3">
@@ -113,7 +136,7 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Protocolos em Destaque -->
+                <!-- Card 2: Principais Ganhadores -->
                 <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 p-4 shadow-sm transition-colors">
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-1.5">
@@ -129,8 +152,8 @@
                 </div>
             </div>
 
-            <!-- NOVO SELETOR DE FILTROS POR TECNOLOGIA DE PRIVACIDADE -->
-            <div class="mt-6 mb-4 py-1">
+            <!-- SELETOR DE FILTROS POR TECNOLOGIA -->
+            <div class="mt-8 mb-4 py-1">
                 <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-550 block mb-2">Protocolos de Privacidade</span>
                 <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar whitespace-nowrap">
                     <!-- Tudo -->
@@ -156,16 +179,21 @@
                 </div>
             </div>
 
-            <!-- TABELA DE MOEDAS (AJUSTE: SEM CONTÊINER E SEM BORDA COMO NO ANEXO) -->
-            <div class="w-full bg-transparent transition-colors mt-2">
-                <div class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-150 dark:border-zinc-800 text-[11px] font-bold text-gray-450 dark:text-gray-500 uppercase tracking-wider items-center">
-                    <div class="col-span-1 text-center">▲ #</div>
-                    <div class="col-span-6">Moeda / Tecnologia</div>
-                    <div class="col-span-5 text-right">Preço / Var. 24h</div>
-                </div>
+            <!-- TABELA DE MOEDAS (Ajustada para layout estendido em Desktop) -->
+            <div class="w-full bg-transparent transition-colors mt-2 overflow-x-auto hide-scrollbar">
+                <div class="min-w-[650px] lg:min-w-full">
+                    <div class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-150 dark:border-zinc-800 text-[11px] font-bold text-gray-450 dark:text-gray-500 uppercase tracking-wider items-center">
+                        <div class="col-span-1 text-center">▲ #</div>
+                        <div class="col-span-5 lg:col-span-4">Moeda / Tecnologia</div>
+                        <div class="col-span-3 text-right">Preço</div>
+                        <div class="col-span-3 lg:col-span-2 text-right">Variação 24h</div>
+                        <!-- Coluna visível apenas em telas Desktop (lg) -->
+                        <div class="hidden lg:block lg:col-span-2 text-right">Volume (Simulado)</div>
+                    </div>
 
-                <div id="coinTableBody" class="divide-y divide-gray-150 dark:divide-zinc-800/80">
-                    <!-- Injetado dinamicamente via requisição de dados -->
+                    <div id="coinTableBody" class="divide-y divide-gray-150 dark:divide-zinc-800/80">
+                        <!-- Injetado dinamicamente via requisição de dados -->
+                    </div>
                 </div>
             </div>
 
@@ -178,34 +206,36 @@
     </div>
 
 
-    <!-- TELA 2: PÁGINA ESPECÍFICA DA MOEDA -->
+    <!-- TELA 2: PÁGINA ESPECÍFICA DA MOEDA (DETAILS VIEW) -->
     <div id="details-view" class="hidden">
         <!-- CABEÇALHO DA TELA DE DETALHES -->
-        <header class="bg-white dark:bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-gray-150 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
-            <div class="flex items-center gap-3">
-                <button onclick="backToMainView()" class="text-gray-700 dark:text-gray-350 p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
-                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                </button>
-                <div class="flex items-center gap-2">
-                    <img id="detailCoinLogo" class="w-7 h-7 rounded-full object-contain" src="" alt="Logo do Ativo">
-                    <div class="flex items-baseline gap-1.5">
-                        <span id="detailCoinTicker" class="font-bold text-base text-gray-900 dark:text-white uppercase"></span>
-                        <span id="detailCoinPrice" class="font-bold text-sm text-gray-900 dark:text-white"></span>
+        <header class="bg-white dark:bg-zinc-900 px-4 lg:px-8 py-3.5 flex items-center justify-between border-b border-gray-150 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
+            <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button onclick="backToMainView()" class="text-gray-700 dark:text-gray-350 p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <img id="detailCoinLogo" class="w-7 h-7 rounded-full object-contain" src="" alt="Logo do Ativo">
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="detailCoinTicker" class="font-bold text-base text-gray-900 dark:text-white uppercase"></span>
+                            <span id="detailCoinPrice" class="font-bold text-sm text-gray-900 dark:text-white"></span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="flex items-center gap-2">
-                <span id="detailCoinHeaderPct" class="text-xs font-bold px-2 py-1 rounded-lg"></span>
-                <button onclick="openBuyModalFromDetails()" class="bg-[#FF6600] hover:bg-[#e05900] text-white font-bold text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-sm">
-                    Comprar
-                </button>
+                
+                <div class="flex items-center gap-2">
+                    <span id="detailCoinHeaderPct" class="text-xs font-bold px-2 py-1 rounded-lg"></span>
+                    <button onclick="openBuyModalFromDetails()" class="bg-[#FF6600] hover:bg-[#e05900] text-white font-bold text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-sm">
+                        Comprar
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- SUB-MENU DE ABAS DA MOEDA -->
         <div class="bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-850 sticky top-12 z-30 transition-colors">
-            <div class="flex items-center justify-around text-xs font-bold text-gray-450 dark:text-gray-400">
+            <div class="max-w-7xl mx-auto flex items-center justify-around text-xs font-bold text-gray-450 dark:text-gray-400">
                 <button onclick="switchDetailsTab('tab-visao-geral')" id="btn-tab-visao-geral" class="w-1/3 text-center py-3 border-b-2 border-[#FF6600] text-gray-900 dark:text-white transition-all">
                     Visão geral
                 </button>
@@ -218,169 +248,170 @@
             </div>
         </div>
 
-        <!-- CONTEÚDO DAS ABAS -->
-        <main class="max-w-md mx-auto px-4 pt-4">
-
-            <!-- ABA 1: VISÃO GERAL -->
-            <div id="tab-visao-geral" class="block space-y-6">
-                <!-- Bloco de Descrição da Moeda -->
-                <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
-                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-2">Sobre o Ativo</h3>
-                    <p id="detailCoinDescription" class="text-xs text-gray-650 dark:text-gray-400 leading-relaxed"></p>
-                </div>
-
-                <!-- Bloco de Variação Temporal -->
-                <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
-                    <div class="grid grid-cols-6 gap-2 text-center text-[10px] text-gray-400 dark:text-gray-550 font-bold uppercase tracking-wider mb-2">
-                        <div>1h</div>
-                        <div>24h</div>
-                        <div>7d</div>
-                        <div>14d</div>
-                        <div>30d</div>
-                        <div>1a</div>
+        <!-- CONTEÚDO DAS ABAS ADAPTATIVO -->
+        <main class="max-w-7xl mx-auto px-4 lg:px-8 pt-6">
+            <div class="max-w-3xl mx-auto">
+                <!-- ABA 1: VISÃO GERAL -->
+                <div id="tab-visao-geral" class="block space-y-6">
+                    <!-- Bloco de Descrição da Moeda -->
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-2">Sobre o Ativo</h3>
+                        <p id="detailCoinDescription" class="text-xs text-gray-650 dark:text-gray-400 leading-relaxed"></p>
                     </div>
-                    <div class="grid grid-cols-6 gap-2 text-center text-xs font-bold" id="timeframePctContainer">
-                        <!-- Gerado Dinamicamente -->
-                    </div>
-                </div>
 
-                <!-- CONVERSOR DE MOEDA -->
-                <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-3">
-                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="converterTitle">Conversor</h3>
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between border border-gray-150 dark:border-zinc-800 rounded-xl p-3 bg-gray-50 dark:bg-zinc-950">
-                            <input type="number" id="convertCryptoInput" oninput="calculateConversion(true)" class="bg-transparent outline-none w-2/3 text-base font-semibold text-gray-950 dark:text-white" value="1">
-                            <span id="convertCryptoLabel" class="font-bold text-xs text-gray-400 dark:text-gray-550 uppercase">XMR</span>
+                    <!-- Bloco de Variação Temporal -->
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
+                        <div class="grid grid-cols-6 gap-2 text-center text-[10px] text-gray-400 dark:text-gray-550 font-bold uppercase tracking-wider mb-2">
+                            <div>1h</div>
+                            <div>24h</div>
+                            <div>7d</div>
+                            <div>14d</div>
+                            <div>30d</div>
+                            <div>1a</div>
                         </div>
-                        <div class="flex items-center justify-between border border-gray-150 dark:border-zinc-800 rounded-xl p-3 bg-gray-50 dark:bg-zinc-950">
-                            <input type="number" id="convertFiatInput" oninput="calculateConversion(false)" class="bg-transparent outline-none w-2/3 text-base font-semibold text-gray-950 dark:text-white">
-                            <span class="font-bold text-xs text-gray-400 dark:text-gray-550 flex items-center gap-1">USD <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
+                        <div class="grid grid-cols-6 gap-2 text-center text-xs font-bold" id="timeframePctContainer">
+                            <!-- Gerado Dinamicamente -->
                         </div>
                     </div>
-                </div>
 
-                <!-- ESTATÍSTICAS DA MOEDA -->
-                <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
-                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="statsTitle">Estatísticas</h3>
-                    
-                    <div class="space-y-3 text-xs">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500 flex items-center gap-1">Protocolo Base <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-gray-900 dark:text-white" id="statTechType"></span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500 flex items-center gap-1">ID do Ativo <i data-lucide="hash" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-gray-900 dark:text-white" id="statAssetId"></span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500 flex items-center gap-1">Capitalização de mercado <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-gray-900 dark:text-white" id="statMarketCap"></span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500 flex items-center gap-1">Volume de negociação de 24h <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-gray-900 dark:text-white" id="statVolume"></span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500 flex items-center gap-1">Fornecimento circulante <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-gray-900 dark:text-white" id="statCirculating"></span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500 flex items-center gap-1">Status de Rede <i data-lucide="activity" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-green-600 dark:text-green-400">Ativa e Segura</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2">
-                            <span class="text-gray-500 flex items-center gap-1">Rich List de Endereços <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
-                            <span class="font-bold text-[#FF6600] flex items-center gap-1">🔒 Oculta Criptograficamente</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA 2: INFORMAÇÕES -->
-            <div id="tab-informacoes" class="hidden space-y-4">
-                <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
-                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Links Úteis</h3>
-                    
-                    <div class="space-y-4 text-xs">
-                        <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500">Website</span>
-                            <div class="flex gap-1.5">
-                                <button onclick="openExternalSimulated('Website')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200" id="infoWebsiteBtn">getmonero.org</button>
+                    <!-- CONVERSOR DE MOEDA -->
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-3">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="converterTitle">Conversor</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between border border-gray-150 dark:border-zinc-800 rounded-xl p-3 bg-gray-50 dark:bg-zinc-950">
+                                <input type="number" id="convertCryptoInput" oninput="calculateConversion(true)" class="bg-transparent outline-none w-2/3 text-base font-semibold text-gray-950 dark:text-white" value="1">
+                                <span id="convertCryptoLabel" class="font-bold text-xs text-gray-400 dark:text-gray-550 uppercase">XMR</span>
+                            </div>
+                            <div class="flex items-center justify-between border border-gray-150 dark:border-zinc-800 rounded-xl p-3 bg-gray-50 dark:bg-zinc-950">
+                                <input type="number" id="convertFiatInput" oninput="calculateConversion(false)" class="bg-transparent outline-none w-2/3 text-base font-semibold text-gray-950 dark:text-white">
+                                <span class="font-bold text-xs text-gray-400 dark:text-gray-550 flex items-center gap-1">USD <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500">Explorador Anonimizado</span>
-                            <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Monepi Explorer')">
-                                <span id="infoExplorer">Titan Exploradores</span>
-                                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    <!-- ESTATÍSTICAS DA MOEDA -->
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="statsTitle">Estatísticas</h3>
+                        
+                        <div class="space-y-3 text-xs">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Protocolo Base <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statTechType"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">ID do Ativo <i data-lucide="hash" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statAssetId"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Capitalização de mercado <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statMarketCap"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Volume de negociação de 24h <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statVolume"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Fornecimento circulante <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statCirculating"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Status de Rede <i data-lucide="activity" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-green-600 dark:text-green-400">Ativa e Segura</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-gray-500 flex items-center gap-1">Rich List de Endereços <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-[#FF6600] flex items-center gap-1">🔒 Oculta Criptograficamente</span>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="py-2 border-b border-gray-50 dark:border-zinc-850 space-y-2">
-                            <span class="text-gray-500 block mb-1">Canais de Comunidade</span>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="openExternalSimulated('Twitter/X')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
-                                    <i data-lucide="twitter" class="w-3.5 h-3.5"></i> Twitter oficial
+                <!-- ABA 2: INFORMAÇÕES -->
+                <div id="tab-informacoes" class="hidden space-y-4">
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Links Úteis</h3>
+                        
+                        <div class="space-y-4 text-xs">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500">Website</span>
+                                <div class="flex gap-1.5">
+                                    <button onclick="openExternalSimulated('Website')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200" id="infoWebsiteBtn">getmonero.org</button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500">Explorador Anonimizado</span>
+                                <div class="bg-gray-100 dark:bg-zinc-850 py-1 px-2.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 cursor-pointer" onclick="openExternalSimulated('Monepi Explorer')">
+                                    <span id="infoExplorer">Titan Exploradores</span>
+                                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                                </div>
+                            </div>
+
+                            <div class="py-2 border-b border-gray-50 dark:border-zinc-850 space-y-2">
+                                <span class="text-gray-500 block mb-1">Canais de Comunidade</span>
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="openExternalSimulated('Twitter/X')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
+                                        <i data-lucide="twitter" class="w-3.5 h-3.5"></i> Twitter oficial
+                                    </button>
+                                    <button onclick="openExternalSimulated('BitcoinTalk')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
+                                        bitcointalk.org
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500">Desenvolvimento Sólido</span>
+                                <button onclick="openExternalSimulated('GitHub')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
+                                    <i data-lucide="github" class="w-3.5 h-3.5"></i> Ver GitHub
                                 </button>
-                                <button onclick="openExternalSimulated('BitcoinTalk')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
-                                    bitcointalk.org
-                                </button>
+                            </div>
+
+                            <div class="flex items-center justify-between py-2">
+                                <span class="text-gray-500">Identificador API</span>
+                                <span onclick="copyAPIId()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-mono font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1 cursor-pointer">
+                                    <span id="infoAPIId">monero</span>
+                                    <i data-lucide="copy" class="w-3.5 h-3.5 text-gray-400"></i>
+                                </span>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
-                            <span class="text-gray-500">Desenvolvimento Sólido</span>
-                            <button onclick="openExternalSimulated('GitHub')" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
-                                <i data-lucide="github" class="w-3.5 h-3.5"></i> Ver GitHub
-                            </button>
-                        </div>
+                <!-- ABA 3: MERCADOS -->
+                <div id="tab-mercados" class="hidden space-y-4">
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-3" id="marketsTitle">Corretoras Parceiras</h3>
 
-                        <div class="flex items-center justify-between py-2">
-                            <span class="text-gray-500">Identificador API</span>
-                            <span onclick="copyAPIId()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-mono font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1 cursor-pointer">
-                                <span id="infoAPIId">monero</span>
-                                <i data-lucide="copy" class="w-3.5 h-3.5 text-gray-400"></i>
-                            </span>
+                        <div class="overflow-hidden">
+                            <div class="grid grid-cols-12 gap-2 py-2 border-b border-gray-100 dark:border-zinc-850 text-[9px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider items-center">
+                                <div class="col-span-1 text-center">#</div>
+                                <div class="col-span-8">Plataformas Recomendadas</div>
+                                <div class="col-span-3 text-right">Par Ativo</div>
+                            </div>
+
+                            <div id="marketsListContainer" class="divide-y divide-gray-50 dark:divide-zinc-850 text-xs">
+                                <!-- Gerado dinamicamente -->
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Botão "Voltar para o Ranking" -->
+                <button onclick="backToMainView()" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 mt-4">
+                    <i data-lucide="corner-up-left" class="w-4 h-4"></i> Voltar ao Ranking Tecnológico
+                </button>
             </div>
-
-            <!-- ABA 3: MERCADOS -->
-            <div id="tab-mercados" class="hidden space-y-4">
-                <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
-                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-3" id="marketsTitle">Corretoras Parceiras</h3>
-
-                    <div class="overflow-hidden">
-                        <div class="grid grid-cols-12 gap-2 py-2 border-b border-gray-100 dark:border-zinc-850 text-[9px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider items-center">
-                            <div class="col-span-1 text-center">#</div>
-                            <div class="col-span-8">Plataformas Recomendadas</div>
-                            <div class="col-span-3 text-right">Par Ativo</div>
-                        </div>
-
-                        <div id="marketsListContainer" class="divide-y divide-gray-50 dark:divide-zinc-850 text-xs">
-                            <!-- Gerado dinamicamente -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botão "Voltar para o Ranking" -->
-            <button onclick="backToMainView()" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 mt-4">
-                <i data-lucide="corner-up-left" class="w-4 h-4"></i> Voltar ao Ranking Tecnológico
-            </button>
         </main>
     </div>
 
     <!-- FLOATING ACTION BUTTON -->
-    <button onclick="scrollToTop()" class="fixed bottom-24 right-5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 p-3 rounded-xl shadow-lg hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all z-30">
+    <button onclick="scrollToTop()" class="fixed bottom-24 lg:bottom-8 right-5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 p-3 rounded-xl shadow-lg hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all z-30">
         <i data-lucide="arrow-up" class="w-5 h-5"></i>
     </button>
 
-    <!-- BARRA DE NAVEGAÇÃO INFERIOR GLOBAL -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-850 py-2.5 px-4 flex items-center justify-around z-40 shadow-xl max-w-md mx-auto transition-colors">
-        <button onclick="backToMainView()" id="navHomeBtn" class="flex flex-col items-center justify-center gap-1 text-[#FF6600]">
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR GLOBAL (Oculta em telas grandes Desktop) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-850 py-2.5 px-4 flex items-center justify-around z-45 shadow-xl max-w-md mx-auto transition-colors lg:hidden">
+        <button onclick="selectHomeTab()" id="navHomeBtn" class="flex flex-col items-center justify-center gap-1 text-[#FF6600]">
             <i data-lucide="home" class="w-5.5 h-5.5"></i>
             <span class="text-[10px] font-semibold">Página inicial</span>
         </button>
@@ -757,7 +788,7 @@
             }).join('');
         }
 
-        // Renderiza a lista de moedas com imagens vindas do JSON
+        // Renderiza a tabela de moedas adaptada para Desktop (lg) e Mobile
         function renderCoinsTable() {
             const container = document.getElementById('coinTableBody');
             let indexCount = 1;
@@ -781,27 +812,43 @@
                     symbol = "▼";
                 }
 
+                // Volume fictício para o modo desktop estendido
+                const simulatedVolume = (coin.mercado.preco_usd * 12450).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
                 const rowHtml = `
                     <div class="grid grid-cols-12 gap-2 px-4 py-4 items-center hover:bg-gray-100/50 dark:hover:bg-zinc-900/40 transition-colors coin-row cursor-pointer" onclick="navigateToCoin('${key}')">
-                        <div class="col-span-1 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
-                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors mb-1">
+                        <!-- Rank e Favorito -->
+                        <div class="col-span-1 flex flex-col lg:flex-row items-center justify-center gap-1" onclick="event.stopPropagation()">
+                            <button onclick="toggleFavorite(this)" class="text-gray-300 dark:text-gray-650 hover:text-[#FF007A] transition-colors">
                                 <i data-lucide="star" class="w-4 h-4"></i>
                             </button>
-                            <span class="text-xs text-gray-400 dark:text-gray-550 font-semibold">${indexCount}</span>
+                            <span class="text-xs text-gray-400 dark:text-gray-555 font-semibold">${indexCount}</span>
                         </div>
-                        <div class="col-span-6 flex items-center gap-2">
-                            <!-- Logo da Moeda vindo da API externa -->
+                        
+                        <!-- Logo, Nome, Símbolo e Protocolo -->
+                        <div class="col-span-5 lg:col-span-4 flex items-center gap-2">
                             <img src="${coin.logo}" class="w-8 h-8 rounded-full object-contain" alt="${coin.nome} Logo">
                             <div class="flex flex-col">
                                 <span class="font-bold text-sm text-gray-900 dark:text-white leading-tight">${coin.nome}</span>
                                 <span class="text-[10px] text-gray-400 dark:text-gray-550 font-semibold mt-0.5">${coin.simbolo} - ${coinTech}</span>
                             </div>
                         </div>
-                        <div class="col-span-5 text-right flex flex-col justify-center">
+
+                        <!-- Preço USD -->
+                        <div class="col-span-3 text-right">
                             <span class="font-bold text-sm text-gray-900 dark:text-white">US$ ${coin.mercado.preco_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</span>
+                        </div>
+
+                        <!-- Variação 24h -->
+                        <div class="col-span-3 lg:col-span-2 text-right">
                             <span class="text-xs font-semibold ${pctColor} flex items-center justify-end gap-0.5">
                                 ${symbol} ${Math.abs(coin.mercado.variacao_24h_pct)}%
                             </span>
+                        </div>
+
+                        <!-- Volume - Visível Apenas em Desktop (lg) -->
+                        <div class="hidden lg:block lg:col-span-2 text-right">
+                            <span class="text-xs text-gray-500 dark:text-gray-450 font-medium">${simulatedVolume}</span>
                         </div>
                     </div>
                 `;
@@ -870,7 +917,7 @@
             // Renderiza Corretoras na Aba Mercados
             renderMarketsTab(coinData);
 
-            document.getElementById('navHomeBtn').className = "flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors";
+            document.getElementById('navHomeBtn').className = "flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors lg:text-gray-600";
             
             lucide.createIcons();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1223,7 +1270,7 @@
                         <div class="flex items-center gap-2">
                             <img src="${coin.logo}" class="w-6 h-6 rounded-full object-contain" alt="Logo">
                             <div>
-                                <p class="text-xs font-bold text-gray-800 dark:text-white">${coin.name}</p>
+                                <p class="text-xs font-bold text-gray-800 dark:text-white">${coin.nome}</p>
                                 <p class="text-[10px] text-gray-400 uppercase font-semibold">${coin.simbolo} - ${coin.privacidade}</p>
                             </div>
                         </div>
