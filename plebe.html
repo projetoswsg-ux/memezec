@@ -432,11 +432,12 @@
         // ============================================================
         // DADOS MANUAIS - TUDO QUE NÃO É PREÇO/VARIAÇÃO ESTÁ AQUI
         // ============================================================
-        const PRIVACY_COINS_MANUAL_DATA = {
+
+const PRIVACY_COINS_MANUAL_DATA = {
             'monero': {
                 tech: 'CryptoNote',
                 desc: 'Criptomoeda descentralizada focada em privacidade total e transações financeiras indetectáveis por padrão. Monero usa assinaturas em anel, endereços stealth e RingCT para ofuscar remetentes, destinatários e valores.',
-                logo: 'https://assets.coingecko.com/coins/images/69/large/monero_logo.png',
+                logo: 'https://api-pribitcap.vercel.app/Monero%20(1).webp',
                 website: 'https://www.getmonero.org',
                 explorer: 'https://xmrchain.net',
                 explorerName: 'XMRChain',
@@ -457,7 +458,7 @@
             'wownero': {
                 tech: 'CryptoNote',
                 desc: 'Wownero é uma moeda meme de privacidade focada no usuário e sem pré-mineração, baseada no protocolo CryptoNote. Oferece transações privadas com um toque divertido e comunidade acolhedora.',
-                logo: 'https://assets.coingecko.com/coins/images/14115/large/wownero_logo.png',
+                logo: 'https://api-pribitcap.vercel.app/download-convertido-de-svg%20(1).webp',
                 website: 'https://wownero.org',
                 explorer: 'https://explorer.wownero.com',
                 explorerName: 'WowExplorer',
@@ -476,7 +477,7 @@
             'zcash': {
                 tech: 'zk-SNARKs',
                 desc: 'Oferece privacidade financeira avançada através do uso das chaves de segurança zk-SNARKs. Zcash permite transações blindadas que ocultam remetente, destinatário e valor no blockchain.',
-                logo: 'https://assets.coingecko.com/coins/images/486/large/zcash-logo.png',
+                logo: 'https://api-pribitcap.vercel.app/Zcash.webp',
                 website: 'https://z.cash',
                 explorer: 'https://zcashblockexplorer.com',
                 explorerName: 'Zcash Explorer',
@@ -496,7 +497,7 @@
             'pirate-chain': {
                 tech: 'zk-SNARKs',
                 desc: 'Moeda de privacidade 100% privada e blindada por padrão, combinando zk-SNARKs com segurança de dPoW. Todas as transações são privadas obrigatoriamente.',
-                logo: 'https://assets.coingecko.com/coins/images/10929/large/piratechain.png',
+                logo: 'https://api-pribitcap.vercel.app/Piratechain.webp',
                 website: 'https://piratechain.com',
                 explorer: 'https://explorer.piratechain.com',
                 explorerName: 'Pirate Explorer',
@@ -553,7 +554,7 @@
             'grin': {
                 tech: 'MimbleWimble',
                 desc: 'Implementação MimbleWimble leve, totalmente sem barreiras, democrática e gerida pela comunidade. Grin não tem endereços, nem quantidades visíveis, com emissão linear de 1 GRIN por segundo.',
-                logo: 'https://assets.coingecko.com/coins/images/7112/large/grin.png',
+                logo: 'https://api-pribitcap.vercel.app/smirk.webp.png',
                 website: 'https://grin.mw',
                 explorer: 'https://grinexplorer.net',
                 explorerName: 'Grin Explorer',
@@ -647,7 +648,7 @@
             'bytecoin': {
                 tech: 'CryptoNote',
                 desc: 'Uma das primeiras criptomoedas a implementar o protocolo CryptoNote, focada em privacidade e transações não rastreáveis desde 2012.',
-                logo: 'https://assets.coingecko.com/coins/images/462/large/bytecoin.png',
+                logo: 'https://api-pribitcap.vercel.app/Bytecoin%20(1).webp',
                 website: 'https://bytecoin.org',
                 explorer: 'https://explorer.bytecoin.org',
                 explorerName: 'Bytecoin Explorer',
@@ -665,7 +666,7 @@
             'dragonx-2': {
                 tech: 'CryptoNote',
                 desc: 'Criptomoeda focada em privacidade com tecnologia CryptoNote, oferecendo transações seguras e anônimas para sua comunidade.',
-                logo: 'https://api-pribitcap.vercel.app/wow.png',
+                logo: 'https://assets.coingecko.com/coins/images/36254/standard/dragonx.png?1710927431',
                 website: 'https://dragonx.is',
                 explorer: '',
                 explorerName: '',
@@ -683,6 +684,24 @@
                 tech: 'CryptoNote',
                 desc: 'Moeda de privacidade baseada em CryptoNote com mineração exclusivamente via CPU, promovendo descentralização máxima sem possibilidade de mineração por GPU ou ASIC.',
                 logo: 'https://assets.coingecko.com/coins/images/18064/large/nerva.png',
+                website: 'https://nerva.one',
+                explorer: 'https://explorer.nerva.one',
+                explorerName: 'Nerva Explorer',
+                github: 'https://github.com/nerva-project/nerva',
+                reddit: 'https://reddit.com/r/Nerva',
+                twitter: 'https://twitter.com/NervaCurrency',
+                telegram: 'https://t.me/nervaproject',
+                discord: 'https://discord.gg/nerva',
+                maxSupply: '18.500.000 XNV',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'XNV/BTC' },
+                    { name: 'XeggeX', pair: 'XNV/USDT' }
+                ]
+            },
+            'smirk': {
+                tech: 'CryptoNote',
+                desc: 'Moeda de privacidade baseada em CryptoNote com mineração exclusivamente via CPU, promovendo descentralização máxima sem possibilidade de mineração por GPU ou ASIC.',
+                logo: 'https://api-pribitcap.vercel.app/smirk.webp.png',
                 website: 'https://nerva.one',
                 explorer: 'https://explorer.nerva.one',
                 explorerName: 'Nerva Explorer',
@@ -733,7 +752,6 @@
                 ]
             }
         };
-
         const coinIds = Object.keys(PRIVACY_COINS_MANUAL_DATA).join(',');
         
         let globalCoinsData = [];
