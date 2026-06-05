@@ -820,35 +820,42 @@ const PRIVACY_COINS_MANUAL_DATA = {
         }
 
  async function fetchWowneroData() {
-            try {
-                const response = await fetch('https://api.nonlogs.io/api/markets/WOW-BTC');
-                const data = await response.json();
-                
-                if (data && data.market && data.market.last_price) {
-                    const wowInBtc = parseFloat(data.market.last_price);
-                    const btcRate = await getBtcToUsdRate();
-                    const wowInUsd = wowInBtc * btcRate;
-                    const percentChange = parseFloat(data.market.percent_change) || 0;
-                    const volume24hInBtc = parseFloat(data.market.base_volume) || 0;
-                    const volume24hInUsd = volume24hInBtc * btcRate; // Convertendo volume para USD se necessário para consistência
-                    
-                    const maxSupply = 184467440; // WOW total supply fixo do seu manualData
-                    
-                    return {
-                        price: wowInUsd,
-                        percentChange: percentChange,
-                        volume24h: volume24hInUsd,
-                        high24h: parseFloat(data.market.high_24h) * btcRate,
-                        low24h: parseFloat(data.market.low_24h) * btcRate,
-                        marketCap: wowInUsd * maxSupply
-                    };
-                }
-                return null;
-            } catch (error) {
-                console.warn("Erro ao buscar dados do WOW na Nonlogs:", error);
-                return null;
-            }
+    try {
+        // Envelopando a URL no proxy do allorigins para burlar o CORS
+        const proxyUrl = 'https://api.allorigins.win/get?url=';
+        const targetUrl = encodeURIComponent('https://api.nonlogs.io/api/markets/WOW-BTC');
+        
+        const response = await fetch(`${proxyUrl}${targetUrl}`);
+        const proxyData = await response.json();
+        
+        // O AllOrigins retorna a resposta original dentro de uma string em .contents
+        const data = JSON.parse(proxyData.contents);
+        
+        if (data && data.market && data.market.last_price) {
+            const wowInBtc = parseFloat(data.market.last_price);
+            const btcRate = await getBtcToUsdRate();
+            const wowInUsd = wowInBtc * btcRate;
+            const percentChange = parseFloat(data.market.percent_change) || 0;
+            const volume24hInBtc = parseFloat(data.market.base_volume) || 0;
+            const volume24hInUsd = volume24hInBtc * btcRate;
+            
+            const maxSupply = 184467440;
+            
+            return {
+                price: wowInUsd,
+                percentChange: percentChange,
+                volume24h: volume24hInUsd,
+                high24h: parseFloat(data.market.high_24h) * btcRate,
+                low24h: parseFloat(data.market.low_24h) * btcRate,
+                marketCap: wowInUsd * maxSupply
+            };
         }
+        return null;
+    } catch (error) {
+        console.warn("Erro ao buscar dados do WOW na Nonlogs via Proxy:", error);
+        return null;
+    }
+}
 
         async function loadPrivacyData(forceRefresh = false) {
             showSpinner(true);
