@@ -45,6 +45,14 @@
         .table-row-sticky {
             background-color: inherit;
         }
+        /* Estilo para o cabeçalho sticky também */
+        thead .sticky-col,
+        .header-sticky {
+            position: sticky;
+            left: 0;
+            background-color: inherit;
+            z-index: 15;
+        }
     </style>
 </head>
 <body class="bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 lg:pb-12 antialiased selection:bg-orange-500/20">
@@ -157,7 +165,7 @@
                 <div class="min-w-[650px] lg:min-w-full">
                     <!-- Cabeçalho da tabela sem a coluna de classificação -->
                     <div class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-150 dark:border-zinc-800 text-[11px] font-bold text-gray-450 dark:text-gray-500 uppercase tracking-wider items-center">
-                        <div class="col-span-6 lg:col-span-5 sticky-col bg-white dark:bg-zinc-950">Moeda / Tecnologia</div>
+                        <div class="col-span-6 lg:col-span-5 sticky-col bg-white dark:bg-zinc-950" style="background-color: inherit;">Moeda / Tecnologia</div>
                         <div class="col-span-3 text-right">Preço</div>
                         <div class="col-span-3 lg:col-span-2 text-right">Variação 24h</div>
                         <div class="hidden lg:block lg:col-span-2 text-right">Volume (Real)</div>
@@ -817,10 +825,19 @@ const PRIVACY_COINS_MANUAL_DATA = {
             // Cache expira em 5 minutos (300000 ms)
             const fiveMinutes = 300000;
 
-            if (!forceRefresh && cachedData && lastUpdate && (Date.now() - parseInt(lastUpdate) < fiveMinutes)) {
+            // Sempre mostra os dados do cache primeiro se existir (nunca fica em branco)
+            if (cachedData && !globalCoinsData.length) {
                 globalCoinsData = JSON.parse(cachedData);
                 renderMainContent();
-                updateStatusBar(parseInt(lastUpdate), true);
+                updateStatusBar(parseInt(lastUpdate || Date.now()), true);
+            }
+
+            if (!forceRefresh && cachedData && lastUpdate && (Date.now() - parseInt(lastUpdate) < fiveMinutes)) {
+                if (!globalCoinsData.length) {
+                    globalCoinsData = JSON.parse(cachedData);
+                    renderMainContent();
+                    updateStatusBar(parseInt(lastUpdate), true);
+                }
                 showSpinner(false);
                 return;
             }
@@ -861,9 +878,13 @@ const PRIVACY_COINS_MANUAL_DATA = {
                 console.error("Falha ao sincronizar CoinGecko API:", error);
                 document.getElementById('rate-limit-banner').classList.remove('hidden');
                 
-                if (cachedData) {
+                // Se não temos dados em memória mas temos cache, usa o cache
+                if (!globalCoinsData.length && cachedData) {
                     globalCoinsData = JSON.parse(cachedData);
                     renderMainContent();
+                    updateStatusBar(parseInt(lastUpdate || Date.now()), true);
+                } else if (globalCoinsData.length) {
+                    // Já temos dados em memória, apenas mostra o banner de aviso
                     updateStatusBar(parseInt(lastUpdate || Date.now()), true);
                 } else {
                     showErrorUI();
@@ -923,21 +944,23 @@ const PRIVACY_COINS_MANUAL_DATA = {
                 statusLabel.className = "font-semibold text-green-500";
             }
 
-            const totalCap = globalCoinsData.reduce((acc, coin) => acc + (coin.market_cap || 0), 0);
-            document.getElementById('global-cap-label').innerText = `$${totalCap.toLocaleString('en-US')}`;
+            if (globalCoinsData && globalCoinsData.length) {
+                const totalCap = globalCoinsData.reduce((acc, coin) => acc + (coin.market_cap || 0), 0);
+                document.getElementById('global-cap-label').innerText = `$${totalCap.toLocaleString('en-US')}`;
 
-            let avgPct = 0;
-            if (totalCap > 0) {
-                avgPct = globalCoinsData.reduce((acc, coin) => acc + ((coin.price_change_percentage_24h || 0) * (coin.market_cap || 0)), 0) / totalCap;
-            }
-            
-            const pctLabel = document.getElementById('global-cap-pct');
-            if (avgPct >= 0) {
-                pctLabel.innerText = `▲ ${avgPct.toFixed(2)}%`;
-                pctLabel.className = "text-green-600 dark:text-green-400 font-medium";
-            } else {
-                pctLabel.innerText = `▼ ${Math.abs(avgPct).toFixed(2)}%`;
-                pctLabel.className = "text-red-600 dark:text-red-400 font-medium";
+                let avgPct = 0;
+                if (totalCap > 0) {
+                    avgPct = globalCoinsData.reduce((acc, coin) => acc + ((coin.price_change_percentage_24h || 0) * (coin.market_cap || 0)), 0) / totalCap;
+                }
+                
+                const pctLabel = document.getElementById('global-cap-pct');
+                if (avgPct >= 0) {
+                    pctLabel.innerText = `▲ ${avgPct.toFixed(2)}%`;
+                    pctLabel.className = "text-green-600 dark:text-green-400 font-medium";
+                } else {
+                    pctLabel.innerText = `▼ ${Math.abs(avgPct).toFixed(2)}%`;
+                    pctLabel.className = "text-red-600 dark:text-red-400 font-medium";
+                }
             }
         }
 
@@ -948,7 +971,13 @@ const PRIVACY_COINS_MANUAL_DATA = {
 
         function renderTable() {
             const container = document.getElementById('coinTableBody');
+            if (!container) return;
             container.innerHTML = '';
+
+            if (!globalCoinsData || globalCoinsData.length === 0) {
+                container.innerHTML = `<div class="col-span-12 text-center py-8 text-gray-450">Carregando dados...</div>`;
+                return;
+            }
 
             const itemsToRender = filteredTech === 'tudo' 
                 ? globalCoinsData 
@@ -969,7 +998,6 @@ const PRIVACY_COINS_MANUAL_DATA = {
                 row.className = "grid grid-cols-12 gap-2 px-4 py-4 hover:bg-gray-50 dark:hover:bg-zinc-900/50 cursor-pointer items-center transition-colors text-xs lg:text-sm";
                 row.onclick = () => openCoinDetails(coin.id);
                 
-                // Coluna sticky apenas horizontal (left: 0) - rola normalmente verticalmente
                 row.innerHTML = `
                     <div class="col-span-6 lg:col-span-5 flex items-center gap-3 sticky-col" style="background-color: inherit;">
                         <img src="${logoUrl}" class="w-8 h-8 rounded-full object-contain shrink-0 shadow-sm" alt="${coin.name}" onerror="this.src='https://placehold.co/24x24'">
@@ -990,6 +1018,7 @@ const PRIVACY_COINS_MANUAL_DATA = {
         }
 
         function renderHighlights() {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
             const gainers = [...globalCoinsData].sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0)).slice(0, 3);
             const gainersContainer = document.getElementById('gainers-cards-container');
             if (gainersContainer) {
@@ -1337,6 +1366,11 @@ const PRIVACY_COINS_MANUAL_DATA = {
         }
 
         async function shareTopGainers(event) {
+            if (!globalCoinsData || globalCoinsData.length === 0) {
+                openPromoModal('Dados ainda carregando');
+                return;
+            }
+            
             const gainers = [...globalCoinsData]
                 .sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0))
                 .slice(0, 3);
@@ -1552,6 +1586,7 @@ const PRIVACY_COINS_MANUAL_DATA = {
         }
 
         async function openCoinDetails(coinId) {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
             selectedCoinId = coinId;
             const coin = globalCoinsData.find(c => c.id === coinId);
             if (!coin) return;
@@ -1772,6 +1807,7 @@ const PRIVACY_COINS_MANUAL_DATA = {
         }
 
         function calculateConversion(isCryptoBase) {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
             const coin = globalCoinsData.find(c => c.id === selectedCoinId);
             if (!coin) return;
 
@@ -1788,6 +1824,7 @@ const PRIVACY_COINS_MANUAL_DATA = {
         }
 
         function liveSearch() {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const resultsContainer = document.getElementById('searchResults');
             resultsContainer.innerHTML = '';
@@ -1837,7 +1874,7 @@ const PRIVACY_COINS_MANUAL_DATA = {
         }
 
         function formatPrice(val) {
-            if (!val) return '0.00';
+            if (!val && val !== 0) return '0.00';
             if (val < 0.01) return val.toFixed(6);
             if (val < 1) return val.toFixed(4);
             return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1855,15 +1892,17 @@ const PRIVACY_COINS_MANUAL_DATA = {
 
         function showErrorUI() {
             const container = document.getElementById('coinTableBody');
-            container.innerHTML = `
-                <div class="col-span-12 text-center py-12">
-                    <i data-lucide="alert-triangle" class="w-10 h-10 text-red-500 mx-auto mb-2"></i>
-                    <p class="text-sm font-bold">Erro de Sincronização Descentralizada</p>
-                    <p class="text-xs text-gray-450 mt-1 max-w-md mx-auto">Não conseguimos nos conectar à API do CoinGecko. Por favor, certifique-se de que sua conexão de internet está ativa ou tente novamente em alguns instantes.</p>
-                    <button onclick="loadPrivacyData(true)" class="mt-4 px-4 py-2 bg-[#FF6600] text-white text-xs font-semibold rounded-lg shadow">Tentar novamente</button>
-                </div>
-            `;
-            lucide.createIcons();
+            if (container) {
+                container.innerHTML = `
+                    <div class="col-span-12 text-center py-12">
+                        <i data-lucide="alert-triangle" class="w-10 h-10 text-red-500 mx-auto mb-2"></i>
+                        <p class="text-sm font-bold">Erro de Sincronização Descentralizada</p>
+                        <p class="text-xs text-gray-450 mt-1 max-w-md mx-auto">Não conseguimos nos conectar à API do CoinGecko. Por favor, certifique-se de que sua conexão de internet está ativa ou tente novamente em alguns instantes.</p>
+                        <button onclick="loadPrivacyData(true)" class="mt-4 px-4 py-2 bg-[#FF6600] text-white text-xs font-semibold rounded-lg shadow">Tentar novamente</button>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
         }
 
         function scrollToTop() {
@@ -1951,6 +1990,7 @@ const PRIVACY_COINS_MANUAL_DATA = {
         }
 
         function openBuyModalFromDetails() {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
             const coin = globalCoinsData.find(c => c.id === selectedCoinId);
             if (!coin) return;
 
