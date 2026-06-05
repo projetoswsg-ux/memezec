@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrivacyGecko - O Mercado de Capitalização da Privacidade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        monero: '#FF6600',
+                        wownero: '#FF007A'
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background-color: inherit;
+            z-index: 5;
+        }
+        .table-row-sticky {
+            background-color: inherit;
+        }
+        thead .sticky-col,
+        .header-sticky {
+            position: sticky;
+            left: 0;
+            background-color: inherit;
+            z-index: 15;
+        }
+        @media (max-width: 768px) {
+            .table-container {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .coin-table-grid {
+                min-width: 100% !important;
+                width: 100%;
+            }
+            .coin-table-grid > div {
+                gap: 0.5rem !important;
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            .coin-table-row {
+                gap: 0.5rem !important;
+                padding: 0.75rem !important;
+            }
+            .coin-name-mobile {
+                font-size: 0.75rem !important;
+            }
+            .coin-symbol-mobile {
+                font-size: 0.65rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 lg:pb-12 antialiased selection:bg-orange-500/20">
+
+    <div id="loading-spinner" class="fixed inset-0 bg-white/80 dark:bg-zinc-950/80 z-50 flex flex-col items-center justify-center gap-3 transition-opacity duration-300">
+        <div class="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#FF6600] animate-spin"></div>
+        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Consumindo dados do Titan Terminal Engine...</p>
+    </div>
+
+    <div id="main-view" class="block">
+        <header class="bg-white dark:bg-zinc-900 px-4 lg:px-8 py-3.5 flex items-center justify-between border-b border-gray-100 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
+            <div class="flex items-center gap-6 max-w-7xl mx-auto w-full justify-between">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="backToMainView()">
+                    <img src="https://i.postimg.cc/q7qN5pJp/Picsart-26-05-24-17-40-22-677.png" class="w-8 h-8 rounded-lg object-cover shadow-sm" alt="Logo" onerror="this.src='https://placehold.co/32x32?text=P'">
+                    <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">PRIBIT<span class="text-[#FF6600]">CAP</span></span>
+                </div>
+                <div class="hidden lg:flex items-center gap-6 text-sm font-semibold text-gray-600 dark:text-gray-305">
+                    <button onclick="backToMainView()" class="hover:text-[#FF6600] text-[#FF6600] transition-colors flex items-center gap-1">
+                        <i data-lucide="home" class="w-4 h-4"></i>Página inicial
+                    </button>
+                    <button onclick="openPromoModal('Portfólio')" class="hover:text-[#FF007A] transition-colors flex items-center gap-1">
+                        <i data-lucide="star" class="w-4 h-4"></i>Portfólio
+                    </button>
+                    <button onclick="openSearchModal()" class="hover:text-[#FF6600] transition-colors flex items-center gap-1">
+                        <i data-lucide="search" class="w-4 h-4"></i>Pesquisar
+                    </button>
+                    <button onclick="collectCandy()" class="hover:text-[#FF007A] transition-colors flex items-center gap-1 relative">
+                        <i data-lucide="brain" class="w-4 h-4"></i>Lore
+                        <span class="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-[#FF007A] animate-ping"></span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <button onclick="toggleTheme()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 p-2 rounded-xl transition-all text-gray-700 dark:text-gray-300">
+                        <span id="themeIcon"><i data-lucide="moon" class="w-4.5 h-4.5"></i></span>
+                    </button>
+                    <button onclick="forceRefreshData()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 p-2 rounded-xl transition-all text-gray-700 dark:text-gray-300" title="Sincronizar rede">
+                        <i data-lucide="refresh-cw" class="w-4.5 h-4.5" id="syncIcon"></i>
+                    </button>
+                    <button onclick="openPromoModal('DApp')" class="bg-[#FF6600] hover:bg-[#e05900] text-white font-semibold text-xs px-4 py-2 rounded-lg transition-colors shadow-sm">Usar App</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="bg-white dark:bg-zinc-900 border-b border-gray-150 dark:border-zinc-800 transition-colors">
+            <div class="max-w-7xl mx-auto px-4 lg:px-8 py-2 text-xs text-gray-500 dark:text-gray-450 overflow-x-auto hide-scrollbar whitespace-nowrap flex items-center gap-4">
+                <div>Global Privacy Cap: <span class="font-semibold text-gray-800 dark:text-gray-200" id="global-cap-label">Carregando...</span> <span class="text-green-600 dark:text-green-400 font-medium" id="global-cap-pct">▲ 0.0%</span></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
+                <div><span class="font-semibold text-green-500" id="status-cache-label"></span></div> 
+                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
+                <div id="last-update-time"></div>
+            </div>
+        </div>
+
+        <main class="max-w-7xl mx-auto px-4 lg:px-8 pt-6">
+            <div id="rate-limit-banner" class="hidden mb-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-2xl p-4 flex gap-3 items-start">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5"></i>
+                <div class="text-xs text-gray-700 dark:text-gray-300">
+                    <span class="font-bold block text-amber-600 dark:text-amber-400 mb-0.5">Limite de Requisições Atingido:</span>
+                    Exibindo os últimos dados em cache local obtidos diretamente da API CoinGecko. Sincronização em segundo plano ativa.
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white leading-tight">Preços de moedas de privacidade por tecnologia criptográfica</h1>
+                <p class="text-xs lg:text-sm text-gray-550 dark:text-gray-400 mt-1.5 leading-relaxed max-w-3xl">
+                    A capitalização de moedas focadas em anonimato é classificada por suas tecnologias subjacentes como 
+                    <span class="text-orange-500 font-semibold cursor-pointer hover:underline" onclick="filterCoinsByTech('CryptoNote')">CryptoNote</span>, 
+                    <span class="text-pink-500 font-semibold cursor-pointer hover:underline" onclick="filterCoinsByTech('zk-SNARKs')">zk-SNARKs</span>, 
+                    <span class="font-semibold text-teal-600 dark:text-teal-400 cursor-pointer hover:underline" onclick="filterCoinsByTech('MimbleWimble')">MimbleWimble</span> e 
+                    <span class="font-semibold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline" onclick="filterCoinsByTech('Lelantus')">Lelantus</span>. 
+                    <span class="text-gray-400 dark:text-gray-550 underline cursor-pointer" onclick="openPromoModal('Saiba mais')">Leia mais</span>
+                </p>
+            </div>
+
+            <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-zinc-900">
+                <span class="font-bold text-sm text-gray-800 dark:text-gray-200">Destaques rápidos</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggleDestaques" class="sr-only peer" checked onchange="toggleHighlights()">
+                    <div class="w-11 h-6 bg-gray-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-zinc-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF6600]"></div>
+                </label>
+            </div>
+
+            <div id="highlightsContainer" class="grid grid-cols-1 gap-4 mt-4 transition-all duration-300 max-w-md mx-auto md:max-w-none">
+                <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-850 p-4 shadow-sm transition-colors">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-base">🐧</span>
+                            <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Top Gainers</h3>
+                        </div>
+                        <button onclick="shareTopGainers(event)" class="text-[#FF007A] hover:bg-pink-50 dark:hover:bg-pink-950/20 p-1.5 rounded-lg transition-colors" title="Compartilhar principais ganhadores">
+                            <i data-lucide="share-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-3.5" id="gainers-cards-container"></div>
+                </div>
+            </div>
+
+            <div class="mt-8 mb-4 py-1">
+                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-555 block mb-2">Protocolos de Privacidade</span>
+                <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar whitespace-nowrap" id="tech-filters-container">
+                    <button onclick="filterCoinsByTech('tudo')" id="tech-tudo" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-50 text-[#FF6600] border border-orange-100 dark:bg-orange-950/20 dark:border-orange-900/30 flex items-center gap-1.5 transition-all">Tudo</button>
+                    <button onclick="filterCoinsByTech('CryptoNote')" id="tech-CryptoNote" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">CryptoNote</button>
+                    <button onclick="filterCoinsByTech('zk-SNARKs')" id="tech-zk-SNARKs" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">zk-SNARKs</button>
+                    <button onclick="filterCoinsByTech('MimbleWimble')" id="tech-MimbleWimble" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">MimbleWimble</button>
+                    <button onclick="filterCoinsByTech('Lelantus')" id="tech-Lelantus" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all">Lelantus</button>
+                </div>
+            </div>
+
+            <div class="w-full bg-transparent transition-colors mt-2 overflow-x-auto hide-scrollbar table-container">
+                <div class="min-w-[650px] lg:min-w-full coin-table-grid">
+                    <div class="grid grid-cols-12 gap-1 px-3 py-3 border-b border-gray-150 dark:border-zinc-800 text-[11px] font-bold text-gray-450 dark:text-gray-500 uppercase tracking-wider items-center">
+                        <div class="col-span-6 lg:col-span-5 sticky-col bg-white dark:bg-zinc-950" style="background-color: inherit;">Moeda</div>
+                        <div class="col-span-3 text-right">Preço</div>
+                        <div class="col-span-3 lg:col-span-2 text-right">Variação</div>
+                        <div class="hidden lg:block lg:col-span-2 text-right">Volume</div>
+                    </div>
+                    <div id="coinTableBody" class="divide-y divide-gray-150 dark:divide-zinc-800/80"></div>
+                </div>
+            </div>
+
+            <div class="mt-8 mb-4 text-center text-[11px] text-gray-400 dark:text-gray-550 px-4 leading-relaxed">
+                <p>Os preços de mercado apresentados são fornecidos de forma automatizada e sincronizados com bases descentralizadas através do CoinGecko e Nonlogs.io.</p>
+                <p class="mt-1">© 2026 PrivacyGecko. Feito com amor por desenvolvedores Cypherpunks.</p>
+            </div>
+        </main>
+    </div>
+
+    <div id="details-view" class="hidden">
+        <header class="bg-white dark:bg-zinc-900 px-4 lg:px-8 py-3.5 flex items-center justify-between border-b border-gray-150 dark:border-zinc-850 sticky top-0 z-40 transition-colors">
+            <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button onclick="backToMainView()" class="text-gray-700 dark:text-gray-350 p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <img id="detailCoinLogo" class="w-7 h-7 rounded-full object-contain" src="">
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="detailCoinTicker" class="font-bold text-base text-gray-900 dark:text-white uppercase"></span>
+                            <span id="detailCoinPrice" class="font-bold text-sm text-gray-900 dark:text-white"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="detailCoinHeaderPct" class="text-xs font-bold px-2 py-1 rounded-lg"></span>
+                    <button onclick="openBuyModalFromDetails()" class="bg-[#FF6600] hover:bg-[#e05900] text-white font-bold text-xs px-3.5 py-1.5 rounded-lg transition-colors shadow-sm">Comprar</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-850 sticky top-12 z-30 transition-colors">
+            <div class="max-w-7xl mx-auto flex items-center justify-around text-xs font-bold text-gray-450 dark:text-gray-400">
+                <button onclick="switchDetailsTab('tab-visao-geral')" id="btn-tab-visao-geral" class="w-1/3 text-center py-3 border-b-2 border-[#FF6600] text-gray-900 dark:text-white transition-all">Visão geral</button>
+                <button onclick="switchDetailsTab('tab-informacoes')" id="btn-tab-informacoes" class="w-1/3 text-center py-3 border-b-2 border-transparent transition-all">Informações</button>
+                <button onclick="switchDetailsTab('tab-mercados')" id="btn-tab-mercados" class="w-1/3 text-center py-3 border-b-2 border-transparent transition-all">Mercados</button>
+            </div>
+        </div>
+
+        <main class="max-w-7xl mx-auto px-4 lg:px-8 pt-6">
+            <div class="max-w-3xl mx-auto">
+                <div id="tab-visao-geral" class="block space-y-6">
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Histórico de Preço (7 Dias)</h3>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500">Acompanhamento e estatísticas reais CoinGecko</p>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                                <span class="w-2 h-2 rounded-full bg-orange-500 inline-block animate-pulse"></span>
+                                Live Chart
+                            </div>
+                        </div>
+                        <div class="relative w-full h-64">
+                            <canvas id="coinDetailsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-2">Sobre o Ativo</h3>
+                        <p id="detailCoinDescription" class="text-xs text-gray-650 dark:text-gray-400 leading-relaxed"></p>
+                    </div>
+
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-3">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="converterTitle">Conversor</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between border border-gray-150 dark:border-zinc-800 rounded-xl p-3 bg-gray-50 dark:bg-zinc-950">
+                                <input type="number" id="convertCryptoInput" oninput="calculateConversion(true)" class="bg-transparent outline-none w-2/3 text-base font-semibold text-gray-950 dark:text-white" value="1">
+                                <span id="convertCryptoLabel" class="font-bold text-xs text-gray-400 dark:text-gray-555 uppercase"></span>
+                            </div>
+                            <div class="flex items-center justify-between border border-gray-150 dark:border-zinc-800 rounded-xl p-3 bg-gray-50 dark:bg-zinc-950">
+                                <input type="number" id="convertFiatInput" oninput="calculateConversion(false)" class="bg-transparent outline-none w-2/3 text-base font-semibold text-gray-950 dark:text-white">
+                                <span class="font-bold text-xs text-gray-400 dark:text-gray-555 flex items-center gap-1">USD <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200" id="statsTitle">Estatísticas</h3>
+                        <div class="space-y-3 text-xs">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Protocolo Base <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statTechType"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">ID do Ativo <i data-lucide="hash" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statAssetId"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Capitalização de mercado <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statMarketCap"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Volume de negociação de 24h <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statVolume"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Fornecimento circulante <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statCirculating"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Fornecimento máximo <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-gray-900 dark:text-white" id="statMaxSupply"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500 flex items-center gap-1">Status de Rede <i data-lucide="activity" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-green-600 dark:text-green-400">Ativa e Segura</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-gray-500 flex items-center gap-1">Rich List de Endereços <i data-lucide="info" class="w-3.5 h-3.5 text-gray-300"></i></span>
+                                <span class="font-bold text-[#FF6600] flex items-center gap-1">🔒 Oculta Criptograficamente</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-informacoes" class="hidden space-y-4">
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm space-y-4">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200">Links Úteis</h3>
+                        <div class="space-y-4 text-xs">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500">Website</span>
+                                <div class="flex gap-1.5">
+                                    <a id="infoWebsiteBtn" target="_blank" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-[#FF6600] flex items-center gap-1">Acessar Web</a>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500">Explorador Anonimizado</span>
+                                <a id="infoExplorerBtn" target="_blank" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                                    <span id="infoExplorer">Explorador</span>
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                </a>
+                            </div>
+                            <div class="py-2 border-b border-gray-50 dark:border-zinc-850 space-y-2">
+                                <span class="text-gray-500 block mb-1">Canais de Comunidade</span>
+                                <div class="flex flex-wrap gap-2" id="infoCommunityContainer"></div>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-zinc-850">
+                                <span class="text-gray-500">Desenvolvimento Sólido</span>
+                                <a id="infoGitBtn" target="_blank" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
+                                    <i data-lucide="github" class="w-3.5 h-3.5"></i> Ver GitHub
+                                </a>
+                            </div>
+                            <div class="flex items-center justify-between py-2">
+                                <span class="text-gray-500">Identificador API</span>
+                                <span onclick="copyAPIId()" class="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-mono font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1 cursor-pointer">
+                                    <span id="infoAPIId"></span>
+                                    <i data-lucide="copy" class="w-3.5 h-3.5 text-gray-400"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-mercados" class="hidden space-y-4">
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-850 rounded-2xl p-4 shadow-sm">
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-3" id="marketsTitle">Corretoras Parceiras</h3>
+                        <div class="overflow-hidden">
+                            <div class="grid grid-cols-12 gap-2 py-2 border-b border-gray-100 dark:border-zinc-850 text-[9px] font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider items-center">
+                                <div class="col-span-1 text-center">#</div>
+                                <div class="col-span-8">Plataformas Recomendadas</div>
+                                <div class="col-span-3 text-right">Par Ativo</div>
+                            </div>
+                            <div id="marketsListContainer" class="divide-y divide-gray-50 dark:divide-zinc-850 text-xs"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="backToMainView()" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 mt-4">
+                    <i data-lucide="corner-up-left" class="w-4 h-4"></i> Voltar ao Ranking Tecnológico
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <button onclick="scrollToTop()" class="fixed bottom-24 lg:bottom-8 right-5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 p-3 rounded-xl shadow-lg hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all z-30">
+        <i data-lucide="arrow-up" class="w-5 h-5"></i>
+    </button>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-850 py-2.5 px-4 flex items-center justify-around z-45 shadow-xl max-w-md mx-auto transition-colors lg:hidden">
+        <button onclick="backToMainView()" id="navHomeBtn" class="flex flex-col items-center justify-center gap-1 text-[#FF6600]">
+            <i data-lucide="home" class="w-5.5 h-5.5"></i><span class="text-[10px] font-semibold">Página inicial</span>
+        </button>
+        <button onclick="openPromoModal('Portfólio')" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF007A] transition-colors">
+            <i data-lucide="star" class="w-5.5 h-5.5"></i><span class="text-[10px] font-medium">Portfólio</span>
+        </button>
+        <button onclick="openSearchModal()" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors">
+            <i data-lucide="search" class="w-5.5 h-5.5"></i><span class="text-[10px] font-medium">Pesquisar</span>
+        </button>
+        <button onclick="collectCandy()" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF007A] transition-colors relative">
+            <i data-lucide="candy" class="w-5.5 h-5.5"></i><span class="text-[10px] font-medium">Candy</span>
+            <span class="absolute top-0 right-1 w-2 h-2 rounded-full bg-[#FF007A] animate-ping"></span>
+        </button>
+        <button onclick="openPromoModal('Menu Geral')" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors">
+            <i data-lucide="menu" class="w-5.5 h-5.5"></i><span class="text-[10px] font-medium">Menu</span>
+        </button>
+    </nav>
+
+    <div id="buyModal" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-zinc-900 rounded-t-3xl w-full max-w-md p-6 space-y-4 shadow-2xl transform translate-y-full transition-transform duration-300" id="buyModalContent">
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <img id="modalCoinBadge" class="w-8 h-8 rounded-full object-contain" src="">
+                    <h3 class="font-bold text-lg text-gray-900 dark:text-white" id="modalCoinTitle">Comprar Moeda</h3>
+                </div>
+                <button onclick="closeBuyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-350 leading-relaxed">Você está prestes a transacionar de forma soberana. Para manter o anonimato máximo da sua carteira, recomendamos a utilização de corretoras descentralizadas (DEX) ou redes de liquidez privadas que não guardem registos de IP ou KYC.</p>
+            <div class="bg-orange-50/50 dark:bg-orange-950/10 rounded-xl p-3 border border-orange-100/50 dark:border-orange-900/20 flex gap-3 items-start">
+                <i data-lucide="shield-check" class="w-5 h-5 text-[#FF6600] shrink-0 mt-0.5"></i>
+                <div class="text-xs text-gray-700 dark:text-gray-300"><span class="font-bold block text-[#FF6600] mb-0.5">Dica de Privacidade:</span>Nunca compre ativos de privacidade utilizando cartões de crédito diretamente em exchanges centralizadas tradicionais se o seu objetivo for anonimato real.</div>
+            </div>
+            <button onclick="simulatedBuyAction()" class="w-full bg-[#FF6600] hover:bg-[#e05900] text-white py-3.5 rounded-xl font-bold transition-all text-sm shadow-md">Conectar Carteira Non-Custodial</button>
+        </div>
+    </div>
+
+    <div id="candyModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl transform scale-90 transition-transform duration-300" id="candyModalContent">
+            <div class="w-16 h-16 bg-pink-100 dark:bg-pink-950/35 text-[#FF007A] rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner animate-bounce">🍬</div>
+            <h3 class="font-bold text-xl text-gray-900 dark:text-white">Candy Diário Resgatado!</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Parabéns! Você acabou de coletar <span class="font-bold text-[#FF007A]">50 Wownero Candies</span>. Acumule candies para trocar por NFTs de privacidade e avatares personalizados.</p>
+            <div class="bg-pink-50 dark:bg-pink-950/20 rounded-xl py-2 px-4 text-xs font-semibold text-[#FF007A] inline-block">Saldo Total: 350 Candies</div>
+            <button onclick="closeCandyModal()" class="w-full bg-[#FF007A] hover:bg-[#e0006c] text-white py-2.5 rounded-xl font-bold transition-all text-sm">Maravilha!</button>
+        </div>
+    </div>
+
+    <div id="searchModal" class="fixed inset-0 bg-black/60 z-50 flex items-start justify-center hidden p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl mt-12 transform -translate-y-4 transition-transform duration-300" id="searchModalContent">
+            <div class="flex items-center gap-2 border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-2 bg-gray-50 dark:bg-zinc-950">
+                <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                <input type="text" id="searchInput" oninput="liveSearch()" placeholder="Pesquise por Monero, WOW, GRIN, FIRO, ZEN..." class="bg-transparent outline-none w-full text-sm text-gray-800 dark:text-gray-200">
+                <button onclick="closeSearchModal()" class="text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">Fechar</button>
+            </div>
+            <div class="max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-zinc-850" id="searchResults">
+                <p class="text-xs text-gray-400 py-2 text-center">Comece a digitar para ver os resultados...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="promoModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl" id="promoModalContent">
+            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-950/20 text-[#FF6600] rounded-full flex items-center justify-center mx-auto text-xl">🔒</div>
+            <h3 class="font-bold text-lg text-gray-900 dark:text-white" id="promoModalTitle">Módulo Protegido</h3>
+            <p class="text-xs text-gray-550 dark:text-gray-455 leading-relaxed" id="promoModalText">Este módulo de navegação está encriptado e disponível apenas na versão do aplicativo descentralizado. Descarregue a aplicação para obter estatísticas nativas sem cookies.</p>
+            <button onclick="closePromoModal()" class="w-full bg-[#FF6600] hover:bg-[#e05900] text-white py-2.5 rounded-xl font-bold text-sm">Entendido</button>
+        </div>
+    </div>
+
+    <div id="shareGainersModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl transform scale-95 transition-transform duration-300" id="shareGainersModalContent">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                    <span>🐧</span> Top Gainers
+                </h3>
+                <button onclick="closeShareGainersModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="shareGainersList" class="space-y-2.5 max-h-60 overflow-y-auto"></div>
+            <div id="shareImagePreview" class="hidden rounded-xl overflow-hidden border border-gray-100 dark:border-zinc-800 shadow-sm">
+                <canvas id="shareImageCanvas" class="w-full h-auto"></canvas>
+            </div>
+            <div class="flex gap-2 pt-2 border-t border-gray-100 dark:border-zinc-800">
+                <button onclick="copyGainersToClipboard()" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Texto
+                </button>
+                <button onclick="shareGainersAsImage()" class="flex-1 bg-[#FF007A] hover:bg-[#e0006c] text-white py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5" id="btnShareImage">
+                    <i data-lucide="image" class="w-3.5 h-3.5"></i> Compartilhar Imagem
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // DADOS MANUAIS - TUDO QUE NÃO É PREÇO/VARIAÇÃO ESTÁ AQUI
+        // ============================================================
+
+const PRIVACY_COINS_MANUAL_DATA = {
+            'monero': {
+                tech: 'CryptoNote',
+                desc: 'Criptomoeda descentralizada focada em privacidade total e transações financeiras indetectáveis por padrão. Monero usa assinaturas em anel, endereços stealth e RingCT para ofuscar remetentes, destinatários e valores.',
+                logo: 'https://api-pribitcap.vercel.app/Monero%20(1).webp',
+                website: 'https://www.getmonero.org',
+                explorer: 'https://xmrchain.net',
+                explorerName: 'XMRChain',
+                github: 'https://github.com/monero-project/monero',
+                reddit: 'https://reddit.com/r/monero',
+                twitter: 'https://twitter.com/monero',
+                telegram: 'https://t.me/monero',
+                discord: 'https://discord.gg/monero',
+                maxSupply: 'Ilimitado (Emissão de cauda: 0.6 XMR/bloco após 18.4M)',
+                corretoras: [
+                    { name: 'Kraken', pair: 'XMR/USD' },
+                    { name: 'Binance', pair: 'XMR/USDT' },
+                    { name: 'KuCoin', pair: 'XMR/USDT' },
+                    { name: 'TradeOgre', pair: 'XMR/BTC' },
+                    { name: 'LocalMonero', pair: 'XMR/P2P' }
+                ]
+            },
+            'wownero': {
+                tech: 'CryptoNote',
+                desc: 'Wownero é uma moeda meme de privacidade focada no usuário e sem pré-mineração, baseada no protocolo CryptoNote. Oferece transações privadas com um toque divertido e comunidade acolhedora.',
+                logo: 'https://api-pribitcap.vercel.app/download-convertido-de-svg%20(1).webp',
+                website: 'https://wownero.org',
+                explorer: 'https://explorer.wownero.com',
+                explorerName: 'WowExplorer',
+                github: 'https://github.com/wownero/wownero',
+                reddit: 'https://reddit.com/r/wownero',
+                twitter: 'https://twitter.com/wownero',
+                telegram: 'https://t.me/wownero',
+                discord: 'https://discord.gg/wownero',
+                maxSupply: '184.467.440 WOW (com emissão de cauda)',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'WOW/BTC' },
+                    { name: 'SevenSeas', pair: 'WOW/USDT' },
+                    { name: 'XeggeX', pair: 'WOW/USDT' }
+                ]
+            },
+            'zcash': {
+                tech: 'zk-SNARKs',
+                desc: 'Oferece privacidade financeira avançada através do uso das chaves de segurança zk-SNARKs. Zcash permite transações blindadas que ocultam remetente, destinatário e valor no blockchain.',
+                logo: 'https://api-pribitcap.vercel.app/Zcash.webp',
+                website: 'https://z.cash',
+                explorer: 'https://zcashblockexplorer.com',
+                explorerName: 'Zcash Explorer',
+                github: 'https://github.com/zcash/zcash',
+                reddit: 'https://reddit.com/r/zcash',
+                twitter: 'https://twitter.com/zcash',
+                telegram: 'https://t.me/zcash',
+                discord: 'https://discord.gg/zcash',
+                maxSupply: '21.000.000 ZEC',
+                corretoras: [
+                    { name: 'Coinbase', pair: 'ZEC/USD' },
+                    { name: 'Binance', pair: 'ZEC/USDT' },
+                    { name: 'Kraken', pair: 'ZEC/USD' },
+                    { name: 'Gemini', pair: 'ZEC/USD' }
+                ]
+            },
+            'pirate-chain': {
+                tech: 'zk-SNARKs',
+                desc: 'Moeda de privacidade 100% privada e blindada por padrão, combinando zk-SNARKs com segurança de dPoW. Todas as transações são privadas obrigatoriamente.',
+                logo: 'https://api-pribitcap.vercel.app/Piratechain.webp',
+                website: 'https://piratechain.com',
+                explorer: 'https://explorer.piratechain.com',
+                explorerName: 'Pirate Explorer',
+                github: 'https://github.com/PirateNetwork/PirateChain',
+                reddit: 'https://reddit.com/r/piratechain',
+                twitter: 'https://twitter.com/PirateChain',
+                telegram: 'https://t.me/piratechain',
+                discord: 'https://discord.gg/piratechain',
+                maxSupply: '200.000.000 ARRR',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'ARRR/BTC' },
+                    { name: 'CoinEx', pair: 'ARRR/USDT' },
+                    { name: 'SafeTrade', pair: 'ARRR/BTC' }
+                ]
+            },
+            'firo': {
+                tech: 'Lelantus',
+                desc: 'Firo (anteriormente Zcoin) implementa o protocolo Lelantus para queimar e resgatar moedas, quebrando o vínculo entre remetente e destinatário sem requerer configurações confiáveis.',
+                logo: 'https://assets.coingecko.com/coins/images/628/large/firo.png',
+                website: 'https://firo.org',
+                explorer: 'https://explorer.firo.org',
+                explorerName: 'Firo Explorer',
+                github: 'https://github.com/firoorg/firo',
+                reddit: 'https://reddit.com/r/firoproject',
+                twitter: 'https://twitter.com/firoorg',
+                telegram: 'https://t.me/firoorg',
+                discord: 'https://discord.gg/firo',
+                maxSupply: '21.400.000 FIRO',
+                corretoras: [
+                    { name: 'Binance', pair: 'FIRO/USDT' },
+                    { name: 'MEXC', pair: 'FIRO/USDT' },
+                    { name: 'Gate.io', pair: 'FIRO/USDT' }
+                ]
+            },
+            'beam': {
+                tech: 'MimbleWimble',
+                desc: 'Moeda baseada em MimbleWimble elegante, focada na alta escalabilidade e privacidade transacional nativa. Beam suporta transações confidenciais e ativos confidenciais.',
+                logo: 'https://assets.coingecko.com/coins/images/6139/large/beam.png',
+                website: 'https://beam.mw',
+                explorer: 'https://explorer.beam.mw',
+                explorerName: 'Beam Explorer',
+                github: 'https://github.com/BeamMW/beam',
+                reddit: 'https://reddit.com/r/beamprivacy',
+                twitter: 'https://twitter.com/beamprivacy',
+                telegram: 'https://t.me/BeamPrivacy',
+                discord: 'https://discord.gg/beamprivacy',
+                maxSupply: '262.800.000 BEAM',
+                corretoras: [
+                    { name: 'Binance', pair: 'BEAM/USDT' },
+                    { name: 'Gate.io', pair: 'BEAM/USDT' },
+                    { name: 'MEXC', pair: 'BEAM/USDT' }
+                ]
+            },
+            'grin': {
+                tech: 'MimbleWimble',
+                desc: 'Implementação MimbleWimble leve, totalmente sem barreiras, democrática e gerida pela comunidade. Grin não tem endereços, nem quantidades visíveis, com emissão linear de 1 GRIN por segundo.',
+                logo: 'https://api-pribitcap.vercel.app/smirk.webp.png',
+                website: 'https://grin.mw',
+                explorer: 'https://grinexplorer.net',
+                explorerName: 'Grin Explorer',
+                github: 'https://github.com/mimblewimble/grin',
+                reddit: 'https://reddit.com/r/grincoin',
+                twitter: 'https://twitter.com/grin_privacy',
+                telegram: 'https://t.me/grincoin',
+                discord: 'https://discord.gg/grin',
+                maxSupply: 'Ilimitado (Emissão linear: 1 GRIN/segundo)',
+                corretoras: [
+                    { name: 'Gate.io', pair: 'GRIN/USDT' },
+                    { name: 'MEXC', pair: 'GRIN/USDT' },
+                    { name: 'TradeOgre', pair: 'GRIN/BTC' }
+                ]
+            },
+            'horizen': {
+                tech: 'zk-SNARKs',
+                desc: 'Ecossistema que suporta sidechains e soluções descentralizadas de privacidade via zk-SNARKs. Horizen oferece a maior rede de nós do setor com privacidade opcional.',
+                logo: 'https://assets.coingecko.com/coins/images/898/large/horizen.png',
+                website: 'https://www.horizen.io',
+                explorer: 'https://explorer.horizen.io',
+                explorerName: 'Horizen Explorer',
+                github: 'https://github.com/HorizenOfficial/zen',
+                reddit: 'https://reddit.com/r/Horizen',
+                twitter: 'https://twitter.com/horizenglobal',
+                telegram: 'https://t.me/horizen',
+                discord: 'https://discord.gg/horizen',
+                maxSupply: '21.000.000 ZEN',
+                corretoras: [
+                    { name: 'Binance', pair: 'ZEN/USDT' },
+                    { name: 'Coinbase', pair: 'ZEN/USD' },
+                    { name: 'Kraken', pair: 'ZEN/USD' },
+                    { name: 'Bittrex', pair: 'ZEN/USDT' }
+                ]
+            },
+            'dero': {
+                tech: 'CryptoNote',
+                desc: 'Plataforma descentralizada de aplicações com privacidade total, combinando CryptoNote com contratos inteligentes privados. DERO oferece anonimato completo em todas as camadas.',
+                logo: 'https://assets.coingecko.com/coins/images/11879/large/dero.png',
+                website: 'https://dero.io',
+                explorer: 'https://explorer.dero.io',
+                explorerName: 'DERO Explorer',
+                github: 'https://github.com/deroproject/derosuite',
+                reddit: 'https://reddit.com/r/DeroProject',
+                twitter: 'https://twitter.com/DeroProject',
+                telegram: 'https://t.me/DeroProject',
+                discord: 'https://discord.gg/dero',
+                maxSupply: '18.400.000 DERO',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'DERO/BTC' },
+                    { name: 'Kucoin', pair: 'DERO/USDT' }
+                ]
+            },
+            'zano': {
+                tech: 'CryptoNote',
+                desc: 'Ecossistema blockchain escalável com privacidade, suportando ativos digitais e contratos inteligentes privados baseados em CryptoNote.',
+                logo: 'https://assets.coingecko.com/coins/images/13781/large/zano.png',
+                website: 'https://zano.org',
+                explorer: 'https://explorer.zano.org',
+                explorerName: 'Zano Explorer',
+                github: 'https://github.com/hyle-team/zano',
+                reddit: 'https://reddit.com/r/Zano',
+                twitter: 'https://twitter.com/ZanoProject',
+                telegram: 'https://t.me/zano_project',
+                discord: 'https://discord.gg/zano',
+                maxSupply: 'Ilimitado',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'ZANO/BTC' },
+                    { name: 'XeggeX', pair: 'ZANO/USDT' }
+                ]
+            },
+            'beldex': {
+                tech: 'CryptoNote',
+                desc: 'Ecossistema de privacidade completo com exchange descentralizada, mensageiro privado e VPN integrados, baseado em tecnologia CryptoNote.',
+                logo: 'https://assets.coingecko.com/coins/images/13559/large/beldex.png',
+                website: 'https://beldex.io',
+                explorer: 'https://explorer.beldex.io',
+                explorerName: 'Beldex Explorer',
+                github: 'https://github.com/beldex-coin/beldex',
+                reddit: 'https://reddit.com/r/BeldexCoin',
+                twitter: 'https://twitter.com/BeldexCoin',
+                telegram: 'https://t.me/beldexcoin',
+                discord: 'https://discord.gg/beldex',
+                maxSupply: '9.900.000 BDX',
+                corretoras: [
+                    { name: 'KuCoin', pair: 'BDX/USDT' },
+                    { name: 'MEXC', pair: 'BDX/USDT' },
+                    { name: 'Gate.io', pair: 'BDX/USDT' }
+                ]
+            },
+            'bytecoin': {
+                tech: 'CryptoNote',
+                desc: 'Uma das primeiras criptomoedas a implementar o protocolo CryptoNote, focada em privacidade e transações não rastreáveis desde 2012.',
+                logo: 'https://api-pribitcap.vercel.app/Bytecoin%20(1).webp',
+                website: 'https://bytecoin.org',
+                explorer: 'https://explorer.bytecoin.org',
+                explorerName: 'Bytecoin Explorer',
+                github: 'https://github.com/bcndev/bytecoin',
+                reddit: 'https://reddit.com/r/BytecoinBCN',
+                twitter: 'https://twitter.com/Bytecoin_BCN',
+                telegram: 'https://t.me/bytecoinchat',
+                discord: '',
+                maxSupply: '184.470.000.000 BCN',
+                corretoras: [
+                    { name: 'HitBTC', pair: 'BCN/BTC' },
+                    { name: 'Poloniex', pair: 'BCN/BTC' }
+                ]
+            },
+            'dragonx-2': {
+                tech: 'CryptoNote',
+                desc: 'Criptomoeda focada em privacidade com tecnologia CryptoNote, oferecendo transações seguras e anônimas para sua comunidade.',
+                logo: 'https://assets.coingecko.com/coins/images/36254/standard/dragonx.png?1710927431',
+                website: 'https://dragonx.is',
+                explorer: '',
+                explorerName: '',
+                github: 'https://github.com/dragonx-project',
+                reddit: '',
+                twitter: 'https://twitter.com/dragonx',
+                telegram: '',
+                discord: '',
+                maxSupply: 'Desconhecido',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'DRAGONX/BTC' }
+                ]
+            },
+            'nerva': {
+                tech: 'CryptoNote',
+                desc: 'Moeda de privacidade baseada em CryptoNote com mineração exclusivamente via CPU, promovendo descentralização máxima sem possibilidade de mineração por GPU ou ASIC.',
+                logo: 'https://assets.coingecko.com/coins/images/18064/large/nerva.png',
+                website: 'https://nerva.one',
+                explorer: 'https://explorer.nerva.one',
+                explorerName: 'Nerva Explorer',
+                github: 'https://github.com/nerva-project/nerva',
+                reddit: 'https://reddit.com/r/Nerva',
+                twitter: 'https://twitter.com/NervaCurrency',
+                telegram: 'https://t.me/nervaproject',
+                discord: 'https://discord.gg/nerva',
+                maxSupply: '18.500.000 XNV',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'XNV/BTC' },
+                    { name: 'XeggeX', pair: 'XNV/USDT' }
+                ]
+            },
+            'smirk': {
+                tech: 'CryptoNote',
+                desc: 'Moeda de privacidade baseada em CryptoNote com mineração exclusivamente via CPU, promovendo descentralização máxima sem possibilidade de mineração por GPU ou ASIC.',
+                logo: 'https://api-pribitcap.vercel.app/smirk.webp.png',
+                website: 'https://nerva.one',
+                explorer: 'https://explorer.nerva.one',
+                explorerName: 'Nerva Explorer',
+                github: 'https://github.com/nerva-project/nerva',
+                reddit: 'https://reddit.com/r/Nerva',
+                twitter: 'https://twitter.com/NervaCurrency',
+                telegram: 'https://t.me/nervaproject',
+                discord: 'https://discord.gg/nerva',
+                maxSupply: '18.500.000 XNV',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'XNV/BTC' },
+                    { name: 'XeggeX', pair: 'XNV/USDT' }
+                ]
+            },
+            'minotari': {
+                tech: 'MimbleWimble',
+                desc: 'Criptomoeda descentralizada focada em privacidade total usando o protocolo MimbleWimble com melhorias significativas em escalabilidade e usabilidade.',
+                logo: 'https://assets.coingecko.com/coins/images/placeholder.png',
+                website: 'https://minotari.com',
+                explorer: 'https://explorer.minotari.com',
+                explorerName: 'Minotari Explorer',
+                github: 'https://github.com/minotari-project',
+                reddit: '',
+                twitter: 'https://twitter.com/minotari',
+                telegram: '',
+                discord: '',
+                maxSupply: 'Desconhecido',
+                corretoras: [
+                    { name: 'TradeOgre', pair: 'MINOTARI/BTC' }
+                ]
+            },
+            'zcoin': {
+                tech: 'Lelantus',
+                desc: 'Criptomoeda descentralizada focada em privacidade total e transações financeiras indetectáveis por padrão. Utiliza tecnologia Lelantus para quebrar vínculos entre transações.',
+                logo: 'https://assets.coingecko.com/coins/images/628/large/firo.png',
+                website: 'https://firo.org',
+                explorer: 'https://explorer.firo.org',
+                explorerName: 'Firo Explorer (Zcoin)',
+                github: 'https://github.com/firoorg/firo',
+                reddit: 'https://reddit.com/r/firoproject',
+                twitter: 'https://twitter.com/firoorg',
+                telegram: 'https://t.me/firoorg',
+                discord: 'https://discord.gg/firo',
+                maxSupply: '21.400.000 FIRO',
+                corretoras: [
+                    { name: 'Binance', pair: 'FIRO/USDT' },
+                    { name: 'MEXC', pair: 'FIRO/USDT' }
+                ]
+            }
+        };
+        
+        let globalCoinsData = [];
+        let filteredTech = 'tudo';
+        let currentChartInstance = null;
+        let selectedCoinId = null;
+        let btcToUsdRate = null;
+        const coinImageCache = {};
+
+        window.onload = function() {
+            lucide.createIcons();
+            applySavedTheme();
+            loadPrivacyData();
+            setInterval(checkAutoUpdateCycle, 300000);
+        };
+
+        async function getBtcToUsdRate() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                const data = await response.json();
+                return data.bitcoin.usd;
+            } catch (error) {
+                console.warn("Erro ao obter cotação BTC/USD:", error);
+                return 65000;
+            }
+        }
+
+        async function fetchWowneroData() {
+            try {
+                const response = await fetch('https://api.nonlogs.io/api/markets/WOW-BTC');
+                const data = await response.json();
+                
+                if (data && data.market && data.market.last_price) {
+                    const wowInBtc = parseFloat(data.market.last_price);
+                    const btcRate = await getBtcToUsdRate();
+                    const wowInUsd = wowInBtc * btcRate;
+                    const percentChange = data.market.percent_change || 0;
+                    const volume24h = parseFloat(data.market.base_volume) || 0;
+                    
+                    return {
+                        price: wowInUsd,
+                        percentChange: percentChange,
+                        volume24h: volume24h,
+                        high24h: parseFloat(data.market.high_24h) * btcRate,
+                        low24h: parseFloat(data.market.low_24h) * btcRate
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.warn("Erro ao buscar dados do WOW na Nonlogs:", error);
+                return null;
+            }
+        }
+
+        async function loadPrivacyData(forceRefresh = false) {
+            showSpinner(true);
+            
+            const lastUpdate = localStorage.getItem('pribitcap_last_update');
+            const cachedData = localStorage.getItem('pribitcap_coins_data');
+            const fiveMinutes = 300000;
+
+            if (cachedData && !globalCoinsData.length) {
+                globalCoinsData = JSON.parse(cachedData);
+                renderMainContent();
+                updateStatusBar(parseInt(lastUpdate || Date.now()), true);
+            }
+
+            if (!forceRefresh && cachedData && lastUpdate && (Date.now() - parseInt(lastUpdate) < fiveMinutes)) {
+                if (!globalCoinsData.length) {
+                    globalCoinsData = JSON.parse(cachedData);
+                    renderMainContent();
+                    updateStatusBar(parseInt(lastUpdate), true);
+                }
+                showSpinner(false);
+                return;
+            }
+
+            try {
+                const coinIdsList = Object.keys(PRIVACY_COINS_MANUAL_DATA).filter(id => id !== 'wownero').join(',');
+                const data = await fetchWithRetry(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIdsList}&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h,24h,7d`);
+                
+                let coinsData = [];
+                if (data && data.length > 0) {
+                    coinsData = data.map(coin => {
+                        const localMeta = PRIVACY_COINS_MANUAL_DATA[coin.id] || { 
+                            tech: 'Desconhecido', 
+                            desc: '',
+                            logo: coin.image || '',
+                            website: '#',
+                            explorer: '',
+                            explorerName: 'Explorador',
+                            github: '#',
+                            reddit: '',
+                            twitter: '',
+                            telegram: '',
+                            discord: '',
+                            maxSupply: 'Desconhecido',
+                            corretoras: []
+                        };
+                        return { ...coin, manualData: localMeta };
+                    });
+                }
+                
+                const wowData = await fetchWowneroData();
+                if (wowData && PRIVACY_COINS_MANUAL_DATA['wownero']) {
+                    const wowLocalMeta = PRIVACY_COINS_MANUAL_DATA['wownero'];
+                    const wowCoin = {
+                        id: 'wownero',
+                        symbol: 'wow',
+                        name: 'Wownero',
+                        current_price: wowData.price,
+                        price_change_percentage_24h: wowData.percentChange,
+                        total_volume: wowData.volume24h,
+                        market_cap: wowData.price * 184467440,
+                        circulating_supply: 184467440,
+                        image: wowLocalMeta.logo,
+                        sparkline_in_7d: { price: [] },
+                        manualData: wowLocalMeta
+                    };
+                    coinsData.push(wowCoin);
+                }
+                
+                if (coinsData.length > 0) {
+                    globalCoinsData = coinsData;
+                    localStorage.setItem('pribitcap_coins_data', JSON.stringify(globalCoinsData));
+                    localStorage.setItem('pribitcap_last_update', Date.now().toString());
+                    
+                    renderMainContent();
+                    updateStatusBar(Date.now(), false);
+                    document.getElementById('rate-limit-banner').classList.add('hidden');
+                } else {
+                    throw new Error("Resposta da API vazia");
+                }
+            } catch (error) {
+                console.error("Falha ao sincronizar dados:", error);
+                document.getElementById('rate-limit-banner').classList.remove('hidden');
+                
+                if (!globalCoinsData.length && cachedData) {
+                    globalCoinsData = JSON.parse(cachedData);
+                    renderMainContent();
+                    updateStatusBar(parseInt(lastUpdate || Date.now()), true);
+                } else if (globalCoinsData.length) {
+                    updateStatusBar(parseInt(lastUpdate || Date.now()), true);
+                } else {
+                    showErrorUI();
+                }
+            } finally {
+                showSpinner(false);
+            }
+        }
+
+        async function fetchWithRetry(url, options = {}, retries = 5, backoff = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (response.status === 429) {
+                    if (retries > 0) {
+                        await new Promise(resolve => setTimeout(resolve, backoff));
+                        return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                    }
+                    throw new Error("Taxa limite do CoinGecko atingida.");
+                }
+                if (!response.ok) throw new Error(`Status HTTP: ${response.status}`);
+                return await response.json();
+            } catch (err) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                }
+                throw err;
+            }
+        }
+
+        function checkAutoUpdateCycle() {
+            const lastUpdate = localStorage.getItem('pribitcap_last_update');
+            if (lastUpdate && (Date.now() - parseInt(lastUpdate) >= 300000)) {
+                loadPrivacyData(true);
+            }
+        }
+
+        function forceRefreshData() {
+            const syncIcon = document.getElementById('syncIcon');
+            syncIcon.classList.add('animate-spin');
+            loadPrivacyData(true).finally(() => {
+                setTimeout(() => syncIcon.classList.remove('animate-spin'), 600);
+            });
+        }
+
+        function updateStatusBar(timestamp, isCached) {
+            const date = new Date(timestamp);
+            document.getElementById('last-update-time').innerText = `Sincronizado: ${date.toLocaleTimeString()}`;
+            
+            const statusLabel = document.getElementById('status-cache-label');
+            if (isCached) {
+                statusLabel.innerText = "🐧";
+                statusLabel.className = "font-semibold text-amber-500";
+            } else {
+                statusLabel.innerText = "🐧";
+                statusLabel.className = "font-semibold text-green-500";
+            }
+
+            if (globalCoinsData && globalCoinsData.length) {
+                const totalCap = globalCoinsData.reduce((acc, coin) => acc + (coin.market_cap || 0), 0);
+                document.getElementById('global-cap-label').innerText = `$${totalCap.toLocaleString('en-US')}`;
+
+                let avgPct = 0;
+                if (totalCap > 0) {
+                    avgPct = globalCoinsData.reduce((acc, coin) => acc + ((coin.price_change_percentage_24h || 0) * (coin.market_cap || 0)), 0) / totalCap;
+                }
+                
+                const pctLabel = document.getElementById('global-cap-pct');
+                if (avgPct >= 0) {
+                    pctLabel.innerText = `▲ ${avgPct.toFixed(2)}%`;
+                    pctLabel.className = "text-green-600 dark:text-green-400 font-medium";
+                } else {
+                    pctLabel.innerText = `▼ ${Math.abs(avgPct).toFixed(2)}%`;
+                    pctLabel.className = "text-red-600 dark:text-red-400 font-medium";
+                }
+            }
+        }
+
+        function renderMainContent() {
+            renderTable();
+            renderHighlights();
+        }
+
+        function renderTable() {
+            const container = document.getElementById('coinTableBody');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!globalCoinsData || globalCoinsData.length === 0) {
+                container.innerHTML = `<div class="col-span-12 text-center py-8 text-gray-450">Carregando dados...</div>`;
+                return;
+            }
+
+            const itemsToRender = filteredTech === 'tudo' 
+                ? globalCoinsData 
+                : globalCoinsData.filter(c => c.manualData && c.manualData.tech === filteredTech);
+
+            if (itemsToRender.length === 0) {
+                container.innerHTML = `<div class="col-span-12 text-center py-8 text-gray-450">Nenhum ativo de privacidade ativo encontrado sob este protocolo.</div>`;
+                return;
+            }
+
+            itemsToRender.forEach((coin, idx) => {
+                const change24h = coin.price_change_percentage_24h || 0;
+                const changeClass = change24h >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400";
+                const changeSign = change24h >= 0 ? "▲" : "▼";
+                const logoUrl = coin.manualData?.logo || coin.image;
+
+                const row = document.createElement('div');
+                row.className = "grid grid-cols-12 gap-1 px-3 py-3 hover:bg-gray-50 dark:hover:bg-zinc-900/50 cursor-pointer items-center transition-colors text-xs lg:text-sm coin-table-row";
+                row.onclick = () => openCoinDetails(coin.id);
+                
+                row.innerHTML = `
+                    <div class="col-span-6 lg:col-span-5 flex items-center gap-2 sticky-col" style="background-color: inherit;">
+                        <img src="${logoUrl}" class="w-7 h-7 rounded-full object-contain shrink-0 shadow-sm" alt="${coin.name}" onerror="this.src='https://placehold.co/24x24'">
+                        <div>
+                            <div class="flex items-center gap-1">
+                                <span class="font-bold text-gray-900 dark:text-white text-sm sm:text-base coin-name-mobile">${coin.name}</span>
+                                <span class="text-[9px] font-mono text-gray-400 uppercase coin-symbol-mobile">${coin.symbol}</span>
+                            </div>
+                            <span class="text-[8px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 font-semibold inline-block mt-0.5">${coin.manualData?.tech || 'Desconhecido'}</span>
+                        </div>
+                    </div>
+                    <div class="col-span-3 text-right font-mono font-semibold text-gray-900 dark:text-gray-100 text-sm">$${formatPrice(coin.current_price)}</div>
+                    <div class="col-span-3 lg:col-span-2 text-right font-mono font-semibold ${changeClass} text-sm">${changeSign} ${Math.abs(change24h).toFixed(2)}%</div>
+                    <div class="hidden lg:block lg:col-span-2 text-right font-mono text-gray-500 dark:text-gray-400 text-xs">$${coin.total_volume?.toLocaleString('en-US') || '0'}</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function renderHighlights() {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
+            const gainers = [...globalCoinsData].sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0)).slice(0, 3);
+            const gainersContainer = document.getElementById('gainers-cards-container');
+            if (gainersContainer) {
+                gainersContainer.innerHTML = '';
+                gainers.forEach(coin => {
+                    const div = createHighlightItem(coin);
+                    gainersContainer.appendChild(div);
+                });
+            }
+        }
+
+        function createHighlightItem(coin) {
+            const change = coin.price_change_percentage_24h || 0;
+            const changeClass = change >= 0 ? "text-green-500 font-semibold" : "text-red-500 font-semibold";
+            const changeSign = change >= 0 ? "▲" : "▼";
+            const logoUrl = coin.manualData?.logo || coin.image;
+
+            const item = document.createElement('div');
+            item.className = "flex items-center justify-between cursor-pointer p-1.5 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-850/50 transition-colors";
+            item.onclick = () => openCoinDetails(coin.id);
+            item.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <img src="${logoUrl}" class="w-6 h-6 rounded-full object-contain" alt="${coin.name}" onerror="this.src='https://placehold.co/20x20'">
+                    <div>
+                        <span class="text-xs font-bold text-gray-900 dark:text-white">${coin.name}</span>
+                        <span class="text-[9px] text-gray-400 font-mono uppercase ml-1">${coin.symbol}</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs font-mono font-bold">$${formatPrice(coin.current_price)}</div>
+                    <div class="text-[10px] font-mono ${changeClass}">${changeSign} ${Math.abs(change).toFixed(2)}%</div>
+                </div>
+            `;
+            return item;
+        }
+
+        function loadImage(url, coinName = '') {
+            return new Promise((resolve) => {
+                if (!url || url.includes('placeholder')) {
+                    const fallbackCanvas = document.createElement('canvas');
+                    fallbackCanvas.width = 80;
+                    fallbackCanvas.height = 80;
+                    const ctx = fallbackCanvas.getContext('2d');
+                    ctx.fillStyle = '#FF6600';
+                    ctx.fillRect(0, 0, 80, 80);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 30px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(coinName ? coinName.substring(0, 2).toUpperCase() : '💰', 40, 52);
+                    
+                    const img = new Image();
+                    img.src = fallbackCanvas.toDataURL();
+                    img.onload = () => resolve(img);
+                    return;
+                }
+                
+                if (coinImageCache[url]) {
+                    resolve(coinImageCache[url]);
+                    return;
+                }
+                
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    coinImageCache[url] = img;
+                    resolve(img);
+                };
+                img.onerror = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 80;
+                    canvas.height = 80;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#FF6600';
+                    ctx.fillRect(0, 0, 80, 80);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 30px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(coinName ? coinName.substring(0, 2).toUpperCase() : '💰', 40, 52);
+                    
+                    const fallbackImg = new Image();
+                    fallbackImg.src = canvas.toDataURL();
+                    fallbackImg.onload = () => {
+                        coinImageCache[url] = fallbackImg;
+                        resolve(fallbackImg);
+                    };
+                };
+                img.src = url;
+            });
+        }
+
+        async function generateGainersImage(gainers) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const width = 1080;
+            const height = 1080;
+            canvas.width = width;
+            canvas.height = height;
+
+            const bgGradient = ctx.createLinearGradient(0, 0, width, height);
+            bgGradient.addColorStop(0, '#0f0f1a');
+            bgGradient.addColorStop(0.5, '#1a1025');
+            bgGradient.addColorStop(1, '#0a0a14');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 64px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🐧 Top Gainers', width / 2, 120);
+
+            const lineGradient = ctx.createLinearGradient(width * 0.25, 0, width * 0.75, 0);
+            lineGradient.addColorStop(0, '#FF6600');
+            lineGradient.addColorStop(0.5, '#FF007A');
+            lineGradient.addColorStop(1, '#FF6600');
+            ctx.strokeStyle = lineGradient;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(width * 0.25, 155);
+            ctx.lineTo(width * 0.75, 155);
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.font = '24px Inter, sans-serif';
+            ctx.fillText('Privacy-Focused Crypto · 24h Performance', width / 2, 200);
+
+            const cardStartY = 270;
+            const cardHeight = 200;
+            const cardSpacing = 30;
+            const cardPadding = 40;
+            const cardWidth = width - (cardPadding * 2);
+
+            const coinImages = await Promise.all(
+                gainers.map(async (coin) => {
+                    const logoUrl = coin.manualData?.logo || coin.image;
+                    return await loadImage(logoUrl, coin.name);
+                })
+            );
+
+            for (let i = 0; i < gainers.length; i++) {
+                const coin = gainers[i];
+                const y = cardStartY + (i * (cardHeight + cardSpacing));
+                const change = coin.price_change_percentage_24h || 0;
+                const isPositive = change >= 0;
+
+                ctx.save();
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                ctx.lineWidth = 1.5;
+                roundRect(ctx, cardPadding, y, cardWidth, cardHeight, 24);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.fillStyle = i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : '#CD7F32';
+                ctx.font = 'bold 48px Inter, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`#${i + 1}`, cardPadding + 30, y + 90);
+
+                const imgX = cardPadding + 140;
+                const imgY = y + 40;
+                const imgSize = 110;
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(imgX + imgSize/2, imgY + imgSize/2, imgSize/2, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.clip();
+                
+                const coinImg = coinImages[i];
+                if (coinImg) {
+                    ctx.drawImage(coinImg, imgX, imgY, imgSize, imgSize);
+                } else {
+                    ctx.fillStyle = '#FF6600';
+                    ctx.fillRect(imgX, imgY, imgSize, imgSize);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 36px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(coin.symbol.substring(0, 2).toUpperCase(), imgX + imgSize/2, imgY + imgSize/2 + 12);
+                }
+                ctx.restore();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 38px Inter, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(coin.name, cardPadding + 280, y + 65);
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.font = '22px Inter, sans-serif';
+                ctx.fillText(coin.symbol.toUpperCase(), cardPadding + 280, y + 100);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 34px Inter, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(`$${formatPrice(coin.current_price)}`, width - cardPadding - 30, y + 65);
+
+                const changeColor = isPositive ? '#22c55e' : '#ef4444';
+                const changeSign = isPositive ? '▲' : '▼';
+                
+                ctx.fillStyle = changeColor;
+                ctx.font = 'bold 32px Inter, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(`${changeSign} ${Math.abs(change).toFixed(2)}%`, width - cardPadding - 40, y + 132);
+            }
+
+            const footerY = height - 100;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.font = '22px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Dados em tempo real via CoinGecko & Nonlogs.io', width / 2, footerY);
+
+            const linkGradient = ctx.createLinearGradient(width * 0.3, 0, width * 0.7, 0);
+            linkGradient.addColorStop(0, '#FF6600');
+            linkGradient.addColorStop(1, '#FF007A');
+            ctx.fillStyle = linkGradient;
+            ctx.font = 'bold 30px Inter, sans-serif';
+            ctx.fillText('pribitcap.com', width / 2, footerY + 50);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '28px Inter, sans-serif';
+            ctx.fillText('🔒', width / 2 - 160, footerY + 50);
+
+            return canvas;
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        async function shareTopGainers(event) {
+            if (!globalCoinsData || globalCoinsData.length === 0) {
+                openPromoModal('Dados ainda carregando');
+                return;
+            }
+            
+            const gainers = [...globalCoinsData]
+                .sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0))
+                .slice(0, 3);
+
+            if (gainers.length === 0) {
+                openPromoModal('Dados ainda carregando');
+                return;
+            }
+
+            const shareButton = event?.target?.closest('button');
+            const originalButtonHtml = shareButton ? shareButton.innerHTML : '';
+            if (shareButton) {
+                shareButton.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i>';
+                lucide.createIcons();
+            }
+
+            try {
+                const validGainers = gainers.filter(g => g && g.name);
+                if (validGainers.length === 0) {
+                    throw new Error('No valid gainers data');
+                }
+                
+                const imageCanvas = await generateGainersImage(validGainers);
+                
+                let shareText = '🐧 Top Gainers - PrivacyGecko\n\n';
+                validGainers.forEach((coin, i) => {
+                    const change = coin.price_change_percentage_24h || 0;
+                    const sign = change >= 0 ? '▲' : '▼';
+                    shareText += `${i + 1}. ${coin.name} (${coin.symbol.toUpperCase()})\n`;
+                    shareText += `   💰 $${formatPrice(coin.current_price)} | ${sign} ${Math.abs(change).toFixed(2)}%\n\n`;
+                });
+                shareText += '📊 pribitcap.com';
+
+                const blob = await new Promise(resolve => imageCanvas.toBlob(resolve, 'image/png', 0.95));
+                
+                if (blob && navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'top-gainers.png', { type: 'image/png' })] })) {
+                    const file = new File([blob], 'top-gainers-pribitcap.png', { type: 'image/png' });
+                    try {
+                        await navigator.share({
+                            title: '🐧 Top Gainers - PrivacyGecko',
+                            text: 'Confira os top gainers de moedas de privacidade! pribitcap.com',
+                            files: [file]
+                        });
+                        return;
+                    } catch (err) {
+                        if (err.name === 'AbortError') return;
+                    }
+                }
+
+                openShareGainersModal(validGainers, shareText, imageCanvas, blob);
+            } catch (error) {
+                console.error('Erro ao gerar imagem:', error);
+                let fallbackText = '🐧 Top Gainers - PrivacyGecko\n\n';
+                gainers.forEach((coin, i) => {
+                    const change = coin.price_change_percentage_24h || 0;
+                    const sign = change >= 0 ? '▲' : '▼';
+                    fallbackText += `${i + 1}. ${coin.name} (${coin.symbol.toUpperCase()})\n`;
+                    fallbackText += `   💰 $${formatPrice(coin.current_price)} | ${sign} ${Math.abs(change).toFixed(2)}%\n\n`;
+                });
+                fallbackText += '📊 pribitcap.com';
+                
+                navigator.clipboard.writeText(fallbackText).then(() => {
+                    const toast = document.createElement('div');
+                    toast.className = "fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-zinc-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl z-50 transition-opacity font-semibold border border-zinc-800";
+                    toast.innerText = "📋 Dados copiados! (Imagem não disponível)";
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+                }).catch(() => {
+                    openPromoModal('Não foi possível compartilhar');
+                });
+            } finally {
+                if (shareButton) {
+                    shareButton.innerHTML = originalButtonHtml;
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        function openShareGainersModal(gainers, shareText, imageCanvas, blob) {
+            const listContainer = document.getElementById('shareGainersList');
+            listContainer.innerHTML = '';
+            
+            gainers.forEach((coin, i) => {
+                const change = coin.price_change_percentage_24h || 0;
+                const sign = change >= 0 ? '▲' : '▼';
+                const changeClass = change >= 0 ? 'text-green-500' : 'text-red-500';
+                const logoUrl = coin.manualData?.logo || coin.image;
+                
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-800/50 rounded-xl';
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <span class="font-bold text-xs text-gray-400">#${i + 1}</span>
+                        <img src="${logoUrl}" class="w-6 h-6 rounded-full object-contain" alt="${coin.name}" onerror="this.src='https://placehold.co/20x20'">
+                        <div>
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">${coin.name}</span>
+                            <span class="text-[9px] text-gray-400 font-mono uppercase ml-1">${coin.symbol}</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-mono font-bold text-gray-900 dark:text-white">$${formatPrice(coin.current_price)}</div>
+                        <div class="text-[10px] font-mono font-semibold ${changeClass}">${sign} ${Math.abs(change).toFixed(2)}%</div>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+
+            const previewDiv = document.getElementById('shareImagePreview');
+            const previewCanvas = document.getElementById('shareImageCanvas');
+            
+            previewDiv.classList.remove('hidden');
+            previewCanvas.width = imageCanvas.width;
+            previewCanvas.height = imageCanvas.height;
+            const previewCtx = previewCanvas.getContext('2d');
+            previewCtx.drawImage(imageCanvas, 0, 0);
+
+            document.getElementById('shareGainersModal')._shareText = shareText;
+            document.getElementById('shareGainersModal')._imageBlob = blob;
+            document.getElementById('shareGainersModal')._imageCanvas = imageCanvas;
+
+            const modal = document.getElementById('shareGainersModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('shareGainersModalContent').classList.remove('scale-95');
+            }, 50);
+            
+            lucide.createIcons();
+        }
+
+        function closeShareGainersModal() {
+            const modal = document.getElementById('shareGainersModal');
+            document.getElementById('shareGainersModalContent').classList.add('scale-95');
+            modal.classList.remove('opacity-100');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function copyGainersToClipboard() {
+            const text = document.getElementById('shareGainersModal')._shareText || '';
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.createElement('div');
+                toast.className = "fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-zinc-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl z-50 transition-opacity font-semibold border border-zinc-800";
+                toast.innerText = "📋 Dados copiados!";
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 1800);
+            }).catch(() => {
+                openPromoModal('Não foi possível copiar');
+            });
+        }
+
+        async function shareGainersAsImage() {
+            const blob = document.getElementById('shareGainersModal')._imageBlob;
+            const canvas = document.getElementById('shareGainersModal')._imageCanvas;
+
+            if (!blob && !canvas) {
+                openPromoModal('Imagem não disponível');
+                return;
+            }
+
+            const file = blob || await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
+            const imageFile = new File([file], 'top-gainers-pribitcap.png', { type: 'image/png' });
+
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+                try {
+                    await navigator.share({
+                        title: '🐧 Top Gainers - PrivacyGecko',
+                        text: 'Confira os top gainers de moedas de privacidade! pribitcap.com',
+                        files: [imageFile]
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                }
+            }
+
+            const url = URL.createObjectURL(file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'top-gainers-pribitcap.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-zinc-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl z-50 transition-opacity font-semibold border border-zinc-800";
+            toast.innerText = "📥 Imagem baixada! Compartilhe manualmente.";
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        function filterCoinsByTech(tech) {
+            filteredTech = tech;
+            
+            const buttons = document.querySelectorAll('#tech-filters-container button');
+            buttons.forEach(btn => {
+                btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 dark:bg-zinc-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 flex items-center gap-1.5 transition-all";
+            });
+
+            const activeBtn = document.getElementById(`tech-${tech}`);
+            if (activeBtn) {
+                activeBtn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-50 text-[#FF6600] border border-orange-100 dark:bg-orange-950/20 dark:border-orange-900/30 flex items-center gap-1.5 transition-all";
+            }
+            renderTable();
+        }
+
+        async function openCoinDetails(coinId) {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
+            selectedCoinId = coinId;
+            const coin = globalCoinsData.find(c => c.id === coinId);
+            if (!coin) return;
+
+            showSpinner(true);
+
+            const manualData = coin.manualData || PRIVACY_COINS_MANUAL_DATA[coinId] || {};
+            const logoUrl = manualData.logo || coin.image;
+
+            document.getElementById('detailCoinLogo').src = logoUrl;
+            document.getElementById('detailCoinTicker').innerText = `${coin.name} (${coin.symbol.toUpperCase()})`;
+            document.getElementById('detailCoinPrice').innerText = `$${formatPrice(coin.current_price)}`;
+            
+            const pctBadge = document.getElementById('detailCoinHeaderPct');
+            const change24h = coin.price_change_percentage_24h || 0;
+            pctBadge.innerText = `${change24h >= 0 ? '▲' : '▼'} ${Math.abs(change24h).toFixed(2)}%`;
+            pctBadge.className = `text-xs font-bold px-2 py-1 rounded-lg ${change24h >= 0 ? 'bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400'}`;
+
+            document.getElementById('detailCoinDescription').innerText = manualData.desc || `Moeda descentralizada de alta qualidade, focada em segurança criptográfica avançada sob o padrão ${manualData.tech || 'Desconhecido'}.`;
+
+            document.getElementById('statTechType').innerText = manualData.tech || 'Desconhecido';
+            document.getElementById('statAssetId').innerText = coin.id;
+            document.getElementById('statMarketCap').innerText = `$${coin.market_cap ? coin.market_cap.toLocaleString('en-US') : '--'}`;
+            document.getElementById('statVolume').innerText = `$${coin.total_volume ? coin.total_volume.toLocaleString('en-US') : '--'}`;
+            document.getElementById('statCirculating').innerText = `${coin.circulating_supply ? coin.circulating_supply.toLocaleString('en-US') : '--'} ${coin.symbol.toUpperCase()}`;
+            document.getElementById('statMaxSupply').innerText = manualData.maxSupply || 'Desconhecido';
+
+            document.getElementById('convertCryptoLabel').innerText = coin.symbol;
+            document.getElementById('convertCryptoInput').value = 1;
+            document.getElementById('convertFiatInput').value = coin.current_price;
+
+            document.getElementById('infoAPIId').innerText = coin.id;
+            
+            document.getElementById('infoWebsiteBtn').href = manualData.website || '#';
+            
+            const explorerBtn = document.getElementById('infoExplorerBtn');
+            const explorerSpan = document.getElementById('infoExplorer');
+            if (manualData.explorer) {
+                explorerBtn.href = manualData.explorer;
+                explorerSpan.innerText = manualData.explorerName || 'Explorador';
+                explorerBtn.style.pointerEvents = 'auto';
+                explorerBtn.style.opacity = '1';
+            } else {
+                explorerBtn.href = '#';
+                explorerSpan.innerText = 'Indisponível';
+                explorerBtn.style.pointerEvents = 'none';
+                explorerBtn.style.opacity = '0.5';
+            }
+            
+            document.getElementById('infoGitBtn').href = manualData.github || '#';
+
+            const communityContainer = document.getElementById('infoCommunityContainer');
+            communityContainer.innerHTML = '';
+            
+            if (manualData.reddit) {
+                const redditLink = document.createElement('a');
+                redditLink.href = manualData.reddit;
+                redditLink.target = '_blank';
+                redditLink.className = 'bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200';
+                redditLink.innerText = 'Reddit';
+                communityContainer.appendChild(redditLink);
+            }
+            
+            if (manualData.twitter) {
+                const twitterLink = document.createElement('a');
+                twitterLink.href = manualData.twitter;
+                twitterLink.target = '_blank';
+                twitterLink.className = 'bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200';
+                twitterLink.innerText = 'Twitter (X)';
+                communityContainer.appendChild(twitterLink);
+            }
+            
+            if (manualData.telegram) {
+                const tgLink = document.createElement('a');
+                tgLink.href = manualData.telegram;
+                tgLink.target = '_blank';
+                tgLink.className = 'bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200';
+                tgLink.innerText = 'Telegram';
+                communityContainer.appendChild(tgLink);
+            }
+            
+            if (manualData.discord) {
+                const dcLink = document.createElement('a');
+                dcLink.href = manualData.discord;
+                dcLink.target = '_blank';
+                dcLink.className = 'bg-gray-100 hover:bg-gray-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 px-3 py-1.5 rounded-lg font-semibold text-gray-800 dark:text-gray-200';
+                dcLink.innerText = 'Discord';
+                communityContainer.appendChild(dcLink);
+            }
+            
+            if (communityContainer.children.length === 0) {
+                communityContainer.innerHTML = '<span class="text-xs text-gray-400">Comunidade não listada</span>';
+            }
+
+            const marketsContainer = document.getElementById('marketsListContainer');
+            marketsContainer.innerHTML = '';
+            
+            if (manualData.corretoras && manualData.corretoras.length > 0) {
+                manualData.corretoras.forEach((market, idx) => {
+                    const row = document.createElement('div');
+                    row.className = "grid grid-cols-12 gap-2 py-3 border-b border-gray-50 dark:border-zinc-850 items-center hover:bg-gray-50 dark:hover:bg-zinc-850/30 transition-colors";
+                    row.innerHTML = `
+                        <div class="col-span-1 text-center font-mono font-bold text-gray-450">${idx + 1}</div>
+                        <div class="col-span-8 font-semibold text-gray-900 dark:text-white">${market.name}</div>
+                        <div class="col-span-3 text-right font-mono font-bold text-green-500">${market.pair}</div>
+                    `;
+                    marketsContainer.appendChild(row);
+                });
+            } else {
+                marketsContainer.innerHTML = '<p class="text-xs text-center text-gray-500 py-4">Nenhuma corretora parceira listada no momento.</p>';
+            }
+
+            document.getElementById('main-view').classList.add('hidden');
+            document.getElementById('details-view').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            await fetchAndRenderChart(coin.id);
+
+            showSpinner(false);
+            switchDetailsTab('tab-visao-geral');
+        }
+
+        async function fetchAndRenderChart(coinId) {
+            const chartCanvas = document.getElementById('coinDetailsChart');
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+            const textColor = isDark ? '#A1A1AA' : '#4B5563';
+
+            let chartPrices = [];
+            let chartLabels = [];
+
+            try {
+                const historyData = await fetchWithRetry(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7`);
+                if (historyData && historyData.prices) {
+                    chartPrices = historyData.prices.map(p => p[1]);
+                    chartLabels = historyData.prices.map(p => {
+                        const date = new Date(p[0]);
+                        return `${date.getDate()}/${date.getMonth() + 1}`;
+                    });
+                }
+            } catch (err) {
+                console.warn("Falha no gráfico detalhado, usando sparkline do cache markets:", err);
+                const coin = globalCoinsData.find(c => c.id === coinId);
+                if (coin && coin.sparkline_in_7d && coin.sparkline_in_7d.price) {
+                    chartPrices = coin.sparkline_in_7d.price;
+                    chartLabels = Array.from({ length: chartPrices.length }, (_, i) => `${Math.floor(i/24)}d`);
+                }
+            }
+
+            if (chartPrices.length === 0) return;
+
+            if (currentChartInstance) {
+                currentChartInstance.destroy();
+            }
+
+            currentChartInstance = new Chart(chartCanvas, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Preço (USD)',
+                        data: chartPrices,
+                        borderColor: '#FF6600',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        backgroundColor: 'rgba(255, 102, 0, 0.04)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 10 },
+                                maxTicksLimit: 7
+                            }
+                        },
+                        y: {
+                            grid: { color: gridColor },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function switchDetailsTab(tabId) {
+            const tabs = ['tab-visao-geral', 'tab-informacoes', 'tab-mercados'];
+            tabs.forEach(t => {
+                const el = document.getElementById(t);
+                if (el) el.classList.add('hidden');
+                
+                const btn = document.getElementById(`btn-${t}`);
+                if (btn) {
+                    btn.className = "w-1/3 text-center py-3 border-b-2 border-transparent transition-all text-gray-400";
+                }
+            });
+
+            const currentEl = document.getElementById(tabId);
+            if (currentEl) currentEl.classList.remove('hidden');
+
+            const currentBtn = document.getElementById(`btn-${tabId}`);
+            if (currentBtn) {
+                currentBtn.className = "w-1/3 text-center py-3 border-b-2 border-[#FF6600] text-gray-900 dark:text-white transition-all font-bold";
+            }
+        }
+
+        function calculateConversion(isCryptoBase) {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
+            const coin = globalCoinsData.find(c => c.id === selectedCoinId);
+            if (!coin) return;
+
+            const cryptoInput = document.getElementById('convertCryptoInput');
+            const fiatInput = document.getElementById('convertFiatInput');
+
+            if (isCryptoBase) {
+                const cryptoValue = parseFloat(cryptoInput.value) || 0;
+                fiatInput.value = (cryptoValue * coin.current_price).toFixed(2);
+            } else {
+                const fiatValue = parseFloat(fiatInput.value) || 0;
+                cryptoInput.value = (fiatValue / coin.current_price).toFixed(6);
+            }
+        }
+
+        function liveSearch() {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+
+            if (query.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-xs text-gray-400 py-2 text-center">Comece a digitar para ver os resultados...</p>';
+                return;
+            }
+
+            const filtered = globalCoinsData.filter(coin => 
+                coin.name.toLowerCase().includes(query) || 
+                coin.symbol.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-xs text-gray-400 py-2 text-center">Nenhum ativo correspondente localizado.</p>';
+                return;
+            }
+
+            filtered.forEach(coin => {
+                const logoUrl = coin.manualData?.logo || coin.image;
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between py-2.5 px-1 hover:bg-gray-50 dark:hover:bg-zinc-850 cursor-pointer transition-all";
+                div.onclick = () => {
+                    closeSearchModal();
+                    openCoinDetails(coin.id);
+                };
+                div.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <img src="${logoUrl}" class="w-5 h-5 rounded-full object-contain" alt="">
+                        <div>
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">${coin.name}</span>
+                            <span class="text-[10px] text-gray-400 font-mono uppercase ml-1">${coin.symbol}</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold">$${formatPrice(coin.current_price)}</span>
+                `;
+                resultsContainer.appendChild(div);
+            });
+        }
+
+        function backToMainView() {
+            document.getElementById('details-view').classList.add('hidden');
+            document.getElementById('main-view').classList.remove('hidden');
+            selectedCoinId = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function formatPrice(val) {
+            if (!val && val !== 0) return '0.00';
+            if (val < 0.01) return val.toFixed(6);
+            if (val < 1) return val.toFixed(4);
+            return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function showSpinner(show) {
+            const spinner = document.getElementById('loading-spinner');
+            if (show) {
+                spinner.classList.remove('hidden');
+                spinner.classList.add('flex');
+            } else {
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function showErrorUI() {
+            const container = document.getElementById('coinTableBody');
+            if (container) {
+                container.innerHTML = `
+                    <div class="col-span-12 text-center py-12">
+                        <i data-lucide="alert-triangle" class="w-10 h-10 text-red-500 mx-auto mb-2"></i>
+                        <p class="text-sm font-bold">Erro de Sincronização Descentralizada</p>
+                        <p class="text-xs text-gray-450 mt-1 max-w-md mx-auto">Não conseguimos nos conectar à API do CoinGecko. Por favor, certifique-se de que sua conexão de internet está ativa ou tente novamente em alguns instantes.</p>
+                        <button onclick="loadPrivacyData(true)" class="mt-4 px-4 py-2 bg-[#FF6600] text-white text-xs font-semibold rounded-lg shadow">Tentar novamente</button>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleHighlights() {
+            const container = document.getElementById('highlightsContainer');
+            const check = document.getElementById('toggleDestaques');
+            if (check.checked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function applySavedTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                updateThemeIcon(true);
+            } else {
+                document.documentElement.classList.remove('dark');
+                updateThemeIcon(false);
+            }
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                updateThemeIcon(false);
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                updateThemeIcon(true);
+            }
+        }
+
+        function updateThemeIcon(isDark) {
+            const iconContainer = document.getElementById('themeIcon');
+            iconContainer.innerHTML = isDark 
+                ? '<i data-lucide="sun" class="w-4.5 h-4.5"></i>' 
+                : '<i data-lucide="moon" class="w-4.5 h-4.5"></i>';
+            lucide.createIcons();
+        }
+
+        function copyAPIId() {
+            const id = document.getElementById('infoAPIId').innerText;
+            navigator.clipboard.writeText(id).then(() => {
+                const toast = document.createElement('div');
+                toast.className = "fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-zinc-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl z-50 transition-opacity font-semibold border border-zinc-800";
+                toast.innerText = "Copiado com sucesso!";
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 1800);
+            }).catch(() => {
+                const tempInput = document.createElement('input');
+                tempInput.value = id;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                
+                const toast = document.createElement('div');
+                toast.className = "fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-zinc-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl z-50 transition-opacity font-semibold border border-zinc-800";
+                toast.innerText = "Copiado com sucesso!";
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 1800);
+            });
+        }
+
+        function openPromoModal(moduleTitle = "Módulo Protegido") {
+            document.getElementById('promoModalTitle').innerText = moduleTitle;
+            const el = document.getElementById('promoModal');
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('opacity-100'), 50);
+        }
+
+        function closePromoModal() {
+            const el = document.getElementById('promoModal');
+            el.classList.remove('opacity-100');
+            setTimeout(() => el.classList.add('hidden'), 300);
+        }
+
+        function openSearchModal() {
+            const el = document.getElementById('searchModal');
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.add('opacity-100');
+                document.getElementById('searchModalContent').classList.remove('-translate-y-4');
+                document.getElementById('searchInput').focus();
+            }, 50);
+        }
+
+        function closeSearchModal() {
+            const el = document.getElementById('searchModal');
+            document.getElementById('searchModalContent').classList.add('-translate-y-4');
+            el.classList.remove('opacity-100');
+            setTimeout(() => el.classList.add('hidden'), 300);
+        }
+
+        function collectCandy() {
+            const el = document.getElementById('candyModal');
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.add('opacity-100');
+                document.getElementById('candyModalContent').classList.remove('scale-90');
+            }, 50);
+        }
+
+        function closeCandyModal() {
+            const el = document.getElementById('candyModal');
+            document.getElementById('candyModalContent').classList.add('scale-90');
+            el.classList.remove('opacity-100');
+            setTimeout(() => el.classList.add('hidden'), 300);
+        }
+
+        function openBuyModalFromDetails() {
+            if (!globalCoinsData || globalCoinsData.length === 0) return;
+            const coin = globalCoinsData.find(c => c.id === selectedCoinId);
+            if (!coin) return;
+
+            const logoUrl = coin.manualData?.logo || coin.image;
+            document.getElementById('modalCoinBadge').src = logoUrl;
+            document.getElementById('modalCoinTitle').innerText = `Comprar ${coin.name}`;
+
+            const el = document.getElementById('buyModal');
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.add('opacity-100');
+                document.getElementById('buyModalContent').classList.remove('translate-y-full');
+            }, 50);
+        }
+
+        function closeBuyModal() {
+            const el = document.getElementById('buyModal');
+            document.getElementById('buyModalContent').classList.add('translate-y-full');
+            el.classList.remove('opacity-100');
+            setTimeout(() => el.classList.add('hidden'), 300);
+        }
+
+        function simulatedBuyAction() {
+            closeBuyModal();
+            openPromoModal('Conexão de Wallet Encriptada');
+        }
+    </script>
+</body>
+</html>
