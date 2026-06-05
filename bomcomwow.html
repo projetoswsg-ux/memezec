@@ -834,28 +834,45 @@ async function fetchWowneroData() {
     }
 }
 
-        async function loadPrivacyData(forceRefresh = false) {
-            showSpinner(true);
-            
-            const lastUpdate = localStorage.getItem('pribitcap_last_update');
-            const cachedData = localStorage.getItem('pribitcap_coins_data');
-            const fiveMinutes = 300000;
-
-            if (cachedData && !globalCoinsData.length) {
-                globalCoinsData = JSON.parse(cachedData);
-                renderMainContent();
-                updateStatusBar(parseInt(lastUpdate || Date.now()), true);
+// --- PROCESSA O COIN DO WORKER AQUI (VERSÃO BLINDADA) ---
+        let wowData = await fetchWowneroData();
+        
+        // Se o Worker falhar temporariamente, tentamos pescar o preço do último cache salvo
+        if (!wowData && cachedData) {
+            const oldCoins = JSON.parse(cachedData);
+            const oldWow = oldCoins.find(c => c.id === 'wownero');
+            if (oldWow) {
+                wowData = {
+                    price: oldWow.current_price,
+                    percentChange: oldWow.price_change_percentage_24h,
+                    volume24h: oldWow.total_volume,
+                    marketCap: oldWow.market_cap,
+                    high24h: oldWow.high_24h || oldWow.current_price,
+                    low24h: oldWow.low_24h || oldWow.current_price
+                };
             }
+        }
 
-            if (!forceRefresh && cachedData && lastUpdate && (Date.now() - parseInt(lastUpdate) < fiveMinutes)) {
-                if (!globalCoinsData.length) {
-                    globalCoinsData = JSON.parse(cachedData);
-                    renderMainContent();
-                    updateStatusBar(parseInt(lastUpdate), true);
-                }
-                showSpinner(false);
-                return;
-            }
+        // Se conseguimos os dados (da API ou do Cache anterior), renderiza!
+        if (wowData && PRIVACY_COINS_MANUAL_DATA['wownero']) {
+            const wowLocalMeta = PRIVACY_COINS_MANUAL_DATA['wownero'];
+            const wowCoin = {
+                id: 'wownero',
+                symbol: 'wow',
+                name: 'Wownero',
+                current_price: wowData.price || 0,
+                price_change_percentage_24h: wowData.percentChange || 0,
+                total_volume: wowData.volume24h || 0,
+                market_cap: wowData.marketCap || 0,
+                circulating_supply: 184467440,
+                image: wowLocalMeta.logo,
+                sparkline_in_7d: { price: new Array(168).fill(wowData.price || 0) }, // Preenche com o preço atual para não quebrar componentes de gráfico de linha
+                high_24h: wowData.high24h,
+                low_24h: wowData.low24h,
+                manualData: wowLocalMeta
+            };
+            coinsData.push(wowCoin);
+        }
 
             try {
                 const coinIdsList = Object.keys(PRIVACY_COINS_MANUAL_DATA).filter(id => id !== 'wownero').join(',');
