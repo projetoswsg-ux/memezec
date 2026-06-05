@@ -53,6 +53,35 @@
             background-color: inherit;
             z-index: 15;
         }
+        /* Ajuste para garantir que a tabela ocupe toda a largura da tela em mobile */
+        @media (max-width: 768px) {
+            .table-container {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .coin-table-grid {
+                min-width: 100% !important;
+                width: 100%;
+            }
+            .coin-table-grid > div {
+                gap: 0.5rem !important;
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            /* Reduzindo o padding e gap em mobile */
+            .coin-table-row {
+                gap: 0.5rem !important;
+                padding: 0.75rem !important;
+            }
+            /* Ajuste do texto em mobile */
+            .coin-name-mobile {
+                font-size: 0.75rem !important;
+            }
+            .coin-symbol-mobile {
+                font-size: 0.65rem !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100 pb-24 lg:pb-12 antialiased selection:bg-orange-500/20">
@@ -161,14 +190,14 @@
                 </div>
             </div>
 
-            <div class="w-full bg-transparent transition-colors mt-2 overflow-x-auto hide-scrollbar">
-                <div class="min-w-[650px] lg:min-w-full">
-                    <!-- Cabeçalho da tabela sem a coluna de classificação -->
-                    <div class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-150 dark:border-zinc-800 text-[11px] font-bold text-gray-450 dark:text-gray-500 uppercase tracking-wider items-center">
-                        <div class="col-span-6 lg:col-span-5 sticky-col bg-white dark:bg-zinc-950" style="background-color: inherit;">Moeda / Tecnologia</div>
+            <div class="w-full bg-transparent transition-colors mt-2 overflow-x-auto hide-scrollbar table-container">
+                <div class="min-w-[650px] lg:min-w-full coin-table-grid">
+                    <!-- Cabeçalho da tabela - espaçamento reduzido -->
+                    <div class="grid grid-cols-12 gap-1 px-3 py-3 border-b border-gray-150 dark:border-zinc-800 text-[11px] font-bold text-gray-450 dark:text-gray-500 uppercase tracking-wider items-center">
+                        <div class="col-span-6 lg:col-span-5 sticky-col bg-white dark:bg-zinc-950" style="background-color: inherit;">Moeda</div>
                         <div class="col-span-3 text-right">Preço</div>
-                        <div class="col-span-3 lg:col-span-2 text-right">Variação 24h</div>
-                        <div class="hidden lg:block lg:col-span-2 text-right">Volume (Real)</div>
+                        <div class="col-span-3 lg:col-span-2 text-right">Variação</div>
+                        <div class="hidden lg:block lg:col-span-2 text-right">Volume</div>
                     </div>
                     <div id="coinTableBody" class="divide-y divide-gray-150 dark:divide-zinc-800/80"></div>
                 </div>
@@ -995,23 +1024,23 @@ const PRIVACY_COINS_MANUAL_DATA = {
                 const logoUrl = coin.manualData?.logo || coin.image;
 
                 const row = document.createElement('div');
-                row.className = "grid grid-cols-12 gap-2 px-4 py-4 hover:bg-gray-50 dark:hover:bg-zinc-900/50 cursor-pointer items-center transition-colors text-xs lg:text-sm";
+                row.className = "grid grid-cols-12 gap-1 px-3 py-3 hover:bg-gray-50 dark:hover:bg-zinc-900/50 cursor-pointer items-center transition-colors text-xs lg:text-sm coin-table-row";
                 row.onclick = () => openCoinDetails(coin.id);
                 
                 row.innerHTML = `
-                    <div class="col-span-6 lg:col-span-5 flex items-center gap-3 sticky-col" style="background-color: inherit;">
-                        <img src="${logoUrl}" class="w-8 h-8 rounded-full object-contain shrink-0 shadow-sm" alt="${coin.name}" onerror="this.src='https://placehold.co/24x24'">
+                    <div class="col-span-6 lg:col-span-5 flex items-center gap-2 sticky-col" style="background-color: inherit;">
+                        <img src="${logoUrl}" class="w-7 h-7 rounded-full object-contain shrink-0 shadow-sm" alt="${coin.name}" onerror="this.src='https://placehold.co/24x24'">
                         <div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="font-bold text-gray-900 dark:text-white">${coin.name}</span>
-                                <span class="text-[10px] font-mono text-gray-400 uppercase">${coin.symbol}</span>
+                            <div class="flex items-center gap-1">
+                                <span class="font-bold text-gray-900 dark:text-white text-sm sm:text-base coin-name-mobile">${coin.name}</span>
+                                <span class="text-[9px] font-mono text-gray-400 uppercase coin-symbol-mobile">${coin.symbol}</span>
                             </div>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 font-semibold inline-block mt-0.5">${coin.manualData?.tech || 'Desconhecido'}</span>
+                            <span class="text-[8px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 font-semibold inline-block mt-0.5">${coin.manualData?.tech || 'Desconhecido'}</span>
                         </div>
                     </div>
-                    <div class="col-span-3 text-right font-mono font-semibold text-gray-900 dark:text-gray-100">$${formatPrice(coin.current_price)}</div>
-                    <div class="col-span-3 lg:col-span-2 text-right font-mono font-semibold ${changeClass}">${changeSign} ${Math.abs(change24h).toFixed(2)}%</div>
-                    <div class="hidden lg:block lg:col-span-2 text-right font-mono text-gray-500 dark:text-gray-400">$${coin.total_volume.toLocaleString('en-US')}</div>
+                    <div class="col-span-3 text-right font-mono font-semibold text-gray-900 dark:text-gray-100 text-sm">$${formatPrice(coin.current_price)}</div>
+                    <div class="col-span-3 lg:col-span-2 text-right font-mono font-semibold ${changeClass} text-sm">${changeSign} ${Math.abs(change24h).toFixed(2)}%</div>
+                    <div class="hidden lg:block lg:col-span-2 text-right font-mono text-gray-500 dark:text-gray-400 text-xs">$${coin.total_volume.toLocaleString('en-US')}</div>
                 `;
                 container.appendChild(row);
             });
