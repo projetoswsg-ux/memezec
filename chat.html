@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Titan Chat | Secure P2P</title>
+    <style>
+        /* Estilo Minimalista Terminal */
+        body {
+            background-color: #000;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 10px;
+            border-bottom: 1px solid #00ff41;
+            text-align: center;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        #chat-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* O Iframe é o que "conecta" ao Matrix */
+        iframe {
+            width: 100%;
+            max-width: 900px;
+            height: 100%;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>TITAN_TERMINAL_CHAT_V1.0 // P2P_SECURE</header>
+
+    <div id="chat-wrapper">
+        <iframe 
+            src="https://hydrogen.element.io/#/room/!sLgYmZJmyKSCgVpUin:matrix.org" 
+            title="Chat">
+        </iframe>
+    </div>
+
+</body>
+</html>
