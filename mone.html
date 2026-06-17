@@ -120,7 +120,6 @@
                 <div><span class="font-semibold text-green-500" id="status-cache-label"></span></div> 
                 <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
                 <div id="last-update-time"></div>
-                <!-- Cotação XMR adicionada na barra de status -->
                 <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
                 <div>XMR: <span class="font-semibold text-[#FF6600]" id="xmr-price-label">Carregando...</span></div>
             </div>
@@ -389,7 +388,6 @@
             <i data-lucide="candy" class="w-5.5 h-5.5"></i><span class="text-[10px] font-medium">Candy</span>
             <span class="absolute top-0 right-1 w-2 h-2 rounded-full bg-[#FF007A] animate-ping"></span>
         </button>
-        <!-- Botão de Menu que abre modal com opção de tema -->
         <button onclick="openThemeMenuModal()" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-[#FF6600] transition-colors">
             <i data-lucide="menu" class="w-5.5 h-5.5"></i><span class="text-[10px] font-medium">Menu</span>
         </button>
@@ -880,8 +878,8 @@
         let selectedCoinId = null;
         let btcToUsdRate = null;
         let lastWowneroData = null;
-        let xmrPrice = null; // Armazena o preço do XMR em USD
-        let fiatCurrencyMode = 'xmr'; // 'xmr' ou 'usd'
+        let xmrPrice = null;
+        let fiatCurrencyMode = 'xmr';
         const coinImageCache = {};
 
         window.onload = function() {
@@ -947,7 +945,6 @@
             const cachedData = !skipCache ? localStorage.getItem('pribitcap_coins_data') : null;
             const lastUpdate = localStorage.getItem('pribitcap_last_update');
             
-            // Busca cotação XMR em paralelo
             const xmrPromise = fetchXmrPrice();
             const wowDataPromise = fetchWowneroData();
             
@@ -1028,7 +1025,7 @@
                     showErrorUI();
                 }
             } finally {
-                await xmrPromise; // Garante que o XMR foi buscado
+                await xmrPromise;
                 showSpinner(false);
             }
         }
@@ -1124,7 +1121,6 @@
                 const changeSign = change24h >= 0 ? "▲" : "▼";
                 const logoUrl = coin.manualData?.logo || coin.image;
 
-                // Calcula o preço em XMR
                 const priceInXmr = xmrPrice ? coin.current_price / xmrPrice : coin.current_price;
 
                 const row = document.createElement('div');
@@ -1143,7 +1139,10 @@
                         </div>
                     </div>
                     <div class="col-span-3 text-right font-mono font-semibold text-gray-900 dark:text-gray-100 text-sm">${xmrPrice ? formatPrice(priceInXmr) + ' XMR' : '$' + formatPrice(coin.current_price)}</div>
-                    <div class="col-span-3 lg:col-span-2 text-right font-mono font-semibold ${changeClass} text-sm">${changeSign} ${Math.abs(change24h).toFixed(2)}%</div>
+                    <div class="col-span-3 lg:col-span-2 text-right font-mono font-semibold ${changeClass} text-sm flex flex-col items-end">
+                        <span>${changeSign} ${Math.abs(change24h).toFixed(2)}%</span>
+                        <span class="text-[9px] text-gray-400 dark:text-gray-500 font-normal">$${formatPrice(coin.current_price)}</span>
+                    </div>
                     <div class="hidden lg:block lg:col-span-2 text-right font-mono text-gray-500 dark:text-gray-400 text-xs">$${coin.total_volume?.toLocaleString('en-US') || '0'}</div>
                 `;
                 container.appendChild(row);
@@ -1184,6 +1183,7 @@
                 <div class="text-right">
                     <div class="text-xs font-mono font-bold">${xmrPrice ? formatPrice(priceInXmr) + ' XMR' : '$' + formatPrice(coin.current_price)}</div>
                     <div class="text-[10px] font-mono ${changeClass}">${changeSign} ${Math.abs(change).toFixed(2)}%</div>
+                    <div class="text-[8px] text-gray-400 font-normal">$${formatPrice(coin.current_price)}</div>
                 </div>
             `;
             return item;
@@ -1350,6 +1350,14 @@
                 ctx.textAlign = 'right';
                 ctx.fillText(xmrPrice ? `${formatPrice(priceInXmr)} XMR` : `$${formatPrice(coin.current_price)}`, width - cardPadding - 30, y + 65);
 
+                // Adiciona o preço em USD menor abaixo do preço em XMR
+                if (xmrPrice) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.font = '20px Inter, sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`$${formatPrice(coin.current_price)}`, width - cardPadding - 30, y + 100);
+                }
+
                 const changeColor = isPositive ? '#22c55e' : '#ef4444';
                 const changeSign = isPositive ? '▲' : '▼';
                 
@@ -1429,7 +1437,8 @@
                     const sign = change >= 0 ? '▲' : '▼';
                     const priceInXmr = xmrPrice ? coin.current_price / xmrPrice : coin.current_price;
                     shareText += `${i + 1}. ${coin.name} (${coin.symbol.toUpperCase()})\n`;
-                    shareText += `   💰 ${xmrPrice ? formatPrice(priceInXmr) + ' XMR' : '$' + formatPrice(coin.current_price)} | ${sign} ${Math.abs(change).toFixed(2)}%\n\n`;
+                    shareText += `   💰 ${xmrPrice ? formatPrice(priceInXmr) + ' XMR' : '$' + formatPrice(coin.current_price)} | $${formatPrice(coin.current_price)}\n`;
+                    shareText += `   ${sign} ${Math.abs(change).toFixed(2)}%\n\n`;
                 });
                 shareText += '📊 pribitcap.com';
 
@@ -1458,7 +1467,8 @@
                     const sign = change >= 0 ? '▲' : '▼';
                     const priceInXmr = xmrPrice ? coin.current_price / xmrPrice : coin.current_price;
                     fallbackText += `${i + 1}. ${coin.name} (${coin.symbol.toUpperCase()})\n`;
-                    fallbackText += `   💰 ${xmrPrice ? formatPrice(priceInXmr) + ' XMR' : '$' + formatPrice(coin.current_price)} | ${sign} ${Math.abs(change).toFixed(2)}%\n\n`;
+                    fallbackText += `   💰 ${xmrPrice ? formatPrice(priceInXmr) + ' XMR' : '$' + formatPrice(coin.current_price)} | $${formatPrice(coin.current_price)}\n`;
+                    fallbackText += `   ${sign} ${Math.abs(change).toFixed(2)}%\n\n`;
                 });
                 fallbackText += '📊 pribitcap.com';
                 
@@ -1503,6 +1513,7 @@
                     </div>
                     <div class="text-right">
                         <div class="text-xs font-mono font-bold text-gray-900 dark:text-white">${xmrPrice ? formatPrice(priceInXmr) + ' XMR' : '$' + formatPrice(coin.current_price)}</div>
+                        <div class="text-[8px] text-gray-400 font-normal">$${formatPrice(coin.current_price)}</div>
                         <div class="text-[10px] font-mono font-semibold ${changeClass}">${sign} ${Math.abs(change).toFixed(2)}%</div>
                     </div>
                 `;
@@ -1527,9 +1538,8 @@
             setTimeout(() => {
                 modal.classList.add('opacity-100');
                 document.getElementById('shareGainersModalContent').classList.remove('scale-95');
+                lucide.createIcons();
             }, 50);
-            
-            lucide.createIcons();
         }
 
         function closeShareGainersModal() {
@@ -1608,7 +1618,6 @@
             renderTable();
         }
 
-        // Função para alternar entre XMR e USD no conversor
         function toggleFiatCurrency() {
             if (fiatCurrencyMode === 'xmr') {
                 fiatCurrencyMode = 'usd';
@@ -1617,11 +1626,9 @@
                 fiatCurrencyMode = 'xmr';
                 document.getElementById('fiatCurrencyLabel').innerText = 'XMR';
             }
-            // Recalcula a conversão com o novo modo
             calculateConversion(true);
         }
 
-        // Função para gerar dados simulados para o gráfico do Wownero
         function generateSimulatedChartData() {
             const prices = [];
             const labels = [];
@@ -1642,7 +1649,6 @@
             return { prices, labels };
         }
 
-        // Função para renderizar gráfico simulado do Wownero
         async function renderSimulatedChart() {
             const chartCanvas = document.getElementById('coinDetailsChart');
             const isDark = document.documentElement.classList.contains('dark');
@@ -1724,11 +1730,9 @@
             const priceInXmr = xmrPrice ? coin.current_price / xmrPrice : coin.current_price;
 
             document.getElementById('detailCoinLogo').src = logoUrl;
-            // Porcentagem agora fica ao lado do nome da moeda
             document.getElementById('detailCoinTicker').innerHTML = `${coin.name} (${coin.symbol.toUpperCase()}) <span class="text-xs font-normal ${changeColor} ml-2">${changeSign} ${Math.abs(change24h).toFixed(2)}%</span>`;
-            document.getElementById('detailCoinPrice').innerText = xmrPrice ? `${formatPrice(priceInXmr)} XMR` : `$${formatPrice(coin.current_price)}`;
+            document.getElementById('detailCoinPrice').innerHTML = xmrPrice ? `${formatPrice(priceInXmr)} XMR <span class="text-xs font-normal text-gray-400 ml-1">($${formatPrice(coin.current_price)})</span>` : `$${formatPrice(coin.current_price)}`;
             
-            // Atualiza o "Live Chart" para mostrar a porcentagem de variação
             const liveChartContainer = document.getElementById('liveChartContainer');
             if (liveChartContainer) {
                 liveChartContainer.innerHTML = `
@@ -1746,10 +1750,8 @@
             document.getElementById('statCirculating').innerText = `${coin.circulating_supply ? coin.circulating_supply.toLocaleString('en-US') : '--'} ${coin.symbol.toUpperCase()}`;
             document.getElementById('statMaxSupply').innerText = manualData.maxSupply || 'Desconhecido';
 
-            // Configura o conversor com o valor atual
             document.getElementById('convertCryptoLabel').innerText = coin.symbol;
             document.getElementById('convertCryptoInput').value = 1;
-            // Atualiza o campo fiat com o valor em XMR ou USD baseado no modo atual
             if (fiatCurrencyMode === 'xmr') {
                 document.getElementById('convertFiatInput').value = priceInXmr;
             } else {
@@ -1841,7 +1843,6 @@
             document.getElementById('details-view').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // Verifica se é Wownero para usar dados simulados no gráfico
             if (coinId === 'wownero') {
                 await renderSimulatedChart();
             } else {
@@ -2072,7 +2073,6 @@
             }
         }
 
-        // Funções do tema
         function applySavedTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -2096,9 +2096,7 @@
         }
 
         function updateThemeIcon(isDark) {
-            // Apenas para manter consistência, mas o ícone agora está no modal
             console.log('Tema alterado para:', isDark ? 'escuro' : 'claro');
-            // Re-renderiza gráficos se necessário
             if (selectedCoinId && document.getElementById('details-view') && !document.getElementById('details-view').classList.contains('hidden')) {
                 const coin = globalCoinsData.find(c => c.id === selectedCoinId);
                 if (coin) {
@@ -2111,7 +2109,6 @@
             }
         }
 
-        // Funções do modal de menu
         function openThemeMenuModal() {
             const modal = document.getElementById('themeMenuModal');
             modal.classList.remove('hidden');
