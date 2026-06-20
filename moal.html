@@ -289,6 +289,7 @@
       flex: 1 1 auto;
       justify-content: center;
       border: 1px solid #f0b90b;
+      text-decoration: none;
     }
 
     .btn-pdf i {
@@ -402,10 +403,22 @@
 
 <script>
   (function() {
-    // ---------- DADOS DAS CARTEIRAS (com arte personalizada) ----------
+    // ---------- DADOS DAS CARTEIRAS ----------
     const walletData = [
       {
         id: 1,
+        name: "Paper Wallet Oficial",
+        desc: "Documento oficial Monero para armazenamento seguro.",
+        style: "classic",
+        icon: "fa-file-pdf",
+        pattern: "◈ OFICIAL ◈",
+        seed: "•••• •••• •••• •••• ••••",
+        extra: "classic",
+        isOfficial: true,
+        url: "https://github.com/projetoswsg-ux/Pddd/raw/refs/heads/main/Monero%20Wallet%20paper%20.pdf"
+      },
+      {
+        id: 2,
         name: "Cibernética XMR",
         desc: "Arte digital com grade neon e circuito.",
         style: "cyber",
@@ -415,7 +428,7 @@
         extra: "cyberpunk"
       },
       {
-        id: 2,
+        id: 3,
         name: "Clássica Monero",
         desc: "Estilo vintage com bordas ornamentadas.",
         style: "classic",
@@ -425,7 +438,7 @@
         extra: "classic"
       },
       {
-        id: 3,
+        id: 4,
         name: "Floresta Secreta",
         desc: "Folhagem e elementos naturais.",
         style: "nature",
@@ -435,7 +448,7 @@
         extra: "nature"
       },
       {
-        id: 4,
+        id: 5,
         name: "Abstrato Geométrico",
         desc: "Formas e cores em harmonia.",
         style: "abstract",
@@ -443,183 +456,55 @@
         pattern: "▣ ▲ ■ ◆ ▲",
         seed: "•••• •••• •••• •••• ••••",
         extra: "abstract"
-      },
-      {
-        id: 5,
-        name: "Nova Aurora",
-        desc: "Arte com gradientes e ondas.",
-        style: "cyber",
-        icon: "fa-bolt",
-        pattern: "⚡ ◈ ⚡ ◈ ⚡",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "cyber"
-      },
-      {
-        id: 6,
-        name: "Ouro Negro",
-        desc: "Elegância com toques dourados.",
-        style: "classic",
-        icon: "fa-gem",
-        pattern: "◆ ✦ ◆ ✦ ◆",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "classic"
-      },
-      {
-        id: 7,
-        name: "Jardim Cripto",
-        desc: "Natureza digital com flores.",
-        style: "nature",
-        icon: "fa-leaf",
-        pattern: "🌸 ✿ 🌼 ✿ 🌸",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "nature"
-      },
-      {
-        id: 8,
-        name: "Caos Colorido",
-        desc: "Arte abstrata vibrante.",
-        style: "abstract",
-        icon: "fa-paint-brush",
-        pattern: "✦ ✧ ✦ ✧ ✦",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "abstract"
       }
     ];
 
     const gallery = document.getElementById('galleryContainer');
-    let currentFilter = 'all';
 
-    // função para gerar os cards
     function renderWallets(filter) {
       const filtered = filter === 'all' ? walletData : walletData.filter(w => w.style === filter);
       
-      if (filtered.length === 0) {
-        gallery.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8896b0;"><i class="fas fa-search" style="font-size:2rem; display:block; margin-bottom:0.5rem;"></i> Nenhuma carteira com esse estilo.</div>`;
-        return;
-      }
-
-      let html = '';
-      filtered.forEach(w => {
-        html += `
-          <div class="wallet-card" data-style="${w.style}">
-            <div class="art-area">
-              <div class="artwork">
-                <div class="monero-icon">
-                  <i class="fas ${w.icon}"></i>
-                </div>
-                <div class="art-pattern">
-                  <i class="fas fa-circle"></i>
-                  <span>${w.pattern}</span>
-                  <i class="fas fa-circle"></i>
-                </div>
-                <!-- elementos decorativos extra (arte custom) -->
-                <div style="display:flex; gap:8px; margin-top:6px; font-size:0.6rem; color:#6b7f9b;">
-                  <i class="fas fa-${w.extra === 'cyber' ? 'wifi' : w.extra === 'classic' ? 'feather' : w.extra === 'nature' ? 'seedling' : 'circle'}"></i>
-                  <span>${w.extra.toUpperCase()}</span>
-                  <i class="fas fa-${w.extra === 'cyber' ? 'satellite' : w.extra === 'classic' ? 'scroll' : w.extra === 'nature' ? 'cloud' : 'square'}"></i>
-                </div>
-              </div>
-            </div>
-            <div class="wallet-info">
-              <div class="wallet-name">
-                ${w.name}
-                <small>XMR</small>
-              </div>
-              <div class="wallet-desc">${w.desc}</div>
-              <div class="seed-placeholder">
-                <i class="fas fa-key"></i>
-                <span class="dots">${w.seed}</span>
-                <i class="fas fa-chevron-right" style="margin-left:auto; opacity:0.5; font-size:0.6rem;"></i>
-              </div>
-              <div class="btn-group">
-                <button class="btn-pdf" data-id="${w.id}"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
-                <button class="btn-outline"><i class="fas fa-print"></i> Imprimir</button>
+      gallery.innerHTML = filtered.map(w => `
+        <div class="wallet-card" data-style="${w.style}">
+          <div class="art-area">
+            <div class="artwork">
+              <div class="monero-icon"><i class="fas ${w.icon}"></i></div>
+              <div class="art-pattern">
+                <i class="fas fa-circle"></i>
+                <span>${w.pattern}</span>
+                <i class="fas fa-circle"></i>
               </div>
             </div>
           </div>
-        `;
-      });
-      gallery.innerHTML = html;
+          <div class="wallet-info">
+            <div class="wallet-name">${w.name} <small>XMR</small></div>
+            <div class="wallet-desc">${w.desc}</div>
+            <div class="seed-placeholder">
+              <i class="fas fa-key"></i>
+              <span class="dots">${w.seed}</span>
+            </div>
+            <div class="btn-group">
+              ${w.isOfficial ? 
+                `<a href="${w.url}" target="_blank" class="btn-pdf"><i class="fas fa-download"></i> Baixar PDF</a>` : 
+                `<button class="btn-pdf" data-id="${w.id}"><i class="fas fa-file-pdf"></i> Baixar PDF</button>`
+              }
+              <button class="btn-outline"><i class="fas fa-print"></i> Imprimir</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
     }
 
-    // função para "baixar PDF" (simulação)
-    function handleDownloadPDF(walletId) {
-      const wallet = walletData.find(w => w.id === walletId);
-      if (!wallet) return;
-      // Cria um PDF simbólico: na realidade faria um fetch ou geraria com jsPDF, 
-      // aqui usamos um alert com a arte personalizada para demonstrar.
-      alert(`📄 Baixando PDF da carteira "${wallet.name}"\nArte: ${wallet.extra} · ${wallet.pattern}\n\n(Na prática, o PDF conteria a arte + espaço para as palavras secretas.)`);
-    }
-
-    // --- listeners de filtro ---
     document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', function(e) {
+      btn.addEventListener('click', function() {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        const filter = this.dataset.filter;
-        currentFilter = filter;
-        renderWallets(filter);
-        // reatachar eventos dos botões PDF (pois o DOM foi recriado)
-        attachPDFEvents();
+        renderWallets(this.dataset.filter);
       });
     });
 
-    // função para anexar eventos de download aos botões PDF
-    function attachPDFEvents() {
-      document.querySelectorAll('.btn-pdf').forEach(btn => {
-        btn.removeEventListener('click', pdfHandler);
-        btn.addEventListener('click', pdfHandler);
-      });
-    }
-
-    function pdfHandler(e) {
-      e.stopPropagation();
-      const id = parseInt(this.dataset.id, 10);
-      handleDownloadPDF(id);
-    }
-
-    // clique nos botões "Imprimir" (simulação)
-    function attachPrintEvents() {
-      document.querySelectorAll('.btn-outline').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          alert('🖨️ Função de impressão: o PDF será aberto para impressão.\n(Simulação: clique em "Baixar PDF" para ver a arte.)');
-        });
-      });
-    }
-
-    // inicializar com todas as carteiras
     renderWallets('all');
-    attachPDFEvents();
-    // para os botões de impressão (que também são recriados)
-    // usamos MutationObserver para capturar os novos botões, mas como renderizamos inteiro, podemos chamar após cada render.
-    // Vamos estender a função renderWallets para também chamar attachPrintEvents 
-    // e usar um observer simples.
-
-    // sobrescrevemos o render para garantir que os eventos de print sejam anexados
-    const originalRender = renderWallets;
-    renderWallets = function(filter) {
-      originalRender(filter);
-      attachPDFEvents();
-      attachPrintEvents();
-    };
-
-    // re-executa o render com o filtro atual (all)
-    renderWallets('all');
-
-    // também garantir que qualquer clique futuro nos filtros chame o render com eventos
-    // já estamos chamando renderWallets dentro do listener de filtro, que agora tem os eventos.
-
-    // Para o "Imprimir" usamos o attachPrintEvents dentro do render.
-    // E para o PDF já está.
-
-    // pequeno extra: se houver clique em "Imprimir" fora do escopo, já tratamos.
-
-    console.log('🚀 Monero Paper Wallet Gallery carregada com arte personalizada!');
   })();
 </script>
-
-<!-- Observação: Os botões "Baixar PDF" exibem um alerta com a arte escolhida, 
-     simulando o download de um PDF personalizado. -->
 </body>
 </html>
