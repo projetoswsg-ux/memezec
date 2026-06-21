@@ -364,6 +364,21 @@
         gap: 0.5rem;
       }
     }
+
+.wallet-image{
+    width:90px;
+    height:90px;
+    object-fit:contain;
+    display:block;
+    margin:auto;
+}
+
+.monero-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+    
   </style>
 </head>
 <body>
@@ -404,107 +419,120 @@
 <script>
   (function() {
     // ---------- DADOS DAS CARTEIRAS ----------
-    const walletData = [
-      {
-        id: 1,
-        name: "Paper Wallet Oficial",
-        desc: "Documento oficial Monero para armazenamento seguro.",
-        style: "classic",
-       icon: "https://i.postimg.cc/J7B9DdDr/Picsart-26-06-17-22-04-46-887.png",
-        pattern: "◈ OFICIAL ◈",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "classic",
-        isOfficial: true,
-        url: "https://github.com/projetoswsg-ux/Pddd/raw/refs/heads/main/Monero%20Wallet%20paper%20.pdf"
-      },
-      {
-        id: 2,
-        name: "Cibernética XMR",
-        desc: "Arte digital com grade neon e circuito.",
-        style: "cyber",
-        icon: "fa-microchip",
-        pattern: "◈ 0x7F • 0x9A ◈",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "cyberpunk"
-      },
-      {
-        id: 3,
-        name: "Clássica Monero",
-        desc: "Estilo vintage com bordas ornamentadas.",
-        style: "classic",
-        icon: "fa-crown",
-        pattern: "⚜️ ✦ ⚜️ ✦ ⚜️",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "classic"
-      },
-      {
-        id: 4,
-        name: "Floresta Secreta",
-        desc: "Folhagem e elementos naturais.",
-        style: "nature",
-        icon: "fa-tree",
-        pattern: "🌿 ✦ 🌱 ✦ 🌿",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "nature"
-      },
-      {
-        id: 5,
-        name: "Abstrato Geométrico",
-        desc: "Formas e cores em harmonia.",
-        style: "abstract",
-        icon: "fa-cube",
-        pattern: "▣ ▲ ■ ◆ ▲",
-        seed: "•••• •••• •••• •••• ••••",
-        extra: "abstract"
-      }
-    ];
+                const walletData = [
+{
+id: 1,
+name: "Paper Wallet Oficial",
+desc: "Documento oficial Monero para armazenamento seguro.",
+style: "classic",
+image: "https://raw.githubusercontent.com/projetoswsg-ux/Pddd/refs/heads/main/pdf-preview.png",
+pattern: "◈ OFICIAL ◈",
+seed: "•••• •••• •••• •••• ••••",
+extra: "classic",
+isOfficial: true,
+url: "https://github.com/projetoswsg-ux/Pddd/raw/refs/heads/main/Monero%20Wallet%20paper%20.pdf"
+},
+{
+id: 2,
+name: "Cibernética XMR",
+desc: "Arte digital com grade neon e circuito.",
+style: "cyber",
+icon: "fa-microchip",
+pattern: "◈ 0x7F • 0x9A ◈",
+seed: "•••• •••• •••• •••• ••••",
+extra: "cyberpunk"
+},
+{
+id: 3,
+name: "Clássica Monero",
+desc: "Estilo vintage com bordas ornamentadas.",
+style: "classic",
+icon: "fa-crown",
+pattern: "⚜️ ✦ ⚜️ ✦ ⚜️",
+seed: "•••• •••• •••• •••• ••••",
+extra: "classic"
+},
+{
+id: 4,
+name: "Floresta Secreta",
+desc: "Folhagem e elementos naturais.",
+style: "nature",
+icon: "fa-tree",
+pattern: "🌿 ✦ 🌱 ✦ 🌿",
+seed: "•••• •••• •••• •••• ••••",
+extra: "nature"
+},
+{
+id: 5,
+name: "Abstrato Geométrico",
+desc: "Formas e cores em harmonia.",
+style: "abstract",
+icon: "fa-cube",
+pattern: "▣ ▲ ■ ◆ ▲",
+seed: "•••• •••• •••• •••• ••••",
+extra: "abstract"
+}
+];
 
-    const gallery = document.getElementById('galleryContainer');
+function renderWallets(filter) {
+const filtered = filter === 'all'
+? walletData
+: walletData.filter(w => w.style === filter);
 
-    function renderWallets(filter) {
-      const filtered = filter === 'all' ? walletData : walletData.filter(w => w.style === filter);
-      
-      gallery.innerHTML = filtered.map(w => `
-        <div class="wallet-card" data-style="${w.style}">
-          <div class="art-area">
-            <div class="artwork">
-              <div class="monero-icon"><i class="fas ${w.icon}"></i></div>
-              <div class="art-pattern">
-                <i class="fas fa-circle"></i>
-                <span>${w.pattern}</span>
-                <i class="fas fa-circle"></i>
-              </div>
-            </div>
-          </div>
-          <div class="wallet-info">
-            <div class="wallet-name">${w.name} <small>XMR</small></div>
-            <div class="wallet-desc">${w.desc}</div>
-            <div class="seed-placeholder">
-              <i class="fas fa-key"></i>
-              <span class="dots">${w.seed}</span>
-            </div>
-            <div class="btn-group">
-              ${w.isOfficial ? 
-                `<a href="${w.url}" target="_blank" class="btn-pdf"><i class="fas fa-download"></i> Baixar PDF</a>` : 
-                `<button class="btn-pdf" data-id="${w.id}"><i class="fas fa-file-pdf"></i> Baixar PDF</button>`
-              }
-              <button class="btn-outline"><i class="fas fa-print"></i> Imprimir</button>
-            </div>
-          </div>
+gallery.innerHTML = filtered.map(w => `
+
+<div class="wallet-card" data-style="${w.style}">
+    <div class="art-area">
+        <div class="artwork">
+
+```
+        <div class="monero-icon">
+            ${
+                w.image
+                ? `<img src="${w.image}" alt="${w.name}" class="wallet-image">`
+                : `<i class="fas ${w.icon}"></i>`
+            }
         </div>
-      `).join('');
-    }
 
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        renderWallets(this.dataset.filter);
-      });
-    });
+        <div class="art-pattern">
+            <i class="fas fa-circle"></i>
+            <span>${w.pattern}</span>
+            <i class="fas fa-circle"></i>
+        </div>
 
-    renderWallets('all');
-  })();
+    </div>
+</div>
+
+<div class="wallet-info">
+    <div class="wallet-name">${w.name} <small>XMR</small></div>
+    <div class="wallet-desc">${w.desc}</div>
+
+    <div class="seed-placeholder">
+        <i class="fas fa-key"></i>
+        <span class="dots">${w.seed}</span>
+    </div>
+
+    <div class="btn-group">
+        ${
+            w.isOfficial
+            ? `<a href="${w.url}" target="_blank" class="btn-pdf">
+                  <i class="fas fa-download"></i> Baixar PDF
+               </a>`
+            : `<button class="btn-pdf" data-id="${w.id}">
+                  <i class="fas fa-file-pdf"></i> Baixar PDF
+               </button>`
+        }
+
+        <button class="btn-outline">
+            <i class="fas fa-print"></i> Imprimir
+        </button>
+    </div>
+</div>
+```
+
+</div>
+`).join('');
+}
 </script>
 </body>
 </html>
