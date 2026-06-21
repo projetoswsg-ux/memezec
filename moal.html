@@ -163,9 +163,81 @@
     }
 
     .artwork .monero-icon {
-      font-size: 3.8rem;
+      width: 100%;
+      max-width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.2rem;
+      position: relative;
+      border-radius: 16px;
+      overflow: visible;
+      background: transparent;
+      aspect-ratio: auto;
+    }
+
+    /* Efeito de luz pulsante atrás da imagem */
+    .artwork .monero-icon::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 20px;
+      padding: 4px;
+      background: linear-gradient(45deg, #ff6600, #f0b90b, #ff6600, #f0b90b);
+      background-size: 300% 300%;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: pulseGlow 2s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    /* Sombra de luz atrás da imagem */
+    .artwork .monero-icon::after {
+      content: '';
+      position: absolute;
+      inset: -15px;
+      border-radius: 24px;
+      background: radial-gradient(circle at center, rgba(255, 102, 0, 0.4), transparent 70%);
+      filter: blur(20px);
+      animation: pulseGlow 2s ease-in-out infinite;
+      z-index: -1;
+      opacity: 0.8;
+    }
+
+    @keyframes pulseGlow {
+      0% {
+        background-position: 0% 50%;
+        opacity: 0.6;
+        transform: scale(1);
+      }
+      50% {
+        background-position: 100% 50%;
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      100% {
+        background-position: 0% 50%;
+        opacity: 0.6;
+        transform: scale(1);
+      }
+    }
+
+    .artwork .monero-icon img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 16px;
+      position: relative;
+      z-index: 1;
+      display: block;
+    }
+
+    .artwork .monero-icon i {
+      font-size: 3.5rem;
       color: #f0b90b;
-      filter: drop-shadow(0 0 6px #f0b90b66);
+      position: relative;
+      z-index: 1;
       background: #1b2535;
       width: 80px;
       height: 80px;
@@ -173,7 +245,6 @@
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      margin-bottom: 0.2rem;
     }
 
     .artwork .art-pattern {
@@ -364,21 +435,6 @@
         gap: 0.5rem;
       }
     }
-
-.wallet-image{
-    width:90px;
-    height:90px;
-    object-fit:contain;
-    display:block;
-    margin:auto;
-}
-
-.monero-icon{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-    
   </style>
 </head>
 <body>
@@ -405,9 +461,7 @@
   </div>
 
   <!-- galeria de carteiras -->
-  <div class="gallery" id="galleryContainer">
-    <!-- os cards serão gerados via JS para manter estrutura limpa -->
-  </div>
+  <div class="gallery" id="galleryContainer"></div>
 
   <!-- rodapé -->
   <div class="footer">
@@ -419,120 +473,136 @@
 <script>
   (function() {
     // ---------- DADOS DAS CARTEIRAS ----------
-                const walletData = [
-{
-id: 1,
-name: "Paper Wallet Oficial",
-desc: "Documento oficial Monero para armazenamento seguro.",
-style: "classic",
-image: "https://raw.githubusercontent.com/projetoswsg-ux/Pddd/refs/heads/main/pdf-preview.png",
-pattern: "◈ OFICIAL ◈",
-seed: "•••• •••• •••• •••• ••••",
-extra: "classic",
-isOfficial: true,
-url: "https://github.com/projetoswsg-ux/Pddd/raw/refs/heads/main/Monero%20Wallet%20paper%20.pdf"
-},
-{
-id: 2,
-name: "Cibernética XMR",
-desc: "Arte digital com grade neon e circuito.",
-style: "cyber",
-icon: "fa-microchip",
-pattern: "◈ 0x7F • 0x9A ◈",
-seed: "•••• •••• •••• •••• ••••",
-extra: "cyberpunk"
-},
-{
-id: 3,
-name: "Clássica Monero",
-desc: "Estilo vintage com bordas ornamentadas.",
-style: "classic",
-icon: "fa-crown",
-pattern: "⚜️ ✦ ⚜️ ✦ ⚜️",
-seed: "•••• •••• •••• •••• ••••",
-extra: "classic"
-},
-{
-id: 4,
-name: "Floresta Secreta",
-desc: "Folhagem e elementos naturais.",
-style: "nature",
-icon: "fa-tree",
-pattern: "🌿 ✦ 🌱 ✦ 🌿",
-seed: "•••• •••• •••• •••• ••••",
-extra: "nature"
-},
-{
-id: 5,
-name: "Abstrato Geométrico",
-desc: "Formas e cores em harmonia.",
-style: "abstract",
-icon: "fa-cube",
-pattern: "▣ ▲ ■ ◆ ▲",
-seed: "•••• •••• •••• •••• ••••",
-extra: "abstract"
-}
-];
+    const walletData = [
+      {
+        id: 1,
+        name: "Paper Wallet Oficial",
+        desc: "Documento oficial Monero para armazenamento seguro.",
+        style: "classic",
+        image: "https://i.postimg.cc/J7B9DdDr/Picsart-26-06-17-22-04-46-887.png",
+        pattern: "◈ OFICIAL ◈",
+        seed: "•••• •••• •••• •••• ••••",
+        extra: "classic",
+        isOfficial: true,
+        url: "https://github.com/projetoswsg-ux/Pddd/raw/refs/heads/main/Monero%20Wallet%20paper%20.pdf"
+      },
+      {
+        id: 2,
+        name: "Cibernética XMR",
+        desc: "Arte digital com grade neon e circuito.",
+        style: "cyber",
+        icon: "fa-microchip",
+        pattern: "◈ 0x7F • 0x9A ◈",
+        seed: "•••• •••• •••• •••• ••••",
+        extra: "cyberpunk"
+      },
+      {
+        id: 3,
+        name: "Clássica Monero",
+        desc: "Estilo vintage com bordas ornamentadas.",
+        style: "classic",
+        icon: "fa-crown",
+        pattern: "⚜️ ✦ ⚜️ ✦ ⚜️",
+        seed: "•••• •••• •••• •••• ••••",
+        extra: "classic"
+      },
+      {
+        id: 4,
+        name: "Floresta Secreta",
+        desc: "Folhagem e elementos naturais.",
+        style: "nature",
+        icon: "fa-tree",
+        pattern: "🌿 ✦ 🌱 ✦ 🌿",
+        seed: "•••• •••• •••• •••• ••••",
+        extra: "nature"
+      },
+      {
+        id: 5,
+        name: "Abstrato Geométrico",
+        desc: "Formas e cores em harmonia.",
+        style: "abstract",
+        icon: "fa-cube",
+        pattern: "▣ ▲ ■ ◆ ▲",
+        seed: "•••• •••• •••• •••• ••••",
+        extra: "abstract"
+      }
+    ];
 
-function renderWallets(filter) {
-const filtered = filter === 'all'
-? walletData
-: walletData.filter(w => w.style === filter);
+    const gallery = document.getElementById('galleryContainer');
+    const filterBtns = document.querySelectorAll('.filter-btn');
 
-gallery.innerHTML = filtered.map(w => `
+    function renderWallets(filter) {
+      const filtered = filter === 'all' 
+        ? walletData 
+        : walletData.filter(w => w.style === filter);
 
-<div class="wallet-card" data-style="${w.style}">
-    <div class="art-area">
-        <div class="artwork">
+      gallery.innerHTML = filtered.map(w => `
+        <div class="wallet-card" data-style="${w.style}">
+          <div class="art-area">
+            <div class="artwork">
+              <div class="monero-icon">
+                ${w.image 
+                  ? `<img src="${w.image}" alt="${w.name}">`
+                  : `<i class="fas ${w.icon}"></i>`
+                }
+              </div>
+              <div class="art-pattern">
+                <i class="fas fa-circle"></i>
+                <span>${w.pattern}</span>
+                <i class="fas fa-circle"></i>
+              </div>
+            </div>
+          </div>
 
-```
-        <div class="monero-icon">
-            ${
-                w.image
-                ? `<img src="${w.image}" alt="${w.name}" class="wallet-image">`
-                : `<i class="fas ${w.icon}"></i>`
-            }
+          <div class="wallet-info">
+            <div class="wallet-name">${w.name} <small>XMR</small></div>
+            <div class="wallet-desc">${w.desc}</div>
+
+            <div class="seed-placeholder">
+              <i class="fas fa-key"></i>
+              <span class="dots">${w.seed}</span>
+            </div>
+
+            <div class="btn-group">
+              ${w.isOfficial 
+                ? `<a href="${w.url}" target="_blank" class="btn-pdf">
+                    <i class="fas fa-download"></i> Baixar PDF
+                  </a>`
+                : `<button class="btn-pdf" data-id="${w.id}">
+                    <i class="fas fa-file-pdf"></i> Baixar PDF
+                  </button>`
+              }
+              <button class="btn-outline">
+                <i class="fas fa-print"></i> Imprimir
+              </button>
+            </div>
+          </div>
         </div>
+      `).join('');
+    }
 
-        <div class="art-pattern">
-            <i class="fas fa-circle"></i>
-            <span>${w.pattern}</span>
-            <i class="fas fa-circle"></i>
-        </div>
+    // Filtros
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const filter = this.dataset.filter;
+        renderWallets(filter);
+      });
+    });
 
-    </div>
-</div>
+    // Renderização inicial
+    renderWallets('all');
 
-<div class="wallet-info">
-    <div class="wallet-name">${w.name} <small>XMR</small></div>
-    <div class="wallet-desc">${w.desc}</div>
+    // Event listener para os botões "Baixar PDF" não oficiais (feedback)
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.btn-pdf');
+      if (btn && !btn.closest('a')) {
+        alert('Este é um modelo de exemplo. O download do PDF estará disponível em breve!');
+      }
+    });
 
-    <div class="seed-placeholder">
-        <i class="fas fa-key"></i>
-        <span class="dots">${w.seed}</span>
-    </div>
-
-    <div class="btn-group">
-        ${
-            w.isOfficial
-            ? `<a href="${w.url}" target="_blank" class="btn-pdf">
-                  <i class="fas fa-download"></i> Baixar PDF
-               </a>`
-            : `<button class="btn-pdf" data-id="${w.id}">
-                  <i class="fas fa-file-pdf"></i> Baixar PDF
-               </button>`
-        }
-
-        <button class="btn-outline">
-            <i class="fas fa-print"></i> Imprimir
-        </button>
-    </div>
-</div>
-```
-
-</div>
-`).join('');
-}
+  })();
 </script>
 </body>
 </html>
