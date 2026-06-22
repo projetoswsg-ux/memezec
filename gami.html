@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monero Quest - O Jogo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        #gameWrapper {
+            background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 100%);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 80px rgba(0, 255, 200, 0.1), inset 0 0 80px rgba(0, 255, 200, 0.02);
+            border: 2px solid rgba(0, 255, 200, 0.15);
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 12px;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8);
+            width: 100%;
+            height: auto;
+            background: #0a0a1a;
+            cursor: pointer;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        #ui-overlay>div {
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 200, 0.1);
+            font-family: 'Courier New', monospace;
+        }
+
+        #ui-overlay .stats span {
+            color: #00ffc8;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #ui-overlay .title {
+            color: #00ffc8;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0, 255, 200, 0.3);
+        }
+
+        #gameOverScreen,
+        #winScreen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            z-index: 20;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #fff;
+            text-align: center;
+            padding: 40px;
+        }
+
+        #gameOverScreen.active,
+        #winScreen.active {
+            display: flex;
+        }
+
+        #gameOverScreen h1 {
+            font-size: 4rem;
+            color: #ff4444;
+            text-shadow: 0 0 40px rgba(255, 68, 68, 0.5);
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #winScreen h1 {
+            font-size: 4rem;
+            color: #00ffc8;
+            text-shadow: 0 0 40px rgba(0, 255, 200, 0.5);
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #gameOverScreen p,
+        #winScreen p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 10px 0 30px 0;
+        }
+
+        .btn-restart {
+            background: transparent;
+            border: 2px solid #00ffc8;
+            color: #00ffc8;
+            padding: 16px 50px;
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            pointer-events: all;
+        }
+
+        .btn-restart:hover {
+            background: #00ffc8;
+            color: #0a0a0f;
+            box-shadow: 0 0 60px rgba(0, 255, 200, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn-restart i {
+            margin-right: 10px;
+        }
+
+        @media (max-width: 800px) {
+            #gameWrapper {
+                padding: 10px;
+                border-radius: 12px;
+            }
+            #ui-overlay {
+                top: 15px;
+                left: 15px;
+                right: 15px;
+                font-size: 11px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            #ui-overlay>div {
+                padding: 8px 14px;
+            }
+            #gameOverScreen h1,
+            #winScreen h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gameWrapper">
+        <canvas id="gameCanvas" width="900" height="500"></canvas>
+
+        <!-- UI Overlay -->
+        <div id="ui-overlay">
+            <div class="title">
+                <span style="color:#fff;">⧫</span> MONERO QUEST
+            </div>
+            <div class="stats">
+                🪙 <span id="coinCount">0</span> &nbsp;|&nbsp; ❤️ <span id="livesCount">3</span> &nbsp;|&nbsp; 🏆 <span id="levelCount">1</span>
+            </div>
+        </div>
+
+        <!-- Game Over -->
+        <div id="gameOverScreen">
+            <h1>💀 GAME OVER</h1>
+            <p>Você foi pego pelo Fisco! Mas não desista, a privacidade sempre vence.</p>
+            <button class="btn-restart" onclick="reiniciarJogo()">
+                <i class="fas fa-redo"></i> REINICIAR
+            </button>
+        </div>
+
+        <!-- Win Screen -->
+        <div id="winScreen">
+            <h1>🏆 VOCÊ VENCEU!</h1>
+            <p>Parabéns! Você dominou o ecossistema Monero e escapou com sua privacidade intacta!</p>
+            <p style="font-size:0.9rem; color:#00ffc8;">⧫ Monero é liberdade ⧫</p>
+            <button class="btn-restart" onclick="reiniciarJogo()">
+                <i class="fas fa-play"></i> JOGAR NOVAMENTE
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  MONERO QUEST - JOGO DE PLATAFORMA 2D
+        // ============================================================
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = 900,
+            H = 500;
+
+        // ============================================================
+        //  ÁUDIO (sintetizado com Web Audio)
+        // ============================================================
+        class AudioManager {
+            constructor() {
+                this.ctx = null;
+                try {
+                    this.ctx = new(window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {}
+            }
+
+            playTone(freq, duration, type = 'square', volume = 0.15) {
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {}
+            }
+
+            jump() { this.playTone(500, 0.12, 'square', 0.1);
+                setTimeout(() => this.playTone(700, 0.1, 'square', 0.08), 80); }
+            coin() { this.playTone(900, 0.08, 'sine', 0.12);
+                setTimeout(() => this.playTone(1200, 0.08, 'sine', 0.1), 100); }
+            hurt() { this.playTone(200, 0.3, 'sawtooth', 0.15); }
+            win() {
+                [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => this.playTone(f, 0.15, 'sine', 0.12), i * 150));
+            }
+            gameOver() { this.playTone(400, 0.4, 'sawtooth', 0.2);
+                setTimeout(() => this.playTone(300, 0.5, 'sawtooth', 0.15), 300); }
+        }
+
+        const audio = new AudioManager();
+
+        // ============================================================
+        //  ENTRADAS DO TECLADO
+        // ============================================================
+        const keys = {};
+        document.addEventListener('keydown', e => {
+            keys[e.key] = true;
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+        });
+        document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+        // ============================================================
+        //  CLASSE DO JOGADOR (Monero Coin)
+        // ============================================================
+        class Player {
+            constructor() {
+                this.x = 60;
+                this.y = 300;
+                this.w = 32;
+                this.h = 32;
+                this.vx = 0;
+                this.vy = 0;
+                this.speed = 4.5;
+                this.jumpPower = -10;
+                this.gravity = 0.55;
+                this.onGround = false;
+                this.lives = 3;
+                this.coins = 0;
+                this.facing = 1;
+                this.frame = 0;
+                this.frameTimer = 0;
+                this.invincible = 0;
+                this.doubleJump = false;
+                this.canDoubleJump = true;
+            }
+
+            update(platforms, enemies, coins, level) {
+                // Movimento horizontal
+                let moveX = 0;
+                if (keys['ArrowLeft'] || keys['a']) { moveX = -1;
+                    this.facing = -1; }
+                if (keys['ArrowRight'] || keys['d']) { moveX = 1;
+                    this.facing = 1; }
+                this.vx = moveX * this.speed;
+
+                // Pulo
+                const jumpKey = keys[' '] || keys['ArrowUp'] || keys['w'];
+                if (jumpKey) {
+                    if (this.onGround) {
+                        this.vy = this.jumpPower;
+                        this.onGround = false;
+                        this.canDoubleJump = true;
+                        audio.jump();
+                    } else if (this.canDoubleJump && !this.onGround) {
+                        this.vy = this.jumpPower * 0.85;
+                        this.canDoubleJump = false;
+                        this.doubleJump = true;
+                        audio.jump();
+                    }
+                }
+
+                // Gravidade
+                this.vy += this.gravity;
+                if (this.vy > 12) this.vy = 12;
+
+                // Movimento X com colisão
+                this.x += this.vx;
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.w > W) this.x = W - this.w;
+
+                // Movimento Y com colisão
+                this.y += this.vy;
+                this.onGround = false;
+
+                // Colisão com plataformas
+                for (let p of platforms) {
+                    if (this.intersects(p)) {
+                        if (this.vy > 0 && this.y + this.h - this.vy <= p.y + 2) {
+                            this.y = p.y - this.h;
+                            this.vy = 0;
+                            this.onGround = true;
+                            this.canDoubleJump = true;
+                            this.doubleJump = false;
+                        } else if (this.vy < 0 && this.y - this.vy >= p.y + p.h - 2) {
+                            this.y = p.y + p.h;
+                            this.vy = 0;
+                        } else if (this.vx > 0 && this.x + this.w - this.vx <= p.x + 2) {
+                            this.x = p.x - this.w;
+                        } else if (this.vx < 0 && this.x - this.vx >= p.x + p.w - 2) {
+                            this.x = p.x + p.w;
+                        }
+                    }
+                }
+
+                // Colisão com inimigos
+                for (let e of enemies) {
+                    if (!e.active) continue;
+                    if (this.intersects(e)) {
+                        if (this.vy > 0 && this.y + this.h - this.vy <= e.y + 10) {
+                            // Mata inimigo por cima
+                            e.active = false;
+                            this.vy = -7;
+                            audio.coin();
+                            this.coins += 2;
+                        } else if (this.invincible === 0) {
+                            // Dano
+                            this.takeDamage();
+                        }
+                    }
+                }
+
+                // Coleta de moedas
+                for (let c of coins) {
+                    if (!c.active) continue;
+                    if (this.intersects(c)) {
+                        c.active = false;
+                        this.coins += c.value || 1;
+                        audio.coin();
+                        // Efeito visual de partícula
+                        spawnParticles(c.x + c.w / 2, c.y + c.h / 2, '#ffd700', 8);
+                    }
+                }
+
+                // Invincibilidade
+                if (this.invincible > 0) this.invincible--;
+
+                // Animação
+                this.frameTimer++;
+                if (Math.abs(this.vx) > 0.5 && this.onGround) {
+                    if (this.frameTimer % 8 === 0) this.frame = (this.frame + 1) % 4;
+                } else {
+                    this.frame = 0;
+                }
+
+                // Limites inferiores
+                if (this.y > H + 50) {
+                    this.takeDamage();
+                    this.y = 100;
+                    this.x = 60;
+                    this.vy = 0;
+                }
+
+                // Verifica se chegou ao final (portal)
+                if (this.x > W - 80 && level.complete) {
+                    return 'win';
+                }
+                return 'playing';
+            }
+
+            intersects(obj) {
+                return this.x < obj.x + obj.w &&
+                    this.x + this.w > obj.x &&
+                    this.y < obj.y + obj.h &&
+                    this.y + this.h > obj.y;
+            }
+
+            takeDamage() {
+                if (this.invincible > 0) return;
+                this.lives--;
+                this.invincible = 90;
+                audio.hurt();
+                if (this.lives <= 0) {
+                    return 'gameover';
+                }
+                return 'hurt';
+            }
+
+            draw() {
+                // Sombra
+                ctx.shadowColor = 'rgba(0, 255, 200, 0.2)';
+                ctx.shadowBlur = 20;
+
+                // Invincibilidade piscando
+                if (this.invincible > 0 && Math.floor(this.invincible / 6) % 2 === 0) {
+                    ctx.globalAlpha = 0.4;
+                }
+
+                const cx = this.x + this.w / 2;
+                const cy = this.y + this.h / 2;
+                const r = this.w / 2;
+
+                // Corpo da moeda (gradiente)
+                const grad = ctx.createRadialGradient(cx - 4, cy - 4, 2, cx, cy, r);
+                grad.addColorStop(0, '#ffd700');
+                grad.addColorStop(0.6, '#ff8c00');
+                grad.addColorStop(1, '#cc5500');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Brilho
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(255, 215, 0, 0.3)';
+                ctx.fillStyle = 'rgba(255, 255, 200, 0.3)';
+                ctx.beginPath();
+                ctx.arc(cx - 6, cy - 8, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Símbolo Monero (⧫)
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(10, 10, 15, 0.85)';
+                ctx.font = 'bold 18px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('⧫', cx, cy + 1);
+
+                // Olhos (direção)
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(cx - 6 + this.facing * 4, cy - 4, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx + 6 + this.facing * 4, cy - 4, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#0a0a0f';
+                ctx.beginPath();
+                ctx.arc(cx - 5 + this.facing * 4, cy - 3, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx + 7 + this.facing * 4, cy - 3, 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // ============================================================
+        //  PARTÍCULAS
+        // ============================================================
+        let particles = [];
+
+        function spawnParticles(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x,
+                    y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6 - 2,
+                    life: 40 + Math.random() * 30,
+                    maxLife: 70,
+                    r: 2 + Math.random() * 4,
+                    color,
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.1;
+                p.life--;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function drawParticles() {
+            for (let p of particles) {
+                const alpha = p.life / p.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r * alpha, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+
+        // ============================================================
+        //  GERADOR DE FASES
+        // ============================================================
+        function gerarFase(level) {
+            const platforms = [];
+            const enemies = [];
+            const coins = [];
+            const groundY = 440;
+
+            // Chão
+            platforms.push({ x: 0, y: groundY, w: 900, h: 20 });
+
+            // Plataformas flutuantes (varia com o nível)
+            const numPlatforms = 6 + level * 2;
+            for (let i = 0; i < numPlatforms; i++) {
+                const px = 60 + i * (800 / numPlatforms) + Math.random() * 40;
+                const py = 250 + Math.random() * 160;
+                const pw = 60 + Math.random() * 80;
+                platforms.push({ x: px, y: py, w: pw, h: 14 });
+            }
+
+            // Plataforma final (portal)
+            platforms.push({ x: 820, y: 380, w: 60, h: 14 });
+
+            // Inimigos
+            const numEnemies = 3 + level;
+            for (let i = 0; i < numEnemies; i++) {
+                const ex = 150 + i * (600 / numEnemies) + Math.random() * 50;
+                enemies.push({
+                    x: ex,
+                    y: groundY - 28,
+                    w: 28,
+                    h: 28,
+                    vx: (1 + level * 0.3) * (Math.random() > 0.5 ? 1 : -1),
+                    minX: ex - 80 - Math.random() * 60,
+                    maxX: ex + 80 + Math.random() * 60,
+                    active: true,
+                    frame: 0,
+                });
+            }
+
+            // Moedas
+            const numCoins = 12 + level * 4;
+            for (let i = 0; i < numCoins; i++) {
+                const cx = 40 + Math.random() * 820;
+                const cy = 100 + Math.random() * 300;
+                coins.push({
+                    x: cx,
+                    y: cy,
+                    w: 16,
+                    h: 16,
+                    active: true,
+                    value: 1,
+                    bob: Math.random() * Math.PI * 2,
+                });
+            }
+
+            // Moedas especiais (valor 3)
+            for (let i = 0; i < level; i++) {
+                const cx = 100 + Math.random() * 700;
+                coins.push({
+                    x: cx,
+                    y: 120 + Math.random() * 200,
+                    w: 20,
+                    h: 20,
+                    active: true,
+                    value: 3,
+                    bob: Math.random() * Math.PI * 2,
+                    special: true,
+                });
+            }
+
+            return {
+                platforms,
+                enemies,
+                coins,
+                groundY,
+                complete: false,
+                name: `FASE ${level}`,
+                level,
+            };
+        }
+
+        // ============================================================
+        //  ESTADO DO JOGO
+        // ============================================================
+        let player = new Player();
+        let currentLevel = 1;
+        let fase = gerarFase(currentLevel);
+        let gameState = 'playing'; // playing, gameover, win
+        let frameCount = 0;
+
+        // ============================================================
+        //  FUNÇÃO PRINCIPAL DE UPDATE
+        // ============================================================
+        function update() {
+            if (gameState !== 'playing') return;
+            frameCount++;
+
+            // Atualiza moedas (animação)
+            for (let c of fase.coins) {
+                if (c.active) {
+                    c.bob += 0.04;
+                    c.y += Math.sin(c.bob) * 0.15;
+                }
+            }
+
+            // Atualiza inimigos
+            for (let e of fase.enemies) {
+                if (!e.active) continue;
+                e.x += e.vx;
+                if (e.x < e.minX || e.x > e.maxX) e.vx *= -1;
+                e.frame += 0.05;
+            }
+
+            // Atualiza jogador
+            const result = player.update(fase.platforms, fase.enemies, fase.coins, fase);
+            if (result === 'gameover') {
+                gameState = 'gameover';
+                audio.gameOver();
+                document.getElementById('gameOverScreen').classList.add('active');
+                return;
+            }
+            if (result === 'win') {
+                gameState = 'win';
+                audio.win();
+                document.getElementById('winScreen').classList.add('active');
+                document.getElementById('winScreen').querySelector('p').textContent =
+                    `Parabéns! Você completou a FASE ${currentLevel} com ${player.coins} moedas!`;
+                return;
+            }
+
+            // Verifica se todas as moedas foram coletadas
+            const totalCoins = fase.coins.filter(c => c.active).length;
+            if (totalCoins === 0) {
+                fase.complete = true;
+            }
+
+            // Atualiza partículas
+            updateParticles();
+
+            // Atualiza UI
+            document.getElementById('coinCount').textContent = player.coins;
+            document.getElementById('livesCount').textContent = player.lives;
+            document.getElementById('levelCount').textContent = currentLevel;
+        }
+
+        // ============================================================
+        //  FUNÇÃO DE DESENHO
+        // ============================================================
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+
+            // ===== FUNDO =====
+            // Céu gradiente
+            const sky = ctx.createLinearGradient(0, 0, 0, H);
+            sky.addColorStop(0, '#0a0a2a');
+            sky.addColorStop(0.5, '#1a1a3e');
+            sky.addColorStop(1, '#0a0a1a');
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, W, H);
+
+            // Estrelas
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            for (let i = 0; i < 50; i++) {
+                const sx = (i * 137 + 50) % W;
+                const sy = (i * 97 + 30) % (H * 0.7);
+                const sr = 0.5 + (i % 3) * 0.5;
+                const twinkle = 0.5 + 0.5 * Math.sin(frameCount * 0.02 + i);
+                ctx.globalAlpha = 0.3 * twinkle;
+                ctx.beginPath();
+                ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // ===== PLATAFORMAS =====
+            for (let p of fase.platforms) {
+                const grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+                grad.addColorStop(0, '#00cc88');
+                grad.addColorStop(0.3, '#008866');
+                grad.addColorStop(1, '#004433');
+                ctx.fillStyle = grad;
+                ctx.shadowColor = 'rgba(0, 255, 200, 0.2)';
+                ctx.shadowBlur = 15;
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                // Brilho superior
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(0, 255, 200, 0.15)';
+                ctx.fillRect(p.x, p.y, p.w, 2);
+            }
+
+            // ===== MOEDAS =====
+            for (let c of fase.coins) {
+                if (!c.active) continue;
+                const cx = c.x + c.w / 2;
+                const cy = c.y + c.h / 2;
+                const r = c.w / 2;
+                const scale = 0.9 + 0.1 * Math.sin(c.bob || 0);
+
+                // Brilho
+                ctx.shadowColor = c.special ? 'rgba(255, 100, 255, 0.4)' : 'rgba(255, 215, 0, 0.3)';
+                ctx.shadowBlur = c.special ? 25 : 15;
+
+                // Corpo
+                const grad = ctx.createRadialGradient(cx - 2, cy - 2, 1, cx, cy, r);
+                if (c.special) {
+                    grad.addColorStop(0, '#ff66ff');
+                    grad.addColorStop(0.5, '#cc44cc');
+                    grad.addColorStop(1, '#882288');
+                } else {
+                    grad.addColorStop(0, '#ffd700');
+                    grad.addColorStop(0.6, '#ff8c00');
+                    grad.addColorStop(1, '#cc5500');
+                }
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r * scale, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Símbolo
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = c.special ? '#fff' : 'rgba(10,10,15,0.7)';
+                ctx.font = `${c.special ? 12 : 10}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(c.special ? '⭐' : '⧫', cx, cy + 1);
+
+                // Brilho
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.beginPath();
+                ctx.arc(cx - 3, cy - 4, r * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // ===== INIMIGOS =====
+            for (let e of fase.enemies) {
+                if (!e.active) continue;
+                const ex = e.x,
+                    ey = e.y;
+
+                // Corpo
+                ctx.shadowColor = 'rgba(255, 50, 50, 0.3)';
+                ctx.shadowBlur = 20;
+                const grad = ctx.createRadialGradient(ex + 6, ey + 6, 2, ex + 14, ey + 14, 16);
+                grad.addColorStop(0, '#ff4444');
+                grad.addColorStop(0.5, '#cc2222');
+                grad.addColorStop(1, '#881111');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(ex + 14, ey + 14, 14, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Olhos
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(ex + 9, ey + 12, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(ex + 19, ey + 12, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#cc0000';
+                const eyeDir = e.vx > 0 ? 2 : -2;
+                ctx.beginPath();
+                ctx.arc(ex + 9 + eyeDir, ey + 13, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(ex + 19 + eyeDir, ey + 13, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // "Fisco" label
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx.font = '6px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('FISCO', ex + 14, ey + 32);
+
+                // Spikes (chifres)
+                ctx.fillStyle = '#ff2222';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(255,0,0,0.2)';
+                ctx.beginPath();
+                ctx.moveTo(ex + 4, ey + 8);
+                ctx.lineTo(ex + 8, ey + 2);
+                ctx.lineTo(ex + 12, ey + 8);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(ex + 16, ey + 8);
+                ctx.lineTo(ex + 20, ey + 2);
+                ctx.lineTo(ex + 24, ey + 8);
+                ctx.fill();
+            }
+
+            // ===== PORTAL (final) =====
+            if (fase.complete) {
+                const px = 830,
+                    py = 355;
+                ctx.shadowColor = 'rgba(0, 255, 200, 0.6)';
+                ctx.shadowBlur = 40;
+                const grad = ctx.createRadialGradient(px + 15, py + 15, 5, px + 15, py + 15, 25);
+                grad.addColorStop(0, 'rgba(0, 255, 200, 0.4)');
+                grad.addColorStop(0.5, 'rgba(0, 200, 255, 0.2)');
+                grad.addColorStop(1, 'rgba(0, 255, 200, 0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(px + 15, py + 15, 30 + 5 * Math.sin(frameCount * 0.05), 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = 'rgba(0, 255, 200, 0.15)';
+                ctx.font = '40px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🚪', px + 15, py + 18);
+
+                ctx.fillStyle = 'rgba(0, 255, 200, 0.3)';
+                ctx.font = '10px Courier New';
+                ctx.fillText('SAIR', px + 15, py + 50);
+            }
+
+            // ===== JOGADOR =====
+            ctx.shadowBlur = 0;
+            player.draw();
+
+            // ===== PARTÍCULAS =====
+            drawParticles();
+
+            // ===== UI DO JOGO =====
+            // Dica de teclas
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.font = '10px Courier New';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText('← → / A D  |  ESPAÇO / ↑  |  PULAR DUPLO', 10, H - 6);
+
+            // Nível
+            ctx.fillStyle = 'rgba(0,255,200,0.2)';
+            ctx.font = 'bold 14px Courier New';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+            ctx.fillText(`FASE ${currentLevel}`, W - 15, 10);
+
+            // Moedas restantes
+            const restantes = fase.coins.filter(c => c.active).length;
+            if (restantes > 0) {
+                ctx.fillStyle = 'rgba(255,215,0,0.2)';
+                ctx.font = '11px Courier New';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'top';
+                ctx.fillText(`🪙 ${restantes} restantes`, W - 15, 30);
+            } else {
+                ctx.fillStyle = 'rgba(0,255,200,0.3)';
+                ctx.font = 'bold 12px Courier New';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'top';
+                ctx.fillText('✨ PORTAL ABERTO!', W - 15, 30);
+            }
+        }
+
+        // ============================================================
+        //  GAME LOOP
+        // ============================================================
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ============================================================
+        //  REINICIAR JOGO
+        // ============================================================
+        function reiniciarJogo() {
+            document.getElementById('gameOverScreen').classList.remove('active');
+            document.getElementById('winScreen').classList.remove('active');
+            currentLevel = 1;
+            player = new Player();
+            fase = gerarFase(currentLevel);
+            particles = [];
+            gameState = 'playing';
+            // Tenta reativar áudio
+            try {
+                if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+            } catch (e) {}
+        }
+
+        // ============================================================
+        //  PRÓXIMA FASE (quando vencer)
+        // ============================================================
+        function nextLevel() {
+            currentLevel++;
+            player.x = 60;
+            player.y = 300;
+            player.vy = 0;
+            fase = gerarFase(currentLevel);
+            gameState = 'playing';
+            document.getElementById('winScreen').classList.remove('active');
+        }
+
+        // Sobrescreve o comportamento de vitória para permitir próxima fase
+        const originalUpdate = update;
+        update = function() {
+            if (gameState !== 'playing') return;
+            frameCount++;
+
+            for (let c of fase.coins) {
+                if (c.active) {
+                    c.bob += 0.04;
+                    c.y += Math.sin(c.bob) * 0.15;
+                }
+            }
+
+            for (let e of fase.enemies) {
+                if (!e.active) continue;
+                e.x += e.vx;
+                if (e.x < e.minX || e.x > e.maxX) e.vx *= -1;
+                e.frame += 0.05;
+            }
+
+            const result = player.update(fase.platforms, fase.enemies, fase.coins, fase);
+            if (result === 'gameover') {
+                gameState = 'gameover';
+                audio.gameOver();
+                document.getElementById('gameOverScreen').classList.add('active');
+                return;
+            }
+            if (result === 'win') {
+                if (currentLevel >= 3) {
+                    // Vitória final
+                    gameState = 'win';
+                    audio.win();
+                    document.getElementById('winScreen').classList.add('active');
+                    document.getElementById('winScreen').querySelector('h1').textContent = '🏆 VOCÊ VENCEU!';
+                    document.getElementById('winScreen').querySelector('p').innerHTML =
+                        `Parabéns! Você completou todas as ${currentLevel} fases com ${player.coins} moedas!<br>⧫ Monero é liberdade ⧫`;
+                    document.getElementById('winScreen').querySelector('.btn-restart').innerHTML =
+                        '<i class="fas fa-redo"></i> JOGAR NOVAMENTE';
+                } else {
+                    // Avança para próxima fase
+                    const btn = document.getElementById('winScreen').querySelector('.btn-restart');
+                    btn.innerHTML = '<i class="fas fa-arrow-right"></i> PRÓXIMA FASE';
+                    btn.onclick = nextLevel;
+                    document.getElementById('winScreen').classList.add('active');
+                    document.getElementById('winScreen').querySelector('h1').textContent = '✨ FASE COMPLETA!';
+                    document.getElementById('winScreen').querySelector('p').textContent =
+                        `Você coletou ${player.coins} moedas! Prepare-se para a FASE ${currentLevel + 1}!`;
+                    audio.win();
+                    gameState = 'win';
+                    return;
+                }
+            }
+
+            const totalCoins = fase.coins.filter(c => c.active).length;
+            if (totalCoins === 0) fase.complete = true;
+
+            updateParticles();
+
+            document.getElementById('coinCount').textContent = player.coins;
+            document.getElementById('livesCount').textContent = player.lives;
+            document.getElementById('levelCount').textContent = currentLevel;
+        };
+
+        // ============================================================
+        //  INICIAR JOGO
+        // ============================================================
+        // Clique no canvas para ativar áudio
+        canvas.addEventListener('click', () => {
+            try {
+                if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+            } catch (e) {}
+        });
+
+        // Início
+        gameLoop();
+
+        // ============================================================
+        //  TOQUE MÓVEL
+        // ============================================================
+        let touchX = null;
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = (touch.clientX - rect.left) / rect.width * W;
+            const y = (touch.clientY - rect.top) / rect.height * H;
+            touchX = x;
+            // Simula tecla de pulo
+            keys[' '] = true;
+            setTimeout(() => { keys[' '] = false; }, 200);
+            try {
+                if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+            } catch (e) {}
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = (touch.clientX - rect.left) / rect.width * W;
+            if (x < touchX) {
+                keys['ArrowLeft'] = true;
+                keys['ArrowRight'] = false;
+            } else if (x > touchX) {
+                keys['ArrowRight'] = true;
+                keys['ArrowLeft'] = false;
+            }
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keys['ArrowLeft'] = false;
+            keys['ArrowRight'] = false;
+            keys[' '] = false;
+            touchX = null;
+        });
+
+        console.log('🎮 MONERO QUEST carregado!');
+        console.log('⧫ Controles: Setas / A D | Espaço / ↑ para pular (duplo pulo!)');
+        console.log('🪙 Colete todas as moedas para abrir o portal!');
+    </script>
+</body>
+</html>
