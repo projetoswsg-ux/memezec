@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Monero Solar System 3D</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      overflow: hidden;
+      background: #050510;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      user-select: none;
+      touch-action: none;
+    }
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: #050510;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      color: #ff6600;
+      z-index: 1000;
+      transition: opacity 1.2s ease;
+      text-shadow: 0 0 30px rgba(255,100,0,0.3);
+    }
+    #loading.hide { opacity: 0; pointer-events: none; }
+    #loading span { animation: pulse 1.8s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* Card do planeta */
+    #planet-card {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      background: rgba(8,8,20,0.92);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,150,50,0.2);
+      border-radius: 24px;
+      padding: 28px 34px;
+      max-width: 460px;
+      width: 90%;
+      z-index: 200;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
+      opacity: 0;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      pointer-events: none;
+    }
+    #planet-card.active {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #planet-card .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    #planet-card .close-btn:hover { color: #fff; }
+    #planet-card h2 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #ff8800;
+    }
+    #planet-card .subtitle {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 14px;
+      letter-spacing: 1px;
+    }
+    #planet-card p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.85);
+    }
+    #planet-card .planet-price {
+      margin-top: 14px;
+      padding: 10px 16px;
+      background: rgba(255,100,0,0.08);
+      border-radius: 12px;
+      border-left: 3px solid #ff8800;
+      font-size: 15px;
+      color: #ffaa55;
+    }
+
+    /* Dica */
+    #hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.2);
+      font-size: 13px;
+      letter-spacing: 2px;
+      background: rgba(0,0,0,0.3);
+      padding: 6px 20px;
+      border-radius: 30px;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+      z-index: 50;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    @media (max-width: 600px) { #hint { display: none; } }
+  </style>
+</head>
+<body>
+
+  <div id="loading"><span>₿ MONERO SYSTEM</span></div>
+
+  <!-- Card do planeta -->
+  <div id="planet-card">
+    <button class="close-btn" id="close-card">✕</button>
+    <h2 id="planet-name">Planeta</h2>
+    <div class="subtitle" id="planet-subtitle">Sistema</div>
+    <p id="planet-desc">Descrição do planeta.</p>
+    <div class="planet-price" id="planet-price-info">Preço XMR: ---</div>
+  </div>
+
+  <div id="hint">🪐 TOQUE EM UM PLANETA PARA EXPLORAR</div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.126.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.126.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // --- CONFIG PLANETAS ---
+    const PLANET_DATA = [
+      { name: 'Cypheria', subtitle: 'Sistema Monero • Núcleo', desc: 'Planeta onde as transações são processadas em segundos. Superfície brilha com a luz dos blocos.', color: 0xff6600, size: 0.9, distance: 4.5, speed: 0.8 },
+      { name: 'Aurora', subtitle: 'Sistema Monero • Anéis', desc: 'Cercado por anéis de dados criptografados. A privacidade perfeita.', color: 0x44aaff, size: 0.8, distance: 6.5, speed: 0.6 },
+      { name: 'Krypton', subtitle: 'Sistema Monero • Mineração', desc: 'Planeta vulcânico onde a mineração é mais eficiente. Atmosfera de pura computação.', color: 0xff4433, size: 1.0, distance: 8.8, speed: 0.45 },
+      { name: 'Nebula', subtitle: 'Sistema Monero • Nebulosa', desc: 'Nebulosa viva que pulsa com a volatilidade do mercado. Abriga segredos dos preços.', color: 0xaa66ff, size: 0.85, distance: 11.0, speed: 0.35 },
+      { name: 'Solara', subtitle: 'Sistema Monero • Estrela', desc: 'Estrela que ilumina todo o universo Monero. Luz da prova de trabalho.', color: 0xffcc00, size: 0.95, distance: 13.5, speed: 0.25 }
+    ];
+
+    // --- PREÇO MONERO (API CoinGecko) ---
+    let currentPrice = 0;
+    let priceChangePercent = 0;
+
+    async function fetchPrice() {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd&include_24hr_change=true');
+        const data = await res.json();
+        if (data.monero) {
+          currentPrice = data.monero.usd;
+          priceChangePercent = data.monero.usd_24h_change || 0;
+          updatePriceDisplay();
+        }
+      } catch (e) {
+        console.warn('Erro ao buscar preço:', e);
+      }
+    }
+
+    function updatePriceDisplay() {
+      if (priceTextSprite) {
+        const text = currentPrice ? `$ ${currentPrice.toFixed(2)}` : '---';
+        const change = priceChangePercent || 0;
+        const sign = change >= 0 ? '+' : '';
+        const fullText = `${text}  ${sign}${change.toFixed(2)}%`;
+        updateTextSprite(priceTextSprite, fullText);
+      }
+    }
+
+    // --- CENA 3D ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050510);
+
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.set(0, 6, 16);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    // --- LUZES ---
+    const ambient = new THREE.AmbientLight(0x222244, 0.5);
+    scene.add(ambient);
+
+    const mainLight = new THREE.DirectionalLight(0xffeedd, 1.0);
+    mainLight.position.set(10, 20, 5);
+    mainLight.castShadow = true;
+    scene.add(mainLight);
+
+    const backLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+    backLight.position.set(-10, 0, -10);
+    scene.add(backLight);
+
+    const sunLight = new THREE.PointLight(0xff6600, 1.5, 30);
+    sunLight.position.set(0, 0, 0);
+    scene.add(sunLight);
+
+    // --- ESTRELAS DE FUNDO ---
+    const starsGeo = new THREE.BufferGeometry();
+    const starsCount = 4000;
+    const starsPos = new Float32Array(starsCount * 3);
+    for (let i = 0; i < starsCount * 3; i += 3) {
+      starsPos[i] = (Math.random() - 0.5) * 500;
+      starsPos[i+1] = (Math.random() - 0.5) * 500;
+      starsPos[i+2] = (Math.random() - 0.5) * 500 - 50;
+    }
+    starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+    const starsMat = new THREE.PointsMaterial({
+      color: 0x88aaff,
+      size: 0.12,
+      transparent: true,
+      opacity: 0.7,
+      blending: THREE.AdditiveBlending
+    });
+    const stars = new THREE.Points(starsGeo, starsMat);
+    scene.add(stars);
+
+    // --- SOL MONERO ---
+    const sunGroup = new THREE.Group();
+    
+    const sunGeo = new THREE.SphereGeometry(1.4, 48, 48);
+    const sunMat = new THREE.MeshStandardMaterial({
+      color: 0xff6600,
+      emissive: 0xff4400,
+      emissiveIntensity: 0.6,
+      roughness: 0.2,
+      metalness: 0.3
+    });
+    const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+    sunGroup.add(sunMesh);
+
+    const glowGeo = new THREE.SphereGeometry(1.7, 32, 32);
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: 0xff8800,
+      transparent: true,
+      opacity: 0.15,
+      wireframe: true
+    });
+    const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+    sunGroup.add(glowMesh);
+
+    const ringGeo = new THREE.TorusGeometry(2.0, 0.05, 16, 64);
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: 0xff8800,
+      emissive: 0xff4400,
+      emissiveIntensity: 0.3,
+      transparent: true,
+      opacity: 0.6
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2.5;
+    ring.rotation.z = 0.3;
+    sunGroup.add(ring);
+
+    const ring2Geo = new THREE.TorusGeometry(2.3, 0.03, 16, 64);
+    const ring2Mat = new THREE.MeshStandardMaterial({
+      color: 0xffaa44,
+      emissive: 0xff6600,
+      emissiveIntensity: 0.2,
+      transparent: true,
+      opacity: 0.4
+    });
+    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+    ring2.rotation.x = Math.PI / 1.8;
+    ring2.rotation.z = -0.2;
+    sunGroup.add(ring2);
+
+    scene.add(sunGroup);
+
+    // --- TEXTO 3D DO PREÇO ---
+    function createTextSprite(text, fontSize = 48, color = '#ff8800') {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 512;
+      canvas.height = 128;
+      
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 20;
+      ctx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(255,100,0,0.3)';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = color;
+      ctx.fillText(text, canvas.width/2, canvas.height/2);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(6, 1.5, 1);
+      return sprite;
+    }
+
+    function updateTextSprite(sprite, text) {
+      const canvas = sprite.material.map.image;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 20;
+      ctx.font = `bold 48px 'Segoe UI', Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(255,100,0,0.3)';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = '#ff8800';
+      ctx.fillText(text, canvas.width/2, canvas.height/2);
+      
+      sprite.material.map.needsUpdate = true;
+    }
+
+    let priceTextSprite = createTextSprite('$ ---  ---%');
+    priceTextSprite.position.set(0, -2.8, 0);
+    scene.add(priceTextSprite);
+
+    const titleSprite = createTextSprite('₿ MONERO', 56, '#ffaa44');
+    titleSprite.position.set(0, 3.2, 0);
+    titleSprite.scale.set(7, 1.8, 1);
+    scene.add(titleSprite);
+
+    // --- PLANETAS ---
+    const planets = [];
+    const planetMeshes = [];
+
+    PLANET_DATA.forEach((data, index) => {
+      const group = new THREE.Group();
+      
+      const geo = new THREE.SphereGeometry(data.size, 32, 32);
+      const mat = new THREE.MeshStandardMaterial({
+        color: data.color,
+        roughness: 0.3,
+        metalness: 0.5,
+        emissive: data.color,
+        emissiveIntensity: 0.1
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.userData = { index };
+      group.add(mesh);
+
+      const glowGeo2 = new THREE.SphereGeometry(data.size * 1.2, 24, 24);
+      const glowMat2 = new THREE.MeshBasicMaterial({
+        color: data.color,
+        transparent: true,
+        opacity: 0.06,
+        wireframe: true
+      });
+      const glow2 = new THREE.Mesh(glowGeo2, glowMat2);
+      group.add(glow2);
+
+      const orbitPoints = [];
+      const radius = data.distance;
+      for (let i = 0; i <= 64; i++) {
+        const angle = (i / 64) * Math.PI * 2;
+        orbitPoints.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
+      }
+      const orbitGeo = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+      const orbitMat = new THREE.LineBasicMaterial({ color: 0x334466, transparent: true, opacity: 0.15 });
+      const orbitLine = new THREE.Line(orbitGeo, orbitMat);
+      group.add(orbitLine);
+
+      const angle = (index / PLANET_DATA.length) * Math.PI * 2;
+      group.position.set(
+        Math.cos(angle) * data.distance,
+        (Math.random() - 0.5) * 0.5,
+        Math.sin(angle) * data.distance
+      );
+      
+      group.userData = {
+        planetData: data,
+        angle: angle,
+        distance: data.distance,
+        speed: data.speed,
+        index
+      };
+      
+      scene.add(group);
+      planets.push(group);
+      planetMeshes.push(mesh);
+    });
+
+    // --- CONTROLE POR TOQUE (deslizar + pinça) ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartDist = 0;
+    let isTouching = false;
+    let isPinching = false;
+    let velocityX = 0;
+    let velocityY = 0;
+    const DAMPING = 0.92;
+    const SENSITIVITY = 0.008;
+
+    // Controle de câmera esférico
+    let cameraTheta = 0;
+    let cameraPhi = Math.PI / 3;
+    let cameraRadius = 16;
+    const minPhi = 0.2;
+    const maxPhi = Math.PI / 1.8;
+    const minRadius = 4;
+    const maxRadius = 30;
+
+    function updateCameraPosition() {
+      camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+      camera.position.y = cameraRadius * Math.cos(cameraPhi);
+      camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+      camera.lookAt(0, 0, 0);
+    }
+
+    // Detectar pinça
+    function getTouchDistance(touches) {
+      if (touches.length < 2) return 0;
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    // Eventos de toque
+    renderer.domElement.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        isTouching = true;
+        isPinching = false;
+        velocityX = 0;
+        velocityY = 0;
+      } else if (e.touches.length === 2) {
+        isPinching = true;
+        isTouching = false;
+        touchStartDist = getTouchDistance(e.touches);
+      }
+    }, { passive: true });
+
+    renderer.domElement.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      
+      if (e.touches.length === 1 && isTouching) {
+        const touch = e.touches[0];
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
+        
+        cameraTheta -= dx * SENSITIVITY;
+        cameraPhi += dy * SENSITIVITY * 0.5;
+        cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
+        
+        velocityX = -dx * SENSITIVITY * 0.5;
+        velocityY = dy * SENSITIVITY * 0.3;
+        
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        
+        updateCameraPosition();
+      } else if (e.touches.length === 2 && isPinching) {
+        const dist = getTouchDistance(e.touches);
+        const delta = dist - touchStartDist;
+        cameraRadius = Math.max(minRadius, Math.min(maxRadius, cameraRadius - delta * 0.05));
+        touchStartDist = dist;
+        updateCameraPosition();
+      }
+    }, { passive: false });
+
+    renderer.domElement.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) isPinching = false;
+      if (e.touches.length === 0) {
+        isTouching = false;
+        isPinching = false;
+      }
+    }, { passive: true });
+
+    // Suporte a mouse (arrastar + scroll)
+    let mouseDown = false;
+    let mouseX = 0, mouseY = 0;
+
+    renderer.domElement.addEventListener('mousedown', (e) => {
+      mouseDown = true;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (mouseDown) {
+        const dx = e.clientX - mouseX;
+        const dy = e.clientY - mouseY;
+        cameraTheta -= dx * SENSITIVITY;
+        cameraPhi += dy * SENSITIVITY * 0.5;
+        cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        updateCameraPosition();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      mouseDown = false;
+    });
+
+    renderer.domElement.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      cameraRadius += e.deltaY * 0.02;
+      cameraRadius = Math.max(minRadius, Math.min(maxRadius, cameraRadius));
+      updateCameraPosition();
+    }, { passive: false });
+
+    // --- INTERAÇÃO COM CLIQUE (planetas) ---
+    const raycaster = new THREE.Raycaster();
+    const mouse2 = new THREE.Vector2();
+
+    function onPointerDown(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = ((event.clientX || event.pageX) - rect.left) / rect.width * 2 - 1;
+      const y = -((event.clientY || event.pageY) - rect.top) / rect.height * 2 + 1;
+      mouse2.set(x, y);
+      
+      raycaster.setFromCamera(mouse2, camera);
+      const intersects = raycaster.intersectObjects(planetMeshes);
+      
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        const index = hit.userData.index;
+        if (index !== undefined) {
+          showPlanetCard(index);
+        }
+      }
+    }
+
+    renderer.domElement.addEventListener('click', onPointerDown);
+    renderer.domElement.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        setTimeout(() => {
+          onPointerDown({ clientX: touch.clientX, clientY: touch.clientY });
+        }, 50);
+      }
+    }, { passive: true });
+
+    // --- CARD DO PLANETA ---
+    const card = document.getElementById('planet-card');
+    const closeBtn = document.getElementById('close-card');
+    const planetName = document.getElementById('planet-name');
+    const planetSubtitle = document.getElementById('planet-subtitle');
+    const planetDesc = document.getElementById('planet-desc');
+    const planetPrice = document.getElementById('planet-price-info');
+
+    function showPlanetCard(index) {
+      const data = PLANET_DATA[index];
+      if (!data) return;
+      planetName.textContent = data.name;
+      planetSubtitle.textContent = data.subtitle;
+      planetDesc.textContent = data.desc;
+      const priceText = currentPrice ? `$ ${currentPrice.toFixed(2)} USD` : 'carregando...';
+      planetPrice.textContent = `💰 Preço XMR: ${priceText}`;
+      card.classList.add('active');
+    }
+
+    closeBtn.addEventListener('click', () => {
+      card.classList.remove('active');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') card.classList.remove('active');
+    });
+
+    // --- ANIMAÇÃO ---
+    const clock = new THREE.Clock();
+
+    function animate() {
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Inércia (toque)
+      if (!isTouching && !mouseDown && !isPinching) {
+        if (Math.abs(velocityX) > 0.0001 || Math.abs(velocityY) > 0.0001) {
+          cameraTheta += velocityX;
+          cameraPhi += velocityY * 0.3;
+          cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
+          velocityX *= DAMPING;
+          velocityY *= DAMPING;
+          updateCameraPosition();
+        }
+      }
+
+      // Rotacionar planetas
+      planets.forEach((group, i) => {
+        const data = group.userData;
+        if (!data) return;
+        data.angle += delta * data.speed * 0.25;
+        group.position.x = Math.cos(data.angle) * data.distance;
+        group.position.z = Math.sin(data.angle) * data.distance;
+        group.position.y = Math.sin(time * 0.4 + i * 1.5) * 0.2;
+        
+        const mesh = group.children[0];
+        if (mesh) mesh.rotation.y += delta * 0.2;
+      });
+
+      // Rotacionar sol
+      sunMesh.rotation.y += delta * 0.1;
+      ring.rotation.z += delta * 0.05;
+      ring2.rotation.x += delta * 0.03;
+
+      stars.rotation.y += delta * 0.003;
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // --- RESPONSIVIDADE ---
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- LOADING ---
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hide');
+    }, 1200);
+
+    // --- BUSCAR PREÇO ---
+    fetchPrice();
+    setInterval(fetchPrice, 30000);
+
+    setInterval(() => {
+      if (card.classList.contains('active')) {
+        const priceText = currentPrice ? `$ ${currentPrice.toFixed(2)} USD` : 'carregando...';
+        planetPrice.textContent = `💰 Preço XMR: ${priceText}`;
+      }
+    }, 5000);
+
+    updateCameraPosition();
+
+    console.log('🚀 Monero Solar System com pinça!');
+  </script>
+</body>
+</html>
