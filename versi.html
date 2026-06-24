@@ -13,7 +13,9 @@
       color: #fff;
       user-select: none;
       touch-action: none;
+      cursor: grab;
     }
+    body:active { cursor: grabbing; }
     #loading {
       position: fixed;
       inset: 0;
@@ -36,7 +38,6 @@
       50% { opacity: 1; }
     }
 
-    /* Card do planeta */
     #planet-card {
       position: fixed;
       bottom: 40px;
@@ -98,32 +99,31 @@
       font-size: 15px;
       color: #ffaa55;
     }
-
-    /* Dica */
-    #hint {
+    #zoom-indicator {
       position: fixed;
-      bottom: 20px;
+      bottom: 120px;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(255,255,255,0.2);
-      font-size: 13px;
-      letter-spacing: 2px;
-      background: rgba(0,0,0,0.3);
-      padding: 6px 20px;
-      border-radius: 30px;
-      backdrop-filter: blur(4px);
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      color: #ffaa44;
+      border: 1px solid rgba(255,150,50,0.2);
+      opacity: 0;
+      transition: opacity 0.5s;
       pointer-events: none;
-      z-index: 50;
-      border: 1px solid rgba(255,255,255,0.05);
+      z-index: 150;
+      white-space: nowrap;
     }
-    @media (max-width: 600px) { #hint { display: none; } }
+    #zoom-indicator.show {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
-
   <div id="loading"><span>₿ MONERO SYSTEM</span></div>
-
-  <!-- Card do planeta -->
   <div id="planet-card">
     <button class="close-btn" id="close-card">✕</button>
     <h2 id="planet-name">Planeta</h2>
@@ -131,8 +131,7 @@
     <p id="planet-desc">Descrição do planeta.</p>
     <div class="planet-price" id="planet-price-info">Preço XMR: ---</div>
   </div>
-
-  <div id="hint">🪐 TOQUE EM UM PLANETA PARA EXPLORAR</div>
+  <div id="zoom-indicator">🔭 Navegando para o planeta...</div>
 
   <script type="importmap">
     {
@@ -146,16 +145,102 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // --- CONFIG PLANETAS ---
-    const PLANET_DATA = [
-      { name: 'Cypheria', subtitle: 'Sistema Monero • Núcleo', desc: 'Planeta onde as transações são processadas em segundos. Superfície brilha com a luz dos blocos.', color: 0xff6600, size: 0.9, distance: 4.5, speed: 0.8 },
-      { name: 'Aurora', subtitle: 'Sistema Monero • Anéis', desc: 'Cercado por anéis de dados criptografados. A privacidade perfeita.', color: 0x44aaff, size: 0.8, distance: 6.5, speed: 0.6 },
-      { name: 'Krypton', subtitle: 'Sistema Monero • Mineração', desc: 'Planeta vulcânico onde a mineração é mais eficiente. Atmosfera de pura computação.', color: 0xff4433, size: 1.0, distance: 8.8, speed: 0.45 },
-      { name: 'Nebula', subtitle: 'Sistema Monero • Nebulosa', desc: 'Nebulosa viva que pulsa com a volatilidade do mercado. Abriga segredos dos preços.', color: 0xaa66ff, size: 0.85, distance: 11.0, speed: 0.35 },
-      { name: 'Solara', subtitle: 'Sistema Monero • Estrela', desc: 'Estrela que ilumina todo o universo Monero. Luz da prova de trabalho.', color: 0xffcc00, size: 0.95, distance: 13.5, speed: 0.25 }
-    ];
+    // --- CONFIGURAÇÃO DO SISTEMA SOLAR ---
+    const SOLAR_SYSTEM_CONFIG = {
+      baseRadius: 3.0,
+      orbitSpacing: 0.8,
+      planetsPerOrbit: 6,
+      maxVerticalOffset: 0.8,
+      baseSpeed: 0.08, // Reduzido drasticamente (era 0.3)
+      speedVariation: 0.1 // Reduzido (era 0.4)
+    };
 
-    // --- PREÇO MONERO (API CoinGecko) ---
+    function generateOrganizedPlanetData(count = 72) {
+      const planets = [];
+      const names = [
+        'Cypheria', 'Aurora', 'Krypton', 'Nebula', 'Solara',
+        'Vortex', 'Pulsar', 'Quasar', 'Nova', 'Cosmos',
+        'Eclipse', 'Zenith', 'Orion', 'Lyra', 'Andromeda',
+        'Cassiopeia', 'Draco', 'Phoenix', 'Titan', 'Rhea',
+        'Themis', 'Mnemosyne', 'Crius', 'Hyperion', 'Iapetus',
+        'Phoebe', 'Janus', 'Epimetheus', 'Pandora', 'Prometheus',
+        'Atlas', 'Calypso', 'Telesto', 'Helene', 'Polydeuces',
+        'Daphnis', 'Pan', 'Mimas', 'Enceladus', 'Tethys',
+        'Dione', 'Rhea', 'Titan', 'Iapetus', 'Phoebe',
+        'Janus', 'Epimetheus', 'Pandora', 'Prometheus', 'Atlas',
+        'Calypso', 'Telesto', 'Helene', 'Polydeuces', 'Daphnis',
+        'Pan', 'Mimas', 'Enceladus', 'Tethys', 'Dione',
+        'Astraea', 'Ceres', 'Pallas', 'Juno', 'Vesta',
+        'Hygiea', 'Interamnia', 'Europa', 'Ganymede', 'Callisto',
+        'Io', 'Triton'
+      ];
+      const colors = [
+        0xff6600, 0x44aaff, 0xff4433, 0xaa66ff, 0xffcc00,
+        0x66ff66, 0xff66aa, 0x66ccff, 0xffaa66, 0xcc66ff,
+        0x66ffcc, 0xff6699, 0x99ccff, 0xffcc66, 0xcc99ff,
+        0x66ff99, 0xff6666, 0x66cc99, 0xff99cc, 0x99ffcc
+      ];
+      const descriptions = [
+        'Planeta vibrante com ecossistemas digitais.',
+        'Mundo congelado de dados criptografados.',
+        'Planeta vulcânico de mineração intensa.',
+        'Nebulosa pulsante de mercado volátil.',
+        'Estrela brilhante de prova de trabalho.',
+        'Vórtice de transações rápidas.',
+        'Pulsar de energia blockchain.',
+        'Quasar de privacidade absoluta.',
+        'Supernova de inovação financeira.',
+        'Cosmos descentralizado e seguro.',
+        'Eclipse de dados e anonimato.',
+        'Zênite da computação distribuída.',
+        'Constelação de nós validadores.',
+        'Lira de transações harmônicas.',
+        'Andrômeda de escalabilidade infinita.',
+        'Cassiopéia de contratos inteligentes.',
+        'Dragão de proteção de dados.',
+        'Fênix de renovação de blocos.',
+        'Titã de processamento massivo.',
+        'Rhea de estabilidade monetária.'
+      ];
+
+      const orbitsNeeded = Math.ceil(count / SOLAR_SYSTEM_CONFIG.planetsPerOrbit);
+      let planetIndex = 0;
+
+      for (let orbit = 0; orbit < orbitsNeeded && planetIndex < count; orbit++) {
+        const radius = SOLAR_SYSTEM_CONFIG.baseRadius + orbit * SOLAR_SYSTEM_CONFIG.orbitSpacing;
+        const planetsInThisOrbit = Math.min(SOLAR_SYSTEM_CONFIG.planetsPerOrbit, count - planetIndex);
+        const startAngle = Math.random() * Math.PI * 2;
+
+        for (let pos = 0; pos < planetsInThisOrbit; pos++) {
+          const angle = startAngle + (pos / planetsInThisOrbit) * Math.PI * 2;
+          const speedFactor = 1 - (orbit / orbitsNeeded) * 0.7;
+          const speed = SOLAR_SYSTEM_CONFIG.baseSpeed * speedFactor + (Math.random() - 0.5) * SOLAR_SYSTEM_CONFIG.speedVariation * 0.3;
+
+          const name = names[planetIndex % names.length];
+          const color = colors[planetIndex % colors.length];
+          const desc = descriptions[planetIndex % descriptions.length];
+          const sizeBase = 0.15 + (1 - orbit / orbitsNeeded) * 0.15;
+          const size = sizeBase + Math.random() * 0.15;
+          const orbitType = ['Núcleo', 'Interna', 'Média', 'Externa', 'Periférica', 'Distante', 'Extrema'][Math.min(orbit, 6)];
+          const subtitle = `Sistema Monero • Órbita ${orbit + 1} • ${orbitType}`;
+
+          planets.push({
+            name, subtitle, desc, color, size,
+            distance: radius,
+            speed: Math.max(0.03, speed), // Garantir velocidade mínima bem baixa
+            angle: angle,
+            verticalOffset: (Math.random() - 0.5) * SOLAR_SYSTEM_CONFIG.maxVerticalOffset * (1 - orbit * 0.05),
+            orbitIndex: orbit,
+            index: planetIndex
+          });
+          planetIndex++;
+        }
+      }
+      return planets;
+    }
+
+    const PLANET_DATA = generateOrganizedPlanetData(72);
+
     let currentPrice = 0;
     let priceChangePercent = 0;
 
@@ -187,9 +272,19 @@
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x050510);
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
-    camera.position.set(0, 6, 16);
-    camera.lookAt(0, 0, 0);
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+    let cameraPosition = new THREE.Vector3(0, 8, 45);
+    let targetPosition = new THREE.Vector3(0, 0, 0);
+    let cameraRadius = 45;
+    let cameraTheta = 0;
+    let cameraPhi = Math.PI / 3;
+    const minPhi = 0.1;
+    const maxPhi = Math.PI / 1.6;
+    const minRadius = 2.0;
+    const maxRadius = 90;
+
+    camera.position.copy(cameraPosition);
+    camera.lookAt(targetPosition);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -211,34 +306,123 @@
     backLight.position.set(-10, 0, -10);
     scene.add(backLight);
 
-    const sunLight = new THREE.PointLight(0xff6600, 1.5, 30);
+    const sunLight = new THREE.PointLight(0xff6600, 1.5, 40);
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
 
-    // --- ESTRELAS DE FUNDO ---
-    const starsGeo = new THREE.BufferGeometry();
-    const starsCount = 4000;
-    const starsPos = new Float32Array(starsCount * 3);
-    for (let i = 0; i < starsCount * 3; i += 3) {
-      starsPos[i] = (Math.random() - 0.5) * 500;
-      starsPos[i+1] = (Math.random() - 0.5) * 500;
-      starsPos[i+2] = (Math.random() - 0.5) * 500 - 50;
-    }
-    starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
-    const starsMat = new THREE.PointsMaterial({
-      color: 0x88aaff,
-      size: 0.12,
-      transparent: true,
-      opacity: 0.7,
-      blending: THREE.AdditiveBlending
-    });
-    const stars = new THREE.Points(starsGeo, starsMat);
-    scene.add(stars);
+    // --- ESTRELAS ---
+    function createStarField() {
+      const starsGroup = new THREE.Group();
+      const starCount = 8000;
+      const positions = new Float32Array(starCount * 3);
+      const colors = new Float32Array(starCount * 3);
 
-    // --- SOL MONERO ---
+      for (let i = 0; i < starCount; i++) {
+        const radius = 150 + Math.random() * 300;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+        positions[i*3+1] = radius * Math.cos(phi);
+        positions[i*3+2] = radius * Math.sin(phi) * Math.sin(theta);
+        const colorChoice = Math.random();
+        if (colorChoice < 0.6) {
+          colors[i*3] = 0.8 + Math.random() * 0.2;
+          colors[i*3+1] = 0.8 + Math.random() * 0.2;
+          colors[i*3+2] = 1.0;
+        } else if (colorChoice < 0.8) {
+          colors[i*3] = 1.0;
+          colors[i*3+1] = 0.8 + Math.random() * 0.2;
+          colors[i*3+2] = 0.4 + Math.random() * 0.2;
+        } else {
+          colors[i*3] = 1.0;
+          colors[i*3+1] = 0.3 + Math.random() * 0.3;
+          colors[i*3+2] = 0.1 + Math.random() * 0.2;
+        }
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: 0.15,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true
+      });
+      const stars = new THREE.Points(geometry, material);
+      starsGroup.add(stars);
+
+      const bigStarCount = 300;
+      const bigPositions = new Float32Array(bigStarCount * 3);
+      const bigColors = new Float32Array(bigStarCount * 3);
+      for (let i = 0; i < bigStarCount; i++) {
+        const radius = 120 + Math.random() * 250;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        bigPositions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+        bigPositions[i*3+1] = radius * Math.cos(phi);
+        bigPositions[i*3+2] = radius * Math.sin(phi) * Math.sin(theta);
+        bigColors[i*3] = 0.9 + Math.random() * 0.1;
+        bigColors[i*3+1] = 0.8 + Math.random() * 0.2;
+        bigColors[i*3+2] = 0.6 + Math.random() * 0.4;
+      }
+      const bigGeometry = new THREE.BufferGeometry();
+      bigGeometry.setAttribute('position', new THREE.BufferAttribute(bigPositions, 3));
+      bigGeometry.setAttribute('color', new THREE.BufferAttribute(bigColors, 3));
+      const bigMaterial = new THREE.PointsMaterial({
+        size: 0.5,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.7,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true
+      });
+      const bigStars = new THREE.Points(bigGeometry, bigMaterial);
+      starsGroup.add(bigStars);
+      return starsGroup;
+    }
+
+    const starField = createStarField();
+    scene.add(starField);
+
+    // --- NEBULOSA ---
+    function createNebula() {
+      const nebulaGroup = new THREE.Group();
+      for (let i = 0; i < 30; i++) {
+        const size = 10 + Math.random() * 30;
+        const geometry = new THREE.SphereGeometry(size, 8, 8);
+        const material = new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setHSL(0.6 + Math.random() * 0.3, 0.5, 0.03 + Math.random() * 0.02),
+          transparent: true,
+          opacity: 0.2,
+          wireframe: true,
+          blending: THREE.AdditiveBlending
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        const radius = 60 + Math.random() * 150;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        mesh.position.set(
+          radius * Math.sin(phi) * Math.cos(theta),
+          radius * Math.cos(phi),
+          radius * Math.sin(phi) * Math.sin(theta)
+        );
+        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        nebulaGroup.add(mesh);
+      }
+      return nebulaGroup;
+    }
+
+    const nebula = createNebula();
+    scene.add(nebula);
+
+    // --- SOL COM PULSO SOLAR ---
     const sunGroup = new THREE.Group();
     
-    const sunGeo = new THREE.SphereGeometry(1.4, 48, 48);
+    const sunGeo = new THREE.SphereGeometry(1.2, 48, 48);
     const sunMat = new THREE.MeshStandardMaterial({
       color: 0xff6600,
       emissive: 0xff4400,
@@ -249,51 +433,63 @@
     const sunMesh = new THREE.Mesh(sunGeo, sunMat);
     sunGroup.add(sunMesh);
 
-    const glowGeo = new THREE.SphereGeometry(1.7, 32, 32);
+    const glowGeo = new THREE.SphereGeometry(1.5, 32, 32);
     const glowMat = new THREE.MeshBasicMaterial({
       color: 0xff8800,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.25,
       wireframe: true
     });
     const glowMesh = new THREE.Mesh(glowGeo, glowMat);
     sunGroup.add(glowMesh);
 
-    const ringGeo = new THREE.TorusGeometry(2.0, 0.05, 16, 64);
+    const ringGeo = new THREE.TorusGeometry(1.8, 0.05, 16, 64);
     const ringMat = new THREE.MeshStandardMaterial({
       color: 0xff8800,
       emissive: 0xff4400,
-      emissiveIntensity: 0.3,
+      emissiveIntensity: 0.5,
       transparent: true,
-      opacity: 0.6
+      opacity: 0.7
     });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = Math.PI / 2.5;
     ring.rotation.z = 0.3;
     sunGroup.add(ring);
 
-    const ring2Geo = new THREE.TorusGeometry(2.3, 0.03, 16, 64);
+    const ring2Geo = new THREE.TorusGeometry(2.1, 0.04, 16, 64);
     const ring2Mat = new THREE.MeshStandardMaterial({
       color: 0xffaa44,
       emissive: 0xff6600,
-      emissiveIntensity: 0.2,
+      emissiveIntensity: 0.4,
       transparent: true,
-      opacity: 0.4
+      opacity: 0.5
     });
     const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
     ring2.rotation.x = Math.PI / 1.8;
     ring2.rotation.z = -0.2;
     sunGroup.add(ring2);
 
+    const ring3Geo = new THREE.TorusGeometry(2.5, 0.03, 16, 64);
+    const ring3Mat = new THREE.MeshStandardMaterial({
+      color: 0xffaa44,
+      emissive: 0xff8800,
+      emissiveIntensity: 0.3,
+      transparent: true,
+      opacity: 0.3
+    });
+    const ring3 = new THREE.Mesh(ring3Geo, ring3Mat);
+    ring3.rotation.x = Math.PI / 2.2;
+    ring3.rotation.z = 0.5;
+    sunGroup.add(ring3);
+
     scene.add(sunGroup);
 
-    // --- TEXTO 3D DO PREÇO ---
+    // --- TEXTO 3D ---
     function createTextSprite(text, fontSize = 48, color = '#ff8800') {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = 512;
       canvas.height = 128;
-      
       ctx.shadowColor = 'rgba(0,0,0,0.8)';
       ctx.shadowBlur = 20;
       ctx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`;
@@ -303,10 +499,8 @@
       ctx.shadowBlur = 30;
       ctx.fillStyle = color;
       ctx.fillText(text, canvas.width/2, canvas.height/2);
-      
       const texture = new THREE.CanvasTexture(canvas);
       texture.needsUpdate = true;
-      
       const material = new THREE.SpriteMaterial({
         map: texture,
         transparent: true,
@@ -323,7 +517,6 @@
       const canvas = sprite.material.map.image;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
       ctx.shadowColor = 'rgba(0,0,0,0.8)';
       ctx.shadowBlur = 20;
       ctx.font = `bold 48px 'Segoe UI', Arial, sans-serif`;
@@ -333,7 +526,6 @@
       ctx.shadowBlur = 30;
       ctx.fillStyle = '#ff8800';
       ctx.fillText(text, canvas.width/2, canvas.height/2);
-      
       sprite.material.map.needsUpdate = true;
     }
 
@@ -346,14 +538,40 @@
     titleSprite.scale.set(7, 1.8, 1);
     scene.add(titleSprite);
 
+    // --- ÓRBITAS VISÍVEIS ---
+    function createOrbitLines() {
+      const orbitGroup = new THREE.Group();
+      const maxOrbit = Math.max(...PLANET_DATA.map(p => p.orbitIndex || 0));
+      for (let orbit = 0; orbit <= maxOrbit; orbit++) {
+        const radius = SOLAR_SYSTEM_CONFIG.baseRadius + orbit * SOLAR_SYSTEM_CONFIG.orbitSpacing;
+        const points = [];
+        const segments = 64;
+        for (let i = 0; i <= segments; i++) {
+          const angle = (i / segments) * Math.PI * 2;
+          points.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
+        }
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = new THREE.LineBasicMaterial({
+          color: 0x334466,
+          transparent: true,
+          opacity: 0.08 + (orbit / maxOrbit) * 0.12
+        });
+        const orbitLine = new THREE.Line(geometry, material);
+        orbitGroup.add(orbitLine);
+      }
+      return orbitGroup;
+    }
+
+    const orbitLines = createOrbitLines();
+    scene.add(orbitLines);
+
     // --- PLANETAS ---
     const planets = [];
     const planetMeshes = [];
 
     PLANET_DATA.forEach((data, index) => {
       const group = new THREE.Group();
-      
-      const geo = new THREE.SphereGeometry(data.size, 32, 32);
+      const geo = new THREE.SphereGeometry(data.size, 16, 16);
       const mat = new THREE.MeshStandardMaterial({
         color: data.color,
         roughness: 0.3,
@@ -367,84 +585,118 @@
       mesh.userData = { index };
       group.add(mesh);
 
-      const glowGeo2 = new THREE.SphereGeometry(data.size * 1.2, 24, 24);
-      const glowMat2 = new THREE.MeshBasicMaterial({
-        color: data.color,
-        transparent: true,
-        opacity: 0.06,
-        wireframe: true
-      });
-      const glow2 = new THREE.Mesh(glowGeo2, glowMat2);
-      group.add(glow2);
-
-      const orbitPoints = [];
-      const radius = data.distance;
-      for (let i = 0; i <= 64; i++) {
-        const angle = (i / 64) * Math.PI * 2;
-        orbitPoints.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
-      }
-      const orbitGeo = new THREE.BufferGeometry().setFromPoints(orbitPoints);
-      const orbitMat = new THREE.LineBasicMaterial({ color: 0x334466, transparent: true, opacity: 0.15 });
-      const orbitLine = new THREE.Line(orbitGeo, orbitMat);
-      group.add(orbitLine);
-
-      const angle = (index / PLANET_DATA.length) * Math.PI * 2;
       group.position.set(
-        Math.cos(angle) * data.distance,
-        (Math.random() - 0.5) * 0.5,
-        Math.sin(angle) * data.distance
+        Math.cos(data.angle) * data.distance,
+        data.verticalOffset || 0,
+        Math.sin(data.angle) * data.distance
       );
-      
       group.userData = {
         planetData: data,
-        angle: angle,
+        angle: data.angle,
         distance: data.distance,
         speed: data.speed,
-        index
+        index,
+        verticalOffset: data.verticalOffset || 0
       };
-      
       scene.add(group);
       planets.push(group);
       planetMeshes.push(mesh);
     });
 
-    // --- CONTROLE POR TOQUE (deslizar + pinça) ---
-    let touchStartX = 0;
-    let touchStartY = 0;
+    // --- NAVEGAÇÃO PARA PLANETA (ZOOM) ---
+    let isZooming = false;
+    let zoomTarget = null;
+    let zoomProgress = 0;
+    let zoomStartPos = new THREE.Vector3();
+    let zoomEndPos = new THREE.Vector3();
+    let zoomStartTarget = new THREE.Vector3();
+    let zoomEndTarget = new THREE.Vector3();
+    const ZOOM_DURATION = 1.5;
+    const ZOOM_DISTANCE = 1.8;
+
+    const zoomIndicator = document.getElementById('zoom-indicator');
+
+    function startZoomToPlanet(index) {
+      const data = PLANET_DATA[index];
+      if (!data) return;
+      
+      const planetGroup = planets[index];
+      if (!planetGroup) return;
+      
+      const worldPos = new THREE.Vector3();
+      planetGroup.getWorldPosition(worldPos);
+      
+      const direction = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
+      const finalPos = worldPos.clone().add(direction.multiplyScalar(ZOOM_DISTANCE));
+      
+      zoomStartPos.copy(camera.position);
+      zoomEndPos.copy(finalPos);
+      zoomStartTarget.copy(targetPosition);
+      zoomEndTarget.copy(worldPos);
+      
+      zoomProgress = 0;
+      isZooming = true;
+      zoomTarget = index;
+      
+      zoomIndicator.textContent = `🔭 Navegando para ${data.name}...`;
+      zoomIndicator.classList.add('show');
+      
+      card.classList.remove('active');
+    }
+
+    function updateZoom(delta) {
+      if (!isZooming) return;
+      
+      zoomProgress += delta / ZOOM_DURATION;
+      
+      if (zoomProgress >= 1) {
+        zoomProgress = 1;
+        isZooming = false;
+        zoomIndicator.classList.remove('show');
+        zoomTarget = null;
+      }
+      
+      const t = zoomProgress < 0.5 ? 2 * zoomProgress * zoomProgress : 1 - Math.pow(-2 * zoomProgress + 2, 2) / 2;
+      
+      camera.position.lerpVectors(zoomStartPos, zoomEndPos, t);
+      targetPosition.lerpVectors(zoomStartTarget, zoomEndTarget, t);
+      
+      const offset = new THREE.Vector3().subVectors(camera.position, targetPosition);
+      cameraRadius = offset.length();
+      cameraTheta = Math.atan2(offset.x, offset.z);
+      cameraPhi = Math.acos(offset.y / cameraRadius);
+      
+      camera.lookAt(targetPosition);
+    }
+
+    // --- FUNÇÕES DA CÂMERA ---
+    function updateCameraFromAngles() {
+      if (isZooming) return;
+      const offset = new THREE.Vector3(
+        cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta),
+        cameraRadius * Math.cos(cameraPhi),
+        cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta)
+      );
+      cameraPosition.copy(targetPosition).add(offset);
+      camera.position.copy(cameraPosition);
+      camera.lookAt(targetPosition);
+    }
+
+    // --- CONTROLES POR TOQUE ---
+    let touchStartX = 0, touchStartY = 0;
     let touchStartDist = 0;
     let isTouching = false;
     let isPinching = false;
-    let velocityX = 0;
-    let velocityY = 0;
+    let velocityX = 0, velocityY = 0;
+    let touchMoveCount = 0;
     const DAMPING = 0.92;
     const SENSITIVITY = 0.008;
+    const MOVE_SENSITIVITY = 0.04;
+    let lastTapTime = 0;
+    let tapTimeout = null;
 
-    // Controle de câmera esférico
-    let cameraTheta = 0;
-    let cameraPhi = Math.PI / 3;
-    let cameraRadius = 16;
-    const minPhi = 0.2;
-    const maxPhi = Math.PI / 1.8;
-    const minRadius = 4;
-    const maxRadius = 30;
-
-    function updateCameraPosition() {
-      camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
-      camera.position.y = cameraRadius * Math.cos(cameraPhi);
-      camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
-      camera.lookAt(0, 0, 0);
-    }
-
-    // Detectar pinça
-    function getTouchDistance(touches) {
-      if (touches.length < 2) return 0;
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx*dx + dy*dy);
-    }
-
-    // Eventos de toque
     renderer.domElement.addEventListener('touchstart', (e) => {
+      if (isZooming) return;
       if (e.touches.length === 1) {
         const touch = e.touches[0];
         touchStartX = touch.clientX;
@@ -453,6 +705,7 @@
         isPinching = false;
         velocityX = 0;
         velocityY = 0;
+        touchMoveCount = 0;
       } else if (e.touches.length === 2) {
         isPinching = true;
         isTouching = false;
@@ -461,30 +714,40 @@
     }, { passive: true });
 
     renderer.domElement.addEventListener('touchmove', (e) => {
+      if (isZooming) return;
       e.preventDefault();
-      
       if (e.touches.length === 1 && isTouching) {
         const touch = e.touches[0];
         const dx = touch.clientX - touchStartX;
         const dy = touch.clientY - touchStartY;
+        touchMoveCount++;
+        if (touchMoveCount < 3 && Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
         
-        cameraTheta -= dx * SENSITIVITY;
-        cameraPhi += dy * SENSITIVITY * 0.5;
+        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+        forward.y = 0;
+        forward.normalize();
+        const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+        right.y = 0;
+        right.normalize();
+        const moveVector = new THREE.Vector3();
+        moveVector.add(right.clone().multiplyScalar(-dx * MOVE_SENSITIVITY * 0.5));
+        moveVector.add(forward.clone().multiplyScalar(dy * MOVE_SENSITIVITY * 0.5));
+        cameraPosition.add(moveVector);
+        targetPosition.add(moveVector);
+        cameraTheta -= dx * SENSITIVITY * 0.3;
+        cameraPhi += dy * SENSITIVITY * 0.15;
         cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
-        
         velocityX = -dx * SENSITIVITY * 0.5;
         velocityY = dy * SENSITIVITY * 0.3;
-        
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
-        
-        updateCameraPosition();
+        updateCameraFromAngles();
       } else if (e.touches.length === 2 && isPinching) {
         const dist = getTouchDistance(e.touches);
         const delta = dist - touchStartDist;
-        cameraRadius = Math.max(minRadius, Math.min(maxRadius, cameraRadius - delta * 0.05));
+        cameraRadius = Math.max(minRadius, Math.min(maxRadius, cameraRadius - delta * 0.08));
         touchStartDist = dist;
-        updateCameraPosition();
+        updateCameraFromAngles();
       }
     }, { passive: false });
 
@@ -496,50 +759,111 @@
       }
     }, { passive: true });
 
-    // Suporte a mouse (arrastar + scroll)
+    function getTouchDistance(touches) {
+      if (touches.length < 2) return 0;
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    // --- CONTROLES POR MOUSE ---
     let mouseDown = false;
     let mouseX = 0, mouseY = 0;
+    let isDragging = false;
+    let dragStartX = 0, dragStartY = 0;
+    let clickTimer = null;
+    let clickCount = 0;
 
     renderer.domElement.addEventListener('mousedown', (e) => {
+      if (isZooming) return;
       mouseDown = true;
       mouseX = e.clientX;
       mouseY = e.clientY;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      isDragging = false;
     });
 
     window.addEventListener('mousemove', (e) => {
+      if (isZooming) return;
       if (mouseDown) {
         const dx = e.clientX - mouseX;
         const dy = e.clientY - mouseY;
-        cameraTheta -= dx * SENSITIVITY;
-        cameraPhi += dy * SENSITIVITY * 0.5;
-        cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        updateCameraPosition();
+        if (Math.abs(e.clientX - dragStartX) > 5 || Math.abs(e.clientY - dragStartY) > 5) {
+          isDragging = true;
+        }
+        if (isDragging) {
+          const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+          forward.y = 0;
+          forward.normalize();
+          const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+          right.y = 0;
+          right.normalize();
+          const moveVector = new THREE.Vector3();
+          moveVector.add(right.clone().multiplyScalar(-dx * MOVE_SENSITIVITY * 0.5));
+          moveVector.add(forward.clone().multiplyScalar(dy * MOVE_SENSITIVITY * 0.5));
+          cameraPosition.add(moveVector);
+          targetPosition.add(moveVector);
+          cameraTheta -= dx * SENSITIVITY * 0.3;
+          cameraPhi += dy * SENSITIVITY * 0.15;
+          cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          updateCameraFromAngles();
+        }
       }
     });
 
-    window.addEventListener('mouseup', () => {
+    window.addEventListener('mouseup', (e) => {
+      if (mouseDown && !isDragging) {
+        const now = Date.now();
+        const timeSinceLastTap = now - lastTapTime;
+        
+        if (timeSinceLastTap < 400) {
+          // Duplo clique -> abrir card
+          clickCount = 2;
+          if (clickTimer) {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+          }
+          onPointerDown({ clientX: e.clientX, clientY: e.clientY, isDouble: true });
+        } else {
+          // Clique simples -> navegar (zoom)
+          clickCount = 1;
+          if (clickTimer) {
+            clearTimeout(clickTimer);
+          }
+          clickTimer = setTimeout(() => {
+            onPointerDown({ clientX: e.clientX, clientY: e.clientY, isDouble: false });
+            clickTimer = null;
+          }, 400);
+        }
+        lastTapTime = now;
+      }
       mouseDown = false;
+      isDragging = false;
     });
 
     renderer.domElement.addEventListener('wheel', (e) => {
+      if (isZooming) return;
       e.preventDefault();
-      cameraRadius += e.deltaY * 0.02;
+      cameraRadius += e.deltaY * 0.03;
       cameraRadius = Math.max(minRadius, Math.min(maxRadius, cameraRadius));
-      updateCameraPosition();
+      updateCameraFromAngles();
     }, { passive: false });
 
-    // --- INTERAÇÃO COM CLIQUE (planetas) ---
+    // --- SELEÇÃO DE PLANETAS ---
     const raycaster = new THREE.Raycaster();
     const mouse2 = new THREE.Vector2();
+    let selectedPlanetIndex = null;
 
     function onPointerDown(event) {
+      if (isZooming) return;
+      
       const rect = renderer.domElement.getBoundingClientRect();
       const x = ((event.clientX || event.pageX) - rect.left) / rect.width * 2 - 1;
       const y = -((event.clientY || event.pageY) - rect.top) / rect.height * 2 + 1;
       mouse2.set(x, y);
-      
       raycaster.setFromCamera(mouse2, camera);
       const intersects = raycaster.intersectObjects(planetMeshes);
       
@@ -547,20 +871,19 @@
         const hit = intersects[0].object;
         const index = hit.userData.index;
         if (index !== undefined) {
-          showPlanetCard(index);
+          if (event.isDouble) {
+            // Duplo clique: mostrar card
+            showPlanetCard(index);
+            selectedPlanetIndex = index;
+          } else {
+            // Clique simples: navegar até o planeta
+            startZoomToPlanet(index);
+          }
         }
+      } else {
+        card.classList.remove('active');
       }
     }
-
-    renderer.domElement.addEventListener('click', onPointerDown);
-    renderer.domElement.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        const touch = e.touches[0];
-        setTimeout(() => {
-          onPointerDown({ clientX: touch.clientX, clientY: touch.clientY });
-        }, 50);
-      }
-    }, { passive: true });
 
     // --- CARD DO PLANETA ---
     const card = document.getElementById('planet-card');
@@ -581,52 +904,68 @@
       card.classList.add('active');
     }
 
-    closeBtn.addEventListener('click', () => {
-      card.classList.remove('active');
-    });
-
+    closeBtn.addEventListener('click', () => card.classList.remove('active'));
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') card.classList.remove('active');
     });
 
-    // --- ANIMAÇÃO ---
+    // --- ANIMAÇÃO COM PULSO SOLAR ---
     const clock = new THREE.Clock();
 
     function animate() {
       const delta = clock.getDelta();
       const time = clock.getElapsedTime();
 
-      // Inércia (toque)
-      if (!isTouching && !mouseDown && !isPinching) {
+      if (isZooming) {
+        updateZoom(delta);
+      }
+
+      if (!isTouching && !mouseDown && !isPinching && !isZooming) {
         if (Math.abs(velocityX) > 0.0001 || Math.abs(velocityY) > 0.0001) {
           cameraTheta += velocityX;
           cameraPhi += velocityY * 0.3;
           cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
           velocityX *= DAMPING;
           velocityY *= DAMPING;
-          updateCameraPosition();
+          updateCameraFromAngles();
         }
       }
 
-      // Rotacionar planetas
+      // Movimento orbital dos planetas (velocidade reduzida)
       planets.forEach((group, i) => {
         const data = group.userData;
         if (!data) return;
-        data.angle += delta * data.speed * 0.25;
+        data.angle += delta * data.speed * 0.2; // Fator adicional reduzido
         group.position.x = Math.cos(data.angle) * data.distance;
         group.position.z = Math.sin(data.angle) * data.distance;
-        group.position.y = Math.sin(time * 0.4 + i * 1.5) * 0.2;
-        
+        group.position.y = data.verticalOffset + Math.sin(time * 0.2 + i * 0.3) * 0.2;
         const mesh = group.children[0];
-        if (mesh) mesh.rotation.y += delta * 0.2;
+        if (mesh) mesh.rotation.y += delta * 0.15;
       });
 
-      // Rotacionar sol
+      // Pulso solar
+      const pulse = Math.sin(time * 1.2) * 0.5 + 0.5;
+      const scalePulse = 1 + pulse * 0.15;
+      ring.scale.set(scalePulse, scalePulse, scalePulse);
+      ring.material.opacity = 0.5 + pulse * 0.4;
+      ring.material.emissiveIntensity = 0.3 + pulse * 0.6;
+      ring2.scale.set(scalePulse * 0.98, scalePulse * 0.98, scalePulse * 0.98);
+      ring2.material.opacity = 0.3 + pulse * 0.5;
+      ring2.material.emissiveIntensity = 0.2 + pulse * 0.5;
+      ring3.scale.set(scalePulse * 0.95, scalePulse * 0.95, scalePulse * 0.95);
+      ring3.material.opacity = 0.2 + pulse * 0.4;
+      ring3.material.emissiveIntensity = 0.1 + pulse * 0.4;
+      glowMesh.scale.set(scalePulse * 1.1, scalePulse * 1.1, scalePulse * 1.1);
+      glowMesh.material.opacity = 0.15 + pulse * 0.25;
+      ring.rotation.z += delta * 0.1;
+      ring2.rotation.x += delta * 0.08;
+      ring3.rotation.y += delta * 0.06;
       sunMesh.rotation.y += delta * 0.1;
-      ring.rotation.z += delta * 0.05;
-      ring2.rotation.x += delta * 0.03;
 
-      stars.rotation.y += delta * 0.003;
+      starField.rotation.y += delta * 0.001;
+      starField.rotation.x += delta * 0.0005;
+      nebula.rotation.y += delta * 0.0008;
+      nebula.rotation.x += delta * 0.0004;
 
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
@@ -657,9 +996,8 @@
       }
     }, 5000);
 
-    updateCameraPosition();
-
-    console.log('🚀 Monero Solar System com pinça!');
+    updateCameraFromAngles();
+    console.log('🚀 Sistema Solar Monero - 1 clique: navegar | 2 cliques: info | Velocidade reduzida');
   </script>
 </body>
 </html>
