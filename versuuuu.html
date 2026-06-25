@@ -272,8 +272,13 @@
     scene.background = new THREE.Color(0x050510);
 
     const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
-    let cameraPosition = new THREE.Vector3(0, 8, 45);
-    let targetPosition = new THREE.Vector3(0, 0, 0);
+    
+    // Posição inicial da câmera
+    const INITIAL_CAMERA_POS = new THREE.Vector3(0, 8, 45);
+    const INITIAL_TARGET_POS = new THREE.Vector3(0, 0, 0);
+    
+    let cameraPosition = new THREE.Vector3().copy(INITIAL_CAMERA_POS);
+    let targetPosition = new THREE.Vector3().copy(INITIAL_TARGET_POS);
     let cameraRadius = 45;
     let cameraTheta = 0;
     let cameraPhi = Math.PI / 3;
@@ -676,7 +681,7 @@
     let zoomEndTarget = new THREE.Vector3();
     const ZOOM_DURATION = 1.5;
     const ZOOM_DISTANCE_PLANET = 1.8;
-    const ZOOM_DISTANCE_SUN = 5.50; // Zoom do Sol ajustado para 2.50
+    const ZOOM_DISTANCE_SUN = 5.50;
 
     const zoomIndicator = document.getElementById('zoom-indicator');
 
@@ -724,6 +729,25 @@
       zoomTarget = 'sun';
       
       zoomIndicator.textContent = `🔭 Navegando para o Sol Monero...`;
+      zoomIndicator.classList.add('show');
+      
+      card.classList.remove('active');
+    }
+
+    // Função para resetar a câmera para a posição inicial
+    function resetCameraToInitial() {
+      if (isZooming) return;
+      
+      zoomStartPos.copy(camera.position);
+      zoomEndPos.copy(INITIAL_CAMERA_POS);
+      zoomStartTarget.copy(targetPosition);
+      zoomEndTarget.copy(INITIAL_TARGET_POS);
+      
+      zoomProgress = 0;
+      isZooming = true;
+      zoomTarget = 'reset';
+      
+      zoomIndicator.textContent = `🔭 Retornando à vista inicial...`;
       zoomIndicator.classList.add('show');
       
       card.classList.remove('active');
@@ -779,6 +803,8 @@
     const MOVE_SENSITIVITY = 0.04;
     let lastTapTime = 0;
     let tapTimeout = null;
+    let touchClickCount = 0;
+    let touchClickTimer = null;
 
     renderer.domElement.addEventListener('touchstart', (e) => {
       if (isZooming) return;
@@ -791,6 +817,42 @@
         velocityX = 0;
         velocityY = 0;
         touchMoveCount = 0;
+        
+        // Detectar toque em área vazia para reset
+        const rect = renderer.domElement.getBoundingClientRect();
+        const x = ((touch.clientX) - rect.left) / rect.width * 2 - 1;
+        const y = -((touch.clientY) - rect.top) / rect.height * 2 + 1;
+        mouse2.set(x, y);
+        raycaster.setFromCamera(mouse2, camera);
+        
+        const allMeshes = [...planetMeshes, sunMeshForRaycast];
+        const intersects = raycaster.intersectObjects(allMeshes);
+        
+        if (intersects.length === 0) {
+          touchClickCount++;
+          if (touchClickCount >= 3) {
+            resetCameraToInitial();
+            touchClickCount = 0;
+            if (touchClickTimer) {
+              clearTimeout(touchClickTimer);
+              touchClickTimer = null;
+            }
+          } else {
+            if (touchClickTimer) {
+              clearTimeout(touchClickTimer);
+            }
+            touchClickTimer = setTimeout(() => {
+              touchClickCount = 0;
+              touchClickTimer = null;
+            }, 1000);
+          }
+        } else {
+          touchClickCount = 0;
+          if (touchClickTimer) {
+            clearTimeout(touchClickTimer);
+            touchClickTimer = null;
+          }
+        }
       } else if (e.touches.length === 2) {
         isPinching = true;
         isTouching = false;
@@ -857,7 +919,9 @@
     let isDragging = false;
     let dragStartX = 0, dragStartY = 0;
     let clickTimer = null;
-    let clickCount = 0;
+    let clickCount = 0; // Contador de cliques para reset
+    let doubleClickTimer = null;
+    let pendingClick = null;
 
     renderer.domElement.addEventListener('mousedown', (e) => {
       if (isZooming) return;
@@ -876,6 +940,20 @@
         const dy = e.clientY - mouseY;
         if (Math.abs(e.clientX - dragStartX) > 5 || Math.abs(e.clientY - dragStartY) > 5) {
           isDragging = true;
+          // Reseta o contador de cliques se arrastar
+          clickCount = 0;
+          if (clickTimer) {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+          }
+          if (doubleClickTimer) {
+            clearTimeout(doubleClickTimer);
+            doubleClickTimer = null;
+          }
+          if (pendingClick) {
+            clearTimeout(pendingClick);
+            pendingClick = null;
+          }
         }
         if (isDragging) {
           const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
@@ -901,27 +979,81 @@
 
     window.addEventListener('mouseup', (e) => {
       if (mouseDown && !isDragging) {
-        const now = Date.now();
-        const timeSinceLastTap = now - lastTapTime;
+        // Processa o clique (pode ser simples ou duplo)
+        const rect = renderer.domElement.getBoundingClientRect();
+        const x = ((e.clientX || e.pageX) - rect.left) / rect.width * 2 - 1;
+        const y = -((e.clientY || e.pageY) - rect.top) / rect.height * 2 + 1;
+        mouse2.set(x, y);
+        raycaster.setFromCamera(mouse2, camera);
         
-        if (timeSinceLastTap < 400) {
-          clickCount = 2;
-          if (clickTimer) {
-            clearTimeout(clickTimer);
-            clickTimer = null;
+        const allMeshes = [...planetMeshes, sunMeshForRaycast];
+        const intersects = raycaster.intersectObjects(allMeshes);
+        
+        // Verifica se clicou em área vazia (para reset de 3 cliques)
+        if (intersects.length === 0) {
+          clickCount++;
+          if (clickCount >= 3) {
+            resetCameraToInitial();
+            clickCount = 0;
+            if (clickTimer) {
+              clearTimeout(clickTimer);
+              clickTimer = null;
+            }
+          } else {
+            if (clickTimer) {
+              clearTimeout(clickTimer);
+            }
+            clickTimer = setTimeout(() => {
+              clickCount = 0;
+              clickTimer = null;
+            }, 1000);
           }
-          onPointerDown({ clientX: e.clientX, clientY: e.clientY, isDouble: true });
         } else {
-          clickCount = 1;
+          clickCount = 0;
           if (clickTimer) {
             clearTimeout(clickTimer);
-          }
-          clickTimer = setTimeout(() => {
-            onPointerDown({ clientX: e.clientX, clientY: e.clientY, isDouble: false });
             clickTimer = null;
-          }, 400);
+          }
         }
-        lastTapTime = now;
+        
+        // Processa clique em objeto (com detecção de duplo clique)
+        if (intersects.length > 0) {
+          const hit = intersects[0].object;
+          
+          // Verifica se é duplo clique
+          if (doubleClickTimer) {
+            // É duplo clique!
+            clearTimeout(doubleClickTimer);
+            doubleClickTimer = null;
+            
+            if (hit.userData.isSun) {
+              showSunCard();
+            } else if (hit.userData.isPlanet) {
+              const index = hit.userData.index;
+              if (index !== undefined) {
+                showPlanetCard(index);
+                selectedPlanetIndex = index;
+              }
+            }
+          } else {
+            // Primeiro clique - aguarda para ver se é duplo
+            doubleClickTimer = setTimeout(() => {
+              doubleClickTimer = null;
+              // Clique simples - faz zoom
+              if (hit.userData.isSun) {
+                startZoomToSun();
+              } else if (hit.userData.isPlanet) {
+                const index = hit.userData.index;
+                if (index !== undefined) {
+                  startZoomToPlanet(index);
+                }
+              }
+            }, 300);
+          }
+        } else {
+          // Clicou em área vazia, fecha o card
+          card.classList.remove('active');
+        }
       }
       mouseDown = false;
       isDragging = false;
@@ -939,51 +1071,6 @@
     const raycaster = new THREE.Raycaster();
     const mouse2 = new THREE.Vector2();
     let selectedPlanetIndex = null;
-
-    function onPointerDown(event) {
-      if (isZooming) return;
-      
-      const rect = renderer.domElement.getBoundingClientRect();
-      const x = ((event.clientX || event.pageX) - rect.left) / rect.width * 2 - 1;
-      const y = -((event.clientY || event.pageY) - rect.top) / rect.height * 2 + 1;
-      mouse2.set(x, y);
-      raycaster.setFromCamera(mouse2, camera);
-      
-      // Verificar colisões com planetas e sol
-      const allMeshes = [...planetMeshes, sunMeshForRaycast];
-      const intersects = raycaster.intersectObjects(allMeshes);
-      
-      if (intersects.length > 0) {
-        const hit = intersects[0].object;
-        
-        // Verifica se é o sol
-        if (hit.userData.isSun) {
-          if (event.isDouble) {
-            showSunCard();
-          } else {
-            startZoomToSun();
-          }
-          return;
-        }
-        
-        // Verifica se é um planeta
-        if (hit.userData.isPlanet) {
-          const index = hit.userData.index;
-          if (index !== undefined) {
-            if (event.isDouble) {
-              showPlanetCard(index);
-              selectedPlanetIndex = index;
-            } else {
-              startZoomToPlanet(index);
-            }
-          }
-          return;
-        }
-      }
-      
-      // Se clicou em lugar vazio, fecha o card
-      card.classList.remove('active');
-    }
 
     // --- CARD DO PLANETA ---
     const card = document.getElementById('planet-card');
@@ -1100,7 +1187,7 @@
     }, 5000);
 
     updateCameraFromAngles();
-    console.log('🚀 Sistema Solar Monero - Zoom do Sol ajustado para 2.50');
+    console.log('🚀 Sistema Solar Monero - 2 cliques: card | 3 cliques em área vazia: reset');
   </script>
 </body>
 </html>
