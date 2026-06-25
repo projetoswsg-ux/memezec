@@ -451,6 +451,14 @@
     sunMesh.userData = { isSun: true };
     sunGroup.add(sunMesh);
 
+
+const material = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  roughness: 1.0, // 💡 1.0 significa rugosidade máxima (tira o reflexo brilhante)
+  metalness: 0.0  // 💡 0.0 garante que ele não se comporte como metal
+});
+    
+
     // --- AURA DO SOL COM GRADIENTE E EBULIÇÃO ---
     const auraRadius = 1.5;
     const auraGeo = new THREE.SphereGeometry(auraRadius, 48, 48);
