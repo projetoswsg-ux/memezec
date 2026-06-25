@@ -675,7 +675,8 @@
     let zoomStartTarget = new THREE.Vector3();
     let zoomEndTarget = new THREE.Vector3();
     const ZOOM_DURATION = 1.5;
-    const ZOOM_DISTANCE = 1.8;
+    const ZOOM_DISTANCE_PLANET = 1.8;
+    const ZOOM_DISTANCE_SUN = 2.50; // Zoom do Sol ajustado para 2.50
 
     const zoomIndicator = document.getElementById('zoom-indicator');
 
@@ -690,7 +691,7 @@
       planetGroup.getWorldPosition(worldPos);
       
       const direction = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
-      const finalPos = worldPos.clone().add(direction.multiplyScalar(ZOOM_DISTANCE));
+      const finalPos = worldPos.clone().add(direction.multiplyScalar(ZOOM_DISTANCE_PLANET));
       
       zoomStartPos.copy(camera.position);
       zoomEndPos.copy(finalPos);
@@ -711,7 +712,7 @@
       const worldPos = new THREE.Vector3(0, 0, 0);
       
       const direction = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
-      const finalPos = worldPos.clone().add(direction.multiplyScalar(ZOOM_DISTANCE));
+      const finalPos = worldPos.clone().add(direction.multiplyScalar(ZOOM_DISTANCE_SUN));
       
       zoomStartPos.copy(camera.position);
       zoomEndPos.copy(finalPos);
@@ -1099,7 +1100,7 @@
     }, 5000);
 
     updateCameraFromAngles();
-    console.log('🚀 Sistema Solar Monero - Planetas com texturas e sólidos!');
+    console.log('🚀 Sistema Solar Monero - Zoom do Sol ajustado para 2.50');
   </script>
 </body>
 </html>
