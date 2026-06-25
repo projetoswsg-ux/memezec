@@ -526,6 +526,9 @@
     const glowMesh = new THREE.Mesh(glowGeo, glowMat);
     sunGroup.add(glowMesh);
 
+    // 💡 COLOQUE ESTA LINHA AQUI PARA SUMIR COM ELE DE VEZ:
+    glowMesh.visible = false;
+
     scene.add(sunGroup);
 
     function updateSunAura() {
