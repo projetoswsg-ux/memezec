@@ -307,7 +307,8 @@
     document.body.appendChild(renderer.domElement);
 
     // --- LUZES ---
-    
+    const ambient = new THREE.AmbientLight(0x222244, 0.5);
+    scene.add(ambient);
 
     const mainLight = new THREE.DirectionalLight(0xffeedd, 1.0);
     mainLight.position.set(10, 20, 5);
