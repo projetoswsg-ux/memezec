@@ -307,10 +307,12 @@
     document.body.appendChild(renderer.domElement);
 
     // --- LUZES ---
-    const ambient = new THREE.AmbientLight(0x222244, 0.5);
-    scene.add(ambient);
+    
 
-  
+    const mainLight = new THREE.DirectionalLight(0xffeedd, 1.0);
+    mainLight.position.set(10, 20, 5);
+    mainLight.castShadow = true;
+    scene.add(mainLight);
 
     const backLight = new THREE.DirectionalLight(0x4488ff, 0.3);
     backLight.position.set(-10, 0, -10);
