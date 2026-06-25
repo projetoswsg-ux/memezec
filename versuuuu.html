@@ -485,6 +485,7 @@
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       side: THREE.BackSide
+      
     });
     
     const auraMesh = new THREE.Mesh(auraGeo, auraMat);
@@ -546,8 +547,8 @@
         edgeColor = 0x00aa00;
         auraMat.opacity = 0.5 + intensity * 0.5;
       } else {
-        centerColor = 0xff8888;
-        edgeColor = 0xaa0000;
+        centerColor = 0xff0000;
+        edgeColor = 0x660000;
         auraMat.opacity = 0.5 + intensity * 0.5;
       }
       
