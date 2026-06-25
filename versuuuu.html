@@ -543,13 +543,13 @@
       
       let centerColor, edgeColor;
       if (isUp) {
-        centerColor = 0x88ff88;
-        edgeColor = 0x00aa00;
-        auraMat.opacity = 0.5 + intensity * 0.5;
+        centerColor = 0x00ff00;
+        edgeColor = 0x006600;
+        auraMat.opacity = 0.8 + intensity * 0.8;
       } else {
         centerColor = 0xff0000;
         edgeColor = 0x660000;
-        auraMat.opacity = 0.5 + intensity * 0.5;
+        auraMat.opacity = 0.8 + intensity * 0.8;
       }
       
       const newTexture = createAuraTexture(centerColor, edgeColor);
