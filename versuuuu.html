@@ -99,6 +99,15 @@
       font-size: 15px;
       color: #ffaa55;
     }
+    #planet-card .planet-price .change-positive {
+      color: #44ff44;
+    }
+    #planet-card .planet-price .change-negative {
+      color: #ff4444;
+    }
+    #planet-card .planet-price .change-neutral {
+      color: #ffaa44;
+    }
     #zoom-indicator {
       position: fixed;
       bottom: 120px;
@@ -260,8 +269,8 @@
         if (data.monero) {
           currentPrice = data.monero.usd;
           priceChangePercent = data.monero.usd_24h_change || 0;
-          updatePriceRing();
           updateSunAura();
+          updatePriceDisplay();
         }
       } catch (e) {
         console.warn('Erro ao buscar preço:', e);
@@ -443,18 +452,15 @@
     sunGroup.add(sunMesh);
 
     // --- AURA DO SOL COM GRADIENTE E EBULIÇÃO ---
-    // Usando uma esfera com textura de gradiente radial para a aura
     const auraRadius = 2.0;
     const auraGeo = new THREE.SphereGeometry(auraRadius, 48, 48);
     
-    // Criar textura de gradiente radial para a aura
     function createAuraTexture(color1, color2) {
       const canvas = document.createElement('canvas');
       canvas.width = 256;
       canvas.height = 256;
       const ctx = canvas.getContext('2d');
       
-      // Gradiente radial do centro para a borda
       const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
       const c1 = new THREE.Color(color1);
       const c2 = new THREE.Color(color2);
@@ -471,7 +477,6 @@
       return new THREE.CanvasTexture(canvas);
     }
 
-    // Textura inicial (verde)
     let auraTexture = createAuraTexture(0x44ff44, 0x44ff44);
     const auraMat = new THREE.MeshBasicMaterial({
       map: auraTexture,
@@ -479,24 +484,23 @@
       opacity: 1.0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      side: THREE.BackSide // Renderiza por dentro para dar efeito de volume
+      side: THREE.BackSide
     });
     
     const auraMesh = new THREE.Mesh(auraGeo, auraMat);
     auraMesh.userData = {
       vertices: [],
       basePositions: null,
-      noiseOffsets: []
+      noiseOffsets: [],
+      baseOpacity: 0.8
     };
     
-    // Salvar as posições base dos vértices para a ebulição
     const positionAttribute = auraGeo.attributes.position;
     const vertexCount = positionAttribute.count;
     const basePositions = new Float32Array(vertexCount * 3);
     basePositions.set(positionAttribute.array);
     auraMesh.userData.basePositions = basePositions;
     
-    // Gerar offsets de ruído para cada vértice
     const noiseOffsets = [];
     for (let i = 0; i < vertexCount; i++) {
       noiseOffsets.push({
@@ -524,7 +528,6 @@
 
     scene.add(sunGroup);
 
-    // Função para atualizar a aura com gradiente e cores
     function updateSunAura() {
       if (priceChangePercent === 0) {
         auraMat.opacity = 0;
@@ -534,92 +537,24 @@
       const isUp = priceChangePercent >= 0;
       const intensity = Math.min(Math.abs(priceChangePercent) / 10, 0.8);
       
-      // Definir cores para o gradiente
       let centerColor, edgeColor;
       if (isUp) {
-        centerColor = 0x88ff88; // Verde claro no centro
-        edgeColor = 0x00aa00;   // Verde mais escuro na borda
+        centerColor = 0x88ff88;
+        edgeColor = 0x00aa00;
         auraMat.opacity = 0.5 + intensity * 0.5;
       } else {
-        centerColor = 0xff8888; // Vermelho claro no centro
-        edgeColor = 0xaa0000;   // Vermelho mais escuro na borda
+        centerColor = 0xff8888;
+        edgeColor = 0xaa0000;
         auraMat.opacity = 0.5 + intensity * 0.5;
       }
       
-      // Recriar textura com o gradiente
       const newTexture = createAuraTexture(centerColor, edgeColor);
       auraMat.map = newTexture;
       auraMat.needsUpdate = true;
       
-      // Salvar a cor base para referência
       auraMesh.userData.centerColor = centerColor;
       auraMesh.userData.edgeColor = edgeColor;
     }
-
-    // --- ANEL DE PREÇO ---
-    const priceRingGroup = new THREE.Group();
-    const RING_RADIUS = 2.2;
-    const TEXT_COUNT = 12;
-
-    function createPriceTextSprite(text, color = '#ff8800', fontSize = 32) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = 256;
-      canvas.height = 64;
-      ctx.shadowColor = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur = 15;
-      ctx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(255,100,0,0.3)';
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = color;
-      ctx.fillText(text, canvas.width/2, canvas.height/2);
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.needsUpdate = true;
-      const material = new THREE.SpriteMaterial({
-        map: texture,
-        transparent: true,
-        depthTest: false,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending
-      });
-      const sprite = new THREE.Sprite(material);
-      sprite.scale.set(0.8, 0.2, 1);
-      return sprite;
-    }
-
-    let priceSprites = [];
-
-    function updatePriceRing() {
-      priceSprites.forEach(sprite => {
-        priceRingGroup.remove(sprite);
-        sprite.material.map.dispose();
-        sprite.material.dispose();
-      });
-      priceSprites = [];
-
-      const priceText = currentPrice ? `₿ $ ${currentPrice.toFixed(2)}` : '₿ ---';
-      const change = priceChangePercent || 0;
-      const sign = change >= 0 ? '+' : '';
-      const fullText = `${priceText}  ${sign}${change.toFixed(2)}%`;
-
-      for (let i = 0; i < TEXT_COUNT; i++) {
-        const angle = (i / TEXT_COUNT) * Math.PI * 2;
-        const sprite = createPriceTextSprite(fullText, '#ff8800', 28);
-        sprite.position.set(
-          Math.cos(angle) * RING_RADIUS,
-          0,
-          Math.sin(angle) * RING_RADIUS
-        );
-        sprite.material.rotation = angle + Math.PI / 2;
-        priceRingGroup.add(sprite);
-        priceSprites.push(sprite);
-      }
-    }
-
-    updatePriceRing();
-    scene.add(priceRingGroup);
 
     // --- TÍTULO ---
     function createTextSprite(text, fontSize = 48, color = '#ff8800') {
@@ -1161,14 +1096,27 @@
     const planetDesc = document.getElementById('planet-desc');
     const planetPrice = document.getElementById('planet-price-info');
 
+    function updatePriceDisplay() {
+      const priceText = currentPrice ? `$ ${currentPrice.toFixed(2)} USD` : 'carregando...';
+      const change = priceChangePercent || 0;
+      const sign = change >= 0 ? '+' : '';
+      const changeText = `${sign}${change.toFixed(2)}%`;
+      
+      let changeClass = '';
+      if (change > 0) changeClass = 'change-positive';
+      else if (change < 0) changeClass = 'change-negative';
+      else changeClass = 'change-neutral';
+      
+      planetPrice.innerHTML = `💰 Preço XMR: ${priceText} <span class="${changeClass}">(${changeText})</span>`;
+    }
+
     function showPlanetCard(index) {
       const data = PLANET_DATA[index];
       if (!data) return;
       planetName.textContent = data.name;
       planetSubtitle.textContent = data.subtitle;
       planetDesc.textContent = data.desc;
-      const priceText = currentPrice ? `$ ${currentPrice.toFixed(2)} USD` : 'carregando...';
-      planetPrice.textContent = `💰 Preço XMR: ${priceText}`;
+      updatePriceDisplay();
       card.classList.add('active');
     }
 
@@ -1176,8 +1124,7 @@
       planetName.textContent = SUN_DATA.name;
       planetSubtitle.textContent = SUN_DATA.subtitle;
       planetDesc.textContent = SUN_DATA.desc;
-      const priceText = currentPrice ? `$ ${currentPrice.toFixed(2)} USD` : 'carregando...';
-      planetPrice.textContent = `💰 Preço XMR: ${priceText}`;
+      updatePriceDisplay();
       card.classList.add('active');
     }
 
@@ -1207,7 +1154,6 @@
           const wave2 = Math.cos(time * noise.speed * 0.7 + noise.y) * noise.amplitude * 0.6;
           const wave3 = Math.sin(time * noise.speed * 0.5 + noise.z) * noise.amplitude * 0.4;
           
-          // Mover os vértices na direção do vetor normal (direção radial)
           const x = base[i3];
           const y = base[i3+1];
           const z = base[i3+2];
@@ -1223,11 +1169,9 @@
         }
         positions.needsUpdate = true;
         
-        // Pulsação de opacidade e escala
         const pulse = Math.sin(time * 1.5) * 0.15 + 0.85;
         auraMat.opacity = (auraMesh.userData.baseOpacity || 0.8) * pulse;
         
-        // Pequena variação na escala
         const scalePulse = 1 + Math.sin(time * 0.8) * 0.02;
         auraMesh.scale.set(scalePulse, scalePulse, scalePulse);
       }
@@ -1258,9 +1202,6 @@
         const mesh = group.children[0];
         if (mesh) mesh.rotation.y += delta * 0.15;
       });
-
-      // Rotação do anel de preço
-      priceRingGroup.rotation.y += delta * 0.15;
 
       // Pulso do glow solar
       const glowPulse = Math.sin(time * 1.2) * 0.5 + 0.5;
@@ -1301,8 +1242,7 @@
 
     setInterval(() => {
       if (card.classList.contains('active')) {
-        const priceText = currentPrice ? `$ ${currentPrice.toFixed(2)} USD` : 'carregando...';
-        planetPrice.textContent = `💰 Preço XMR: ${priceText}`;
+        updatePriceDisplay();
       }
     }, 5000);
 
