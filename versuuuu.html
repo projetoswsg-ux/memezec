@@ -241,6 +241,15 @@
 
     const PLANET_DATA = generateOrganizedPlanetData(72);
 
+    // Dados do Sol
+    const SUN_DATA = {
+      name: 'Sol Monero',
+      subtitle: 'Sistema Central • Estrela Mãe',
+      desc: 'O Sol Monero é a estrela central do sistema, uma gigante laranja que fornece energia e luz para todos os planetas. Sua superfície vibrante pulsa com a energia da blockchain Monero, representando a descentralização e segurança da rede.',
+      color: 0xff6600,
+      size: 1.2
+    };
+
     let currentPrice = 0;
     let priceChangePercent = 0;
 
@@ -413,6 +422,7 @@
     const sunGroup = new THREE.Group();
 
     const textureLoader = new THREE.TextureLoader();
+    // Usando uma textura de sol mais realista
     const sunTexture = textureLoader.load('https://i.postimg.cc/FsTG7Tt1/Picsart-26-06-25-07-51-06-166.jpg');
 
     const sunGeo = new THREE.SphereGeometry(1.2, 64, 64);
@@ -425,6 +435,7 @@
       emissiveMap: sunTexture
     });
     const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+    sunMesh.userData = { isSun: true }; // Marca o sol para detecção de clique
     sunGroup.add(sunMesh);
 
     // Glow do sol (mantido, sem malha pulsante)
@@ -432,8 +443,8 @@
     const glowMat = new THREE.MeshBasicMaterial({
       color: 0xff8800,
       transparent: true,
-      opacity: 0.01, // Opacidade fixa, sem pulsar
-      wireframe: false // Sem wireframe para evitar malha
+      opacity: 0.01,
+      wireframe: false
     });
     const glowMesh = new THREE.Mesh(glowGeo, glowMat);
     sunGroup.add(glowMesh);
@@ -443,9 +454,8 @@
     // --- ANEL DE PREÇO (TEXTOS EM VOLTA DO SOL) ---
     const priceRingGroup = new THREE.Group();
     const RING_RADIUS = 2.2;
-    const TEXT_COUNT = 12; // Quantos textos no anel
+    const TEXT_COUNT = 12;
 
-    // Cria um sprite de texto
     function createPriceTextSprite(text, color = '#ff8800', fontSize = 32) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -474,11 +484,9 @@
       return sprite;
     }
 
-    // Array para armazenar os sprites do anel
     let priceSprites = [];
 
     function updatePriceRing() {
-      // Remove sprites antigos
       priceSprites.forEach(sprite => {
         priceRingGroup.remove(sprite);
         sprite.material.map.dispose();
@@ -486,13 +494,11 @@
       });
       priceSprites = [];
 
-      // Texto a ser exibido
       const priceText = currentPrice ? `₿ $ ${currentPrice.toFixed(2)}` : '₿ ---';
       const change = priceChangePercent || 0;
       const sign = change >= 0 ? '+' : '';
       const fullText = `${priceText}  ${sign}${change.toFixed(2)}%`;
 
-      // Cria vários sprites ao redor do anel
       for (let i = 0; i < TEXT_COUNT; i++) {
         const angle = (i / TEXT_COUNT) * Math.PI * 2;
         const sprite = createPriceTextSprite(fullText, '#ff8800', 28);
@@ -501,14 +507,12 @@
           0,
           Math.sin(angle) * RING_RADIUS
         );
-        // Rotaciona o sprite para ficar de frente para o centro
         sprite.material.rotation = angle + Math.PI / 2;
         priceRingGroup.add(sprite);
         priceSprites.push(sprite);
       }
     }
 
-    // Inicializa o anel com texto padrão
     updatePriceRing();
     scene.add(priceRingGroup);
 
@@ -573,25 +577,73 @@
     const orbitLines = createOrbitLines();
     scene.add(orbitLines);
 
-    // --- PLANETAS ---
+    // --- PLANETAS COM TEXTURAS E SÓLIDOS ---
     const planets = [];
     const planetMeshes = [];
 
+    function createPlanetTexture(baseColor, size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      
+      ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`;
+      ctx.fillRect(0, 0, 512, 512);
+      
+      for (let i = 0; i < 100 + Math.random() * 100; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const radius = 2 + Math.random() * 20;
+        const opacity = 0.1 + Math.random() * 0.4;
+        const color = Math.random() > 0.5 ? 'rgba(255,255,255,' : 'rgba(0,0,0,';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = color + opacity + ')';
+        ctx.fill();
+      }
+      
+      for (let i = 0; i < 5 + Math.random() * 10; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const radius = 10 + Math.random() * 40;
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, `rgba(255,255,255,${0.1 + Math.random() * 0.2})`);
+        gradient.addColorStop(1, `rgba(255,255,255,0)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      }
+      
+      return new THREE.CanvasTexture(canvas);
+    }
+
     PLANET_DATA.forEach((data, index) => {
       const group = new THREE.Group();
-      const geo = new THREE.SphereGeometry(data.size, 16, 16);
+      
+      const texture = createPlanetTexture(data.color, data.size);
+      
+      const geo = new THREE.SphereGeometry(data.size, 24, 24);
       const mat = new THREE.MeshStandardMaterial({
-        color: data.color,
-        roughness: 0.3,
-        metalness: 0.5,
-        emissive: data.color,
-        emissiveIntensity: 0.1
+        map: texture,
+        roughness: 0.5 + Math.random() * 0.3,
+        metalness: 0.2 + Math.random() * 0.3,
+        emissive: new THREE.Color(data.color),
+        emissiveIntensity: 0.05
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      mesh.userData = { index };
+      mesh.userData = { index, isPlanet: true };
       group.add(mesh);
+
+      const atmosGeo = new THREE.SphereGeometry(data.size * 1.02, 16, 16);
+      const atmosMat = new THREE.MeshBasicMaterial({
+        color: data.color,
+        transparent: true,
+        opacity: 0.03,
+        wireframe: true
+      });
+      const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
+      group.add(atmosMesh);
 
       group.position.set(
         Math.cos(data.angle) * data.distance,
@@ -610,6 +662,9 @@
       planets.push(group);
       planetMeshes.push(mesh);
     });
+
+    // Adicionar o sol à lista de meshes para detecção de clique
+    const sunMeshForRaycast = sunMesh;
 
     // --- NAVEGAÇÃO PARA PLANETA (ZOOM) ---
     let isZooming = false;
@@ -647,6 +702,27 @@
       zoomTarget = index;
       
       zoomIndicator.textContent = `🔭 Navegando para ${data.name}...`;
+      zoomIndicator.classList.add('show');
+      
+      card.classList.remove('active');
+    }
+
+    function startZoomToSun() {
+      const worldPos = new THREE.Vector3(0, 0, 0);
+      
+      const direction = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
+      const finalPos = worldPos.clone().add(direction.multiplyScalar(ZOOM_DISTANCE));
+      
+      zoomStartPos.copy(camera.position);
+      zoomEndPos.copy(finalPos);
+      zoomStartTarget.copy(targetPosition);
+      zoomEndTarget.copy(worldPos);
+      
+      zoomProgress = 0;
+      isZooming = true;
+      zoomTarget = 'sun';
+      
+      zoomIndicator.textContent = `🔭 Navegando para o Sol Monero...`;
       zoomIndicator.classList.add('show');
       
       card.classList.remove('active');
@@ -858,7 +934,7 @@
       updateCameraFromAngles();
     }, { passive: false });
 
-    // --- SELEÇÃO DE PLANETAS ---
+    // --- SELEÇÃO DE PLANETAS E SOL ---
     const raycaster = new THREE.Raycaster();
     const mouse2 = new THREE.Vector2();
     let selectedPlanetIndex = null;
@@ -871,22 +947,41 @@
       const y = -((event.clientY || event.pageY) - rect.top) / rect.height * 2 + 1;
       mouse2.set(x, y);
       raycaster.setFromCamera(mouse2, camera);
-      const intersects = raycaster.intersectObjects(planetMeshes);
+      
+      // Verificar colisões com planetas e sol
+      const allMeshes = [...planetMeshes, sunMeshForRaycast];
+      const intersects = raycaster.intersectObjects(allMeshes);
       
       if (intersects.length > 0) {
         const hit = intersects[0].object;
-        const index = hit.userData.index;
-        if (index !== undefined) {
+        
+        // Verifica se é o sol
+        if (hit.userData.isSun) {
           if (event.isDouble) {
-            showPlanetCard(index);
-            selectedPlanetIndex = index;
+            showSunCard();
           } else {
-            startZoomToPlanet(index);
+            startZoomToSun();
           }
+          return;
         }
-      } else {
-        card.classList.remove('active');
+        
+        // Verifica se é um planeta
+        if (hit.userData.isPlanet) {
+          const index = hit.userData.index;
+          if (index !== undefined) {
+            if (event.isDouble) {
+              showPlanetCard(index);
+              selectedPlanetIndex = index;
+            } else {
+              startZoomToPlanet(index);
+            }
+          }
+          return;
+        }
       }
+      
+      // Se clicou em lugar vazio, fecha o card
+      card.classList.remove('active');
     }
 
     // --- CARD DO PLANETA ---
@@ -903,6 +998,15 @@
       planetName.textContent = data.name;
       planetSubtitle.textContent = data.subtitle;
       planetDesc.textContent = data.desc;
+      const priceText = currentPrice ? `$ ${currentPrice.toFixed(2)} USD` : 'carregando...';
+      planetPrice.textContent = `💰 Preço XMR: ${priceText}`;
+      card.classList.add('active');
+    }
+
+    function showSunCard() {
+      planetName.textContent = SUN_DATA.name;
+      planetSubtitle.textContent = SUN_DATA.subtitle;
+      planetDesc.textContent = SUN_DATA.desc;
       const priceText = currentPrice ? `$ ${currentPrice.toFixed(2)} USD` : 'carregando...';
       planetPrice.textContent = `💰 Preço XMR: ${priceText}`;
       card.classList.add('active');
@@ -947,17 +1051,17 @@
         if (mesh) mesh.rotation.y += delta * 0.15;
       });
 
-      // Rotação do anel de preço em volta do sol (como anéis de Saturno)
+      // Rotação do anel de preço em volta do sol
       priceRingGroup.rotation.y += delta * 0.15;
 
-      // Pulso solar (apenas no glow, sem malha)
+      // Pulso solar
       const pulse = Math.sin(time * 1.2) * 0.5 + 0.5;
       glowMesh.scale.set(
         1 + pulse * 0.15,
         1 + pulse * 0.15,
         1 + pulse * 0.15
       );
-      glowMesh.material.opacity = 0.15 + pulse * 0.15; // Variação suave
+      glowMesh.material.opacity = 0.15 + pulse * 0.15;
       sunMesh.rotation.y += delta * 0.05;
 
       starField.rotation.y += delta * 0.001;
@@ -995,7 +1099,7 @@
     }, 5000);
 
     updateCameraFromAngles();
-    console.log('🚀 Sistema Solar Monero - Anel de preço em volta do Sol!');
+    console.log('🚀 Sistema Solar Monero - Planetas com texturas e sólidos!');
   </script>
 </body>
 </html>
