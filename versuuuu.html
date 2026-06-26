@@ -469,10 +469,10 @@
       const c1 = new THREE.Color(color1);
       const c2 = new THREE.Color(color2);
       
-      gradient.addColorStop(0, `rgba(${c1.r*255|0}, ${c1.g*255|0}, ${c1.b*255|0}, 0.0)`);
+      gradient.addColorStop(0, `rgba(${c1.r*255|0}, ${c1.g*255|0}, ${c1.b*255|0}, 0.1)`);
       gradient.addColorStop(0.3, `rgba(${c1.r*255|0}, ${c1.g*255|0}, ${c1.b*255|0}, 0.15)`);
-      gradient.addColorStop(0.6, `rgba(${c2.r*255|0}, ${c2.g*255|0}, ${c2.b*255|0}, 0.35)`);
-      gradient.addColorStop(0.85, `rgba(${c2.r*255|0}, ${c2.g*255|0}, ${c2.b*255|0}, 0.15)`);
+      gradient.addColorStop(0.6, `rgba(${c2.r*255|0}, ${c2.g*255|0}, ${c2.b*255|0}, 0.50)`);
+      gradient.addColorStop(0.85, `rgba(${c2.r*255|0}, ${c2.g*255|0}, ${c2.b*255|0}, 0.25)`);
       gradient.addColorStop(1, `rgba(${c2.r*255|0}, ${c2.g*255|0}, ${c2.b*255|0}, 0.0)`);
       
       ctx.fillStyle = gradient;
