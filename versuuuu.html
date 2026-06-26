@@ -108,6 +108,16 @@
     #planet-card .planet-price .change-neutral {
       color: #ffaa44;
     }
+    #planet-card .planet-price a {
+      color: #ff8800;
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px dashed rgba(255,136,0,0.3);
+      transition: border-color 0.2s;
+    }
+    #planet-card .planet-price a:hover {
+      border-color: #ff8800;
+    }
     #zoom-indicator {
       position: fixed;
       bottom: 120px;
@@ -164,10 +174,11 @@
       speedVariation: 0.1
     };
 
+    // --- DADOS DOS PLANETAS (72) + PLANETA DOCS SUBSTITUINDO O ÍNDICE 0 ---
     function generateOrganizedPlanetData(count = 72) {
       const planets = [];
       const names = [
-        'Cypheria', 'Aurora', 'Krypton', 'Nebula', 'Solara',
+        'Planeta docs', 'Aurora', 'Krypton', 'Nebula', 'Solara',
         'Vortex', 'Pulsar', 'Quasar', 'Nova', 'Cosmos',
         'Eclipse', 'Zenith', 'Orion', 'Lyra', 'Andromeda',
         'Cassiopeia', 'Draco', 'Phoenix', 'Titan', 'Rhea',
@@ -190,7 +201,7 @@
         0x66ff99, 0xff6666, 0x66cc99, 0xff99cc, 0x99ffcc
       ];
       const descriptions = [
-        'Planeta vibrante com ecossistemas digitais.',
+        'Planeta Docs: o centro de documentação do sistema. Explore a wiki interativa e os manuais da rede Monero.',
         'Mundo congelado de dados criptografados.',
         'Planeta vulcânico de mineração intensa.',
         'Nebulosa pulsante de mercado volátil.',
@@ -229,18 +240,19 @@
           const color = colors[planetIndex % colors.length];
           const desc = descriptions[planetIndex % descriptions.length];
           const sizeBase = 0.15 + (1 - orbit / orbitsNeeded) * 0.15;
-          const size = sizeBase + Math.random() * 0.15;
+          const size = (planetIndex === 0) ? 0.45 : sizeBase + Math.random() * 0.15; // Planeta docs um pouco maior
           const orbitType = ['Núcleo', 'Interna', 'Média', 'Externa', 'Periférica', 'Distante', 'Extrema'][Math.min(orbit, 6)];
-          const subtitle = `Sistema Monero • Órbita ${orbit + 1} • ${orbitType}`;
+          const subtitle = (planetIndex === 0) ? '📘 Centro de Documentação' : `Sistema Monero • Órbita ${orbit + 1} • ${orbitType}`;
 
           planets.push({
             name, subtitle, desc, color, size,
             distance: radius,
             speed: Math.max(0.03, speed),
             angle: angle,
-            verticalOffset: (Math.random() - 0.5) * SOLAR_SYSTEM_CONFIG.maxVerticalOffset * (1 - orbit * 0.05),
+            verticalOffset: (planetIndex === 0) ? 0 : (Math.random() - 0.5) * SOLAR_SYSTEM_CONFIG.maxVerticalOffset * (1 - orbit * 0.05),
             orbitIndex: orbit,
-            index: planetIndex
+            index: planetIndex,
+            isDocs: (planetIndex === 0)
           });
           planetIndex++;
         }
@@ -451,10 +463,6 @@
     sunMesh.userData = { isSun: true };
     sunGroup.add(sunMesh);
 
-
-
-    
-
     // --- AURA DO SOL COM GRADIENTE E EBULIÇÃO ---
     const auraRadius = 1.5;
     const auraGeo = new THREE.SphereGeometry(auraRadius, 48, 48);
@@ -520,7 +528,7 @@
     
     sunGroup.add(auraMesh);
 
-    // Glow do sol
+    // Glow do sol (desativado)
     const glowGeo = new THREE.SphereGeometry(1.5, 32, 32);
     const glowMat = new THREE.MeshBasicMaterial({
       color: 0xff8800,
@@ -529,10 +537,8 @@
       wireframe: false
     });
     const glowMesh = new THREE.Mesh(glowGeo, glowMat);
-    sunGroup.add(glowMesh);
-
-    // 💡 COLOQUE ESTA LINHA AQUI PARA SUMIR COM ELE DE VEZ:
     glowMesh.visible = false;
+    sunGroup.add(glowMesh);
 
     scene.add(sunGroup);
 
@@ -625,11 +631,17 @@
     const orbitLines = createOrbitLines();
     scene.add(orbitLines);
 
-    // --- PLANETAS ---
+    // --- PLANETAS (com Planeta docs usando a textura fornecida) ---
     const planets = [];
     const planetMeshes = [];
 
-    function createPlanetTexture(baseColor, size) {
+    // Textura para o Planeta docs
+    const docsTexture = textureLoader.load('https://i.postimg.cc/DZ0GvXVq/Picsart-26-06-25-21-38-42-862.jpg');
+
+    function createPlanetTexture(baseColor, size, isDocs = false) {
+      if (isDocs) {
+        return docsTexture;
+      }
       const canvas = document.createElement('canvas');
       canvas.width = 512;
       canvas.height = 512;
@@ -667,15 +679,15 @@
     PLANET_DATA.forEach((data, index) => {
       const group = new THREE.Group();
       
-      const texture = createPlanetTexture(data.color, data.size);
+      const texture = createPlanetTexture(data.color, data.size, data.isDocs === true);
       
-      const geo = new THREE.SphereGeometry(data.size, 24, 24);
+      const geo = new THREE.SphereGeometry(data.size, 32, 32);
       const mat = new THREE.MeshStandardMaterial({
         map: texture,
-        roughness: 0.5 + Math.random() * 0.3,
-        metalness: 0.2 + Math.random() * 0.3,
-        emissive: new THREE.Color(data.color),
-        emissiveIntensity: 0.05
+        roughness: data.isDocs ? 0.3 : 0.5 + Math.random() * 0.3,
+        metalness: data.isDocs ? 0.1 : 0.2 + Math.random() * 0.3,
+        emissive: data.isDocs ? new THREE.Color(0xff8800) : new THREE.Color(data.color),
+        emissiveIntensity: data.isDocs ? 0.15 : 0.05
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.castShadow = true;
@@ -683,15 +695,28 @@
       mesh.userData = { index, isPlanet: true };
       group.add(mesh);
 
-      const atmosGeo = new THREE.SphereGeometry(data.size * 1.02, 16, 16);
-      const atmosMat = new THREE.MeshBasicMaterial({
-        color: data.color,
-        transparent: true,
-        opacity: 0.03,
-        wireframe: true
-      });
-      const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
-      group.add(atmosMesh);
+      // Atmosfera sutil para o Planeta docs
+      if (data.isDocs) {
+        const atmosGeo = new THREE.SphereGeometry(data.size * 1.04, 24, 24);
+        const atmosMat = new THREE.MeshBasicMaterial({
+          color: 0xff8800,
+          transparent: true,
+          opacity: 0.08,
+          wireframe: true
+        });
+        const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
+        group.add(atmosMesh);
+      } else {
+        const atmosGeo = new THREE.SphereGeometry(data.size * 1.02, 16, 16);
+        const atmosMat = new THREE.MeshBasicMaterial({
+          color: data.color,
+          transparent: true,
+          opacity: 0.03,
+          wireframe: true
+        });
+        const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
+        group.add(atmosMesh);
+      }
 
       group.position.set(
         Math.cos(data.angle) * data.distance,
@@ -819,7 +844,7 @@
       camera.lookAt(targetPosition);
     }
 
-    // --- FUNÇÕES DA CÂMERA ---
+    // --- FUNÇÕES DA CÂMARA ---
     function updateCameraFromAngles() {
       if (isZooming) return;
       const offset = new THREE.Vector3(
@@ -1115,7 +1140,8 @@
       else if (change < 0) changeClass = 'change-negative';
       else changeClass = 'change-neutral';
       
-      planetPrice.innerHTML = `💰 Preço XMR: ${priceText} <span class="${changeClass}">(${changeText})</span>`;
+      const linkHtml = '<a href="https://docs.getmonero.org/" target="_blank">📖 docs.getmonero.org</a>';
+      planetPrice.innerHTML = `💰 Preço XMR: ${priceText} <span class="${changeClass}">(${changeText})</span> &nbsp; ${linkHtml}`;
     }
 
     function showPlanetCard(index) {
@@ -1211,14 +1237,10 @@
         if (mesh) mesh.rotation.y += delta * 0.15;
       });
 
-      // Pulso do glow solar
-      const glowPulse = Math.sin(time * 1.2) * 0.5 + 0.5;
-      glowMesh.scale.set(
-        1 + glowPulse * 0.15,
-        1 + glowPulse * 0.15,
-        1 + glowPulse * 0.15
-      );
-      glowMesh.material.opacity = 0.15 + glowPulse * 0.15;
+      // Pulso do glow solar (desativado)
+      glowMesh.scale.set(1, 1, 1);
+      glowMesh.material.opacity = 0;
+
       sunMesh.rotation.y += delta * 0.05;
 
       starField.rotation.y += delta * 0.001;
@@ -1255,7 +1277,7 @@
     }, 5000);
 
     updateCameraFromAngles();
-    console.log('🚀 Sistema Solar Monero - Aura com gradiente e ebulição ativados!');
+    console.log('🚀 Sistema Solar Monero - Planeta Docs com textura personalizada!');
   </script>
 </body>
 </html>
