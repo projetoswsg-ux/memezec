@@ -178,10 +178,7 @@
     // 1. MAPEAMENTO DE TEXTURAS - Estrutura centralizada
     // ============================================================
     const TEXTURE_MAP = {
-      // Texturas do Sol
       sun: 'https://i.postimg.cc/FsTG7Tt1/Picsart-26-06-25-07-51-06-166.jpg',
-      
-      // Texturas dos planetas (cada planeta tem seu próprio link)
       planets: {
         'Planeta Docs': 'https://picsum.photos/seed/docs_planet/512/512',
         'Aurora': 'https://i.postimg.cc/d0cVP25d/36f27e86-f4fc-4d76-86bf-73b8d6bf99e8.png',
@@ -237,8 +234,6 @@
         'Io': 'https://picsum.photos/seed/io_planet/512/512',
         'Triton': 'https://picsum.photos/seed/triton_planet/512/512'
       },
-      
-      // Texturas das luas (cada lua tem seu próprio link)
       moons: {
         'Lua A': 'https://i.postimg.cc/N0QZHDDz/a801b24e-775a-4caa-b840-f385741a359c.png',
         'Lua B': 'https://i.postimg.cc/N0QZHDDz/a801b24e-775a-4caa-b840-f385741a359c.png',
@@ -253,12 +248,10 @@
       }
     };
 
-    // Função helper para obter textura de planeta
     function getPlanetTexture(planetName) {
       return TEXTURE_MAP.planets[planetName] || 'https://picsum.photos/seed/default_planet/512/512';
     }
 
-    // Função helper para obter textura de lua
     function getMoonTexture(moonName) {
       return TEXTURE_MAP.moons[moonName] || 'https://picsum.photos/seed/default_moon/256/256';
     }
@@ -288,7 +281,7 @@
     function generateOrganizedPlanetData() {
       const planets = [];
       const planetNames = [
-        'Planeta Docs', 'Aurora', 'Krypton', 'Nebula', 'Solara',
+        'Planeta Docs', 'Wallets', 'Exchanges', 'Nebula', 'Solara',
         'Vortex', 'Pulsar', 'Quasar', 'Nova', 'Cosmos',
         'Eclipse', 'Zenith', 'Orion', 'Lyra', 'Andromeda',
         'Cassiopeia', 'Draco', 'Phoenix', 'Titan', 'Rhea',
@@ -377,7 +370,6 @@
           const desc = descriptions[planetIndex % descriptions.length];
           const link = links[planetIndex % links.length];
           
-          // Usa o mapeamento de texturas
           const textureUrl = getPlanetTexture(name);
           
           const hasMoons = planetsWithMoons.includes(planetIndex);
@@ -399,7 +391,7 @@
                 name: moonName,
                 desc: `Lua natural orbitando ${name}. Superfície coberta de dados criptografados.`,
                 link: link + '/moon',
-                textureUrl: getMoonTexture(moonName), // Usa mapeamento de texturas
+                textureUrl: getMoonTexture(moonName),
                 size: moonSize,
                 distance: moonOrbitRadius + m * ORBIT_CONFIG.moonOrbitSpacing,
                 speed: moonSpeed,
@@ -439,7 +431,7 @@
       subtitle: 'Sistema Central • Estrela Mãe',
       desc: 'O Sol Monero é a estrela central do sistema, uma gigante laranja que fornece energia e luz para todos os planetas. Sua superfície vibrante pulsa com a energia da blockchain Monero, representando a descentralização e segurança da rede.',
       size: ORBIT_CONFIG.sunRadius,
-      textureUrl: TEXTURE_MAP.sun // Textura específica do Sol
+      textureUrl: TEXTURE_MAP.sun
     };
 
     let currentPrice = 0;
@@ -619,7 +611,6 @@
     const sunGroup = new THREE.Group();
 
     const textureLoader = new THREE.TextureLoader();
-    // Usa a textura mapeada para o Sol
     const sunTexture = textureLoader.load(SUN_DATA.textureUrl);
 
     const sunGeo = new THREE.SphereGeometry(ORBIT_CONFIG.sunRadius, 64, 64);
@@ -788,6 +779,39 @@
     const orbitLines = createOrbitLines();
     scene.add(orbitLines);
 
+    // ------------------------------------------------------------
+    // FUNÇÃO PARA CRIAR SPRITE DE TEXTO 3D (NOME DO PLANETA)
+    // ------------------------------------------------------------
+    function createPlanetLabel(text, fontSize = 32, color = '#ffffff') {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 512;
+      canvas.height = 128;
+      
+      ctx.shadowColor = 'rgba(0,0,0,0.9)';
+      ctx.shadowBlur = 15;
+      ctx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = color;
+      ctx.fillText(text, canvas.width/2, canvas.height/2 + 4);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(1.2, 0.35, 1);
+      return sprite;
+    }
+
     // --- HIERARQUIA: PLANETAS E LUAS COM TEXTURAS MAPEADAS ---
     const planets = [];
     const planetMeshes = [];
@@ -798,7 +822,7 @@
       // Grupo do planeta (órbita ao redor do sol)
       const planetGroup = new THREE.Group();
       
-      // Mesh do planeta - usa textura do mapeamento
+      // Mesh do planeta
       const texture = textureLoader.load(data.textureUrl);
       const geo = new THREE.SphereGeometry(data.size, 32, 32);
       const mat = new THREE.MeshStandardMaterial({
@@ -818,6 +842,12 @@
       };
       planetGroup.add(mesh);
       planetMeshes.push(mesh);
+
+      // --- TEXTO 3D COM O NOME DO PLANETA ---
+      const label = createPlanetLabel(data.name, 28, '#ffaa66');
+      // Posiciona o texto acima do planeta (altura baseada no tamanho do planeta)
+      label.position.set(0, data.size + 0.25, 0);
+      planetGroup.add(label);
 
       // Atmosfera para o Planeta Docs
       if (data.isDocs) {
@@ -851,14 +881,12 @@
       scene.add(planetGroup);
       planets.push(planetGroup);
 
-      // --- CRIAR LUAS COM TEXTURAS MAPEADAS ---
+      // --- CRIAR LUAS ---
       const moons = data.moons || [];
       const moonGroupList = [];
 
       moons.forEach((moonData, moonIdx) => {
-        // Grupo da lua (filho do planeta)
         const moonGroup = new THREE.Group();
-        // Usa textura mapeada para a lua
         const moonTexture = textureLoader.load(moonData.textureUrl);
         const moonGeo = new THREE.SphereGeometry(moonData.size, 16, 16);
         const moonMat = new THREE.MeshStandardMaterial({
