@@ -174,22 +174,37 @@
   <script type="module">
     import * as THREE from 'three';
 
-    // --- CONFIGURAÇÃO DO SISTEMA SOLAR ---
-    const SOLAR_SYSTEM_CONFIG = {
-      baseRadius: 3.0,
-      orbitSpacing: 0.8,
-      planetsPerOrbit: 6,
-      maxVerticalOffset: 0.8,
-      baseSpeed: 0.08,
-      speedVariation: 0.1
+    // --- CONFIGURAÇÃO DO SISTEMA SOLAR COM HIERARQUIA MATEMÁTICA ---
+    const ORBIT_CONFIG = {
+      // Raios mínimos para evitar colisões (baseado no tamanho dos objetos)
+      sunRadius: 1.2,
+      planetMinRadius: 0.15,
+      planetMaxRadius: 0.45,
+      moonMinRadius: 0.04,
+      moonMaxRadius: 0.08,
+      
+      // Espaçamento entre órbitas de planetas
+      planetOrbitSpacing: 0.9,
+      // Distância mínima entre planetas na mesma órbita
+      planetAngularSeparation: 0.8, // radianos
+      
+      // Configurações de órbitas de luas
+      moonOrbitMin: 0.25,
+      moonOrbitMax: 0.55,
+      moonOrbitSpacing: 0.12,
+      moonAngularSeparation: 1.2, // radianos
+      
+      // Número de órbitas de planetas
+      numPlanetOrbits: 8,
+      // Planetas por órbita (varia para evitar colisões)
+      planetsPerOrbit: [4, 5, 6, 7, 8, 9, 10, 12]
     };
 
-    // --- DADOS DOS PLANETAS (72) CADA UM COM SEUS PRÓPRIOS ATRIBUTOS E TEXTURA INDIVIDUAL ---
-    function generateOrganizedPlanetData(count = 72) {
+    // --- DADOS DOS PLANETAS COM HIERARQUIA DEFINIDA ---
+    function generateOrganizedPlanetData() {
       const planets = [];
-      // Nomes, cores, descrições, links e URLs de textura individuais
-      const names = [
-        'Planeta docs', 'Aurora', 'Krypton', 'Nebula', 'Solara',
+      const planetNames = [
+        'Planeta Docs', 'Aurora', 'Krypton', 'Nebula', 'Solara',
         'Vortex', 'Pulsar', 'Quasar', 'Nova', 'Cosmos',
         'Eclipse', 'Zenith', 'Orion', 'Lyra', 'Andromeda',
         'Cassiopeia', 'Draco', 'Phoenix', 'Titan', 'Rhea',
@@ -205,14 +220,6 @@
         'Hygiea', 'Interamnia', 'Europa', 'Ganymede', 'Callisto',
         'Io', 'Triton'
       ];
-      // URLs de textura individuais para cada planeta (geradas aleatoriamente com base no índice)
-      const textureUrls = Array.from({ length: count }, (_, i) => {
-        // Gera uma URL de imagem diferente para cada planeta usando o índice
-        const seed = i * 7 + 13;
-        return `https://picsum.photos/seed/${seed}/512/512`;
-      });
-      // Força a textura do Planeta docs para ser a imagem específica
-      textureUrls[0] = 'https://i.postimg.cc/jdBYZ0qp/Picsart-26-06-25-21-54-20-249.png';
       
       const descriptions = [
         'Planeta Docs: o centro de documentação do sistema. Explore a wiki interativa e os manuais da rede Monero.',
@@ -236,7 +243,7 @@
         'Titã de processamento massivo, suportando a carga da rede.',
         'Rhea de estabilidade monetária, a âncora do sistema.'
       ];
-      // Links individuais para cada planeta
+      
       const links = [
         'https://docs.getmonero.org/',
         'https://www.getmonero.org/',
@@ -258,108 +265,99 @@
         'https://monero.space/',
         'https://monero.world/',
         'https://monero.life/',
-        'https://monero.guide/',
-        'https://monero.co/',
-        'https://monero.dev/',
-        'https://monero.io/',
-        'https://monero.app/',
-        'https://monero.xyz/',
-        'https://monero.cloud/',
-        'https://monero.ai/',
-        'https://monero.tech/',
-        'https://monero.finance/',
-        'https://monero.exchange/',
-        'https://monero.wiki/',
-        'https://monero.party/',
-        'https://monero.rocks/',
-        'https://monero.blue/',
-        'https://monero.green/',
-        'https://monero.pink/',
-        'https://monero.red/',
-        'https://monero.orange/',
-        'https://monero.purple/',
-        'https://monero.black/',
-        'https://monero.white/',
-        'https://monero.gold/',
-        'https://monero.silver/',
-        'https://monero.bronze/',
-        'https://monero.iron/',
-        'https://monero.steel/',
-        'https://monero.copper/',
-        'https://monero.zinc/',
-        'https://monero.tin/',
-        'https://monero.lead/',
-        'https://monero.nickel/',
-        'https://monero.cobalt/',
-        'https://monero.manganese/',
-        'https://monero.titanium/',
-        'https://monero.chromium/',
-        'https://monero.vanadium/',
-        'https://monero.molybdenum/',
-        'https://monero.tungsten/',
-        'https://monero.rhenium/',
-        'https://monero.osmium/',
-        'https://monero.iridium/',
-        'https://monero.platinum/',
-        'https://monero.palladium/',
-        'https://monero.rhodium/',
-        'https://monero.ruthenium/',
-        'https://monero.technetium/',
-        'https://monero.niobium/',
-        'https://monero.zirconium/',
-        'https://monero.strontium/',
-        'https://monero.barium/',
-        'https://monero.radium/'
+        'https://monero.guide/'
       ];
 
-      const orbitsNeeded = Math.ceil(count / SOLAR_SYSTEM_CONFIG.planetsPerOrbit);
+      // Definir quais planetas terão luas (índices específicos)
+      const planetsWithMoons = [0, 2, 3, 5, 8, 10, 12, 15, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70];
+      
       let planetIndex = 0;
-
-      for (let orbit = 0; orbit < orbitsNeeded && planetIndex < count; orbit++) {
-        const radius = SOLAR_SYSTEM_CONFIG.baseRadius + orbit * SOLAR_SYSTEM_CONFIG.orbitSpacing;
-        const planetsInThisOrbit = Math.min(SOLAR_SYSTEM_CONFIG.planetsPerOrbit, count - planetIndex);
-        const startAngle = Math.random() * Math.PI * 2;
-
-        for (let pos = 0; pos < planetsInThisOrbit; pos++) {
-          const angle = startAngle + (pos / planetsInThisOrbit) * Math.PI * 2;
-          const speedFactor = 1 - (orbit / orbitsNeeded) * 0.7;
-          const speed = SOLAR_SYSTEM_CONFIG.baseSpeed * speedFactor + (Math.random() - 0.5) * SOLAR_SYSTEM_CONFIG.speedVariation * 0.3;
-
-          const name = names[planetIndex % names.length];
-          const color = 0x888888; // cor neutra, a textura será a imagem
+      
+      // Gerar planetas por órbita com espaçamento matemático
+      for (let orbit = 0; orbit < ORBIT_CONFIG.numPlanetOrbits; orbit++) {
+        const radius = ORBIT_CONFIG.sunRadius + 1.5 + orbit * ORBIT_CONFIG.planetOrbitSpacing;
+        const numPlanets = ORBIT_CONFIG.planetsPerOrbit[orbit % ORBIT_CONFIG.planetsPerOrbit.length];
+        
+        // Espaçamento angular uniforme para evitar colisões
+        const angularSpacing = (Math.PI * 2) / numPlanets;
+        // Offset aleatório para variedade
+        const startAngle = Math.random() * angularSpacing * 0.5;
+        
+        for (let pos = 0; pos < numPlanets; pos++) {
+          if (planetIndex >= planetNames.length) break;
+          
+          const angle = startAngle + pos * angularSpacing;
+          const speed = 0.04 + (0.12 / (orbit + 1));
+          const size = ORBIT_CONFIG.planetMinRadius + 
+                      (ORBIT_CONFIG.planetMaxRadius - ORBIT_CONFIG.planetMinRadius) * 
+                      (1 - orbit / ORBIT_CONFIG.numPlanetOrbits) * 0.8 + 
+                      Math.random() * 0.05;
+          
+          const name = planetNames[planetIndex % planetNames.length];
           const desc = descriptions[planetIndex % descriptions.length];
           const link = links[planetIndex % links.length];
-          const textureUrl = textureUrls[planetIndex % textureUrls.length];
-          const sizeBase = 0.15 + (1 - orbit / orbitsNeeded) * 0.15;
-          const size = (planetIndex === 0) ? 0.45 : sizeBase + Math.random() * 0.15;
-          const orbitType = ['Núcleo', 'Interna', 'Média', 'Externa', 'Periférica', 'Distante', 'Extrema'][Math.min(orbit, 6)];
-          const subtitle = (planetIndex === 0) ? '📘 Centro de Documentação' : `Sistema Monero • Órbita ${orbit + 1} • ${orbitType}`;
-
+          const textureUrl = `https://picsum.photos/seed/planet_${planetIndex}_${orbit}_${pos}/512/512`;
+          
+          // Definir se o planeta terá luas
+          const hasMoons = planetsWithMoons.includes(planetIndex);
+          const numMoons = hasMoons ? 1 + Math.floor(Math.random() * 2.5) : 0;
+          
+          // Gerar luas com órbitas matematicamente espaçadas
+          const moons = [];
+          if (hasMoons && numMoons > 0) {
+            const moonOrbitRadius = ORBIT_CONFIG.moonOrbitMin + Math.random() * (ORBIT_CONFIG.moonOrbitMax - ORBIT_CONFIG.moonOrbitMin);
+            const moonAngularSpacing = (Math.PI * 2) / numMoons;
+            const moonStartAngle = Math.random() * moonAngularSpacing;
+            
+            for (let m = 0; m < numMoons; m++) {
+              const moonAngle = moonStartAngle + m * moonAngularSpacing + Math.random() * 0.2;
+              const moonSize = ORBIT_CONFIG.moonMinRadius + Math.random() * (ORBIT_CONFIG.moonMaxRadius - ORBIT_CONFIG.moonMinRadius);
+              const moonSpeed = 0.3 + Math.random() * 0.4;
+              
+              moons.push({
+                name: `Lua ${String.fromCharCode(65 + m)}`,
+                desc: `Lua natural orbitando ${name}. Superfície coberta de dados criptografados.`,
+                link: link + '/moon',
+                textureUrl: `https://picsum.photos/seed/moon_${planetIndex}_${m}/256/256`,
+                size: moonSize,
+                distance: moonOrbitRadius + m * ORBIT_CONFIG.moonOrbitSpacing,
+                speed: moonSpeed,
+                angle: moonAngle
+              });
+            }
+          }
+          
+          const orbitType = ['Interna', 'Média', 'Externa', 'Periférica', 'Distante'][Math.min(orbit, 4)];
+          const subtitle = (planetIndex === 0) ? '📘 Centro de Documentação' : 
+                          `Sistema Monero • Órbita ${orbit + 1} • ${orbitType}`;
+          
           planets.push({
-            name, subtitle, desc, color, size, link, textureUrl,
+            name, subtitle, desc, size, link, textureUrl,
             distance: radius,
-            speed: Math.max(0.03, speed),
+            speed: speed,
             angle: angle,
-            verticalOffset: (planetIndex === 0) ? 0 : (Math.random() - 0.5) * SOLAR_SYSTEM_CONFIG.maxVerticalOffset * (1 - orbit * 0.05),
             orbitIndex: orbit,
             index: planetIndex,
-            isDocs: (planetIndex === 0)
+            isDocs: (planetIndex === 0),
+            moons: moons,
+            verticalOffset: (planetIndex === 0) ? 0 : (Math.random() - 0.5) * 0.3
           });
+          
           planetIndex++;
         }
       }
+      
       return planets;
     }
 
-    const PLANET_DATA = generateOrganizedPlanetData(72);
+    const PLANET_DATA = generateOrganizedPlanetData();
 
     // Dados do Sol
     const SUN_DATA = {
       name: 'Sol Monero',
       subtitle: 'Sistema Central • Estrela Mãe',
       desc: 'O Sol Monero é a estrela central do sistema, uma gigante laranja que fornece energia e luz para todos os planetas. Sua superfície vibrante pulsa com a energia da blockchain Monero, representando a descentralização e segurança da rede.',
-      color: 0xff6600,
-      size: 1.2
+      size: ORBIT_CONFIG.sunRadius
     };
 
     let currentPrice = 0;
@@ -386,18 +384,18 @@
 
     const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
     
-    const INITIAL_CAMERA_POS = new THREE.Vector3(0, 8, 45);
+    const INITIAL_CAMERA_POS = new THREE.Vector3(0, 10, 50);
     const INITIAL_TARGET_POS = new THREE.Vector3(0, 0, 0);
     
     let cameraPosition = new THREE.Vector3().copy(INITIAL_CAMERA_POS);
     let targetPosition = new THREE.Vector3().copy(INITIAL_TARGET_POS);
-    let cameraRadius = 45;
+    let cameraRadius = 50;
     let cameraTheta = 0;
-    let cameraPhi = Math.PI / 3;
+    let cameraPhi = Math.PI / 2.8;
     const minPhi = 0.1;
     const maxPhi = Math.PI / 1.6;
     const minRadius = 2.0;
-    const maxRadius = 90;
+    const maxRadius = 100;
 
     camera.position.copy(cameraPosition);
     camera.lookAt(targetPosition);
@@ -541,7 +539,7 @@
     const textureLoader = new THREE.TextureLoader();
     const sunTexture = textureLoader.load('https://i.postimg.cc/FsTG7Tt1/Picsart-26-06-25-07-51-06-166.jpg');
 
-    const sunGeo = new THREE.SphereGeometry(1.2, 64, 64);
+    const sunGeo = new THREE.SphereGeometry(ORBIT_CONFIG.sunRadius, 64, 64);
     const sunMat = new THREE.MeshStandardMaterial({
       map: sunTexture,
       roughness: 1.0,
@@ -555,7 +553,7 @@
     sunGroup.add(sunMesh);
 
     // --- AURA DO SOL ---
-    const auraRadius = 1.5;
+    const auraRadius = ORBIT_CONFIG.sunRadius * 1.4;
     const auraGeo = new THREE.SphereGeometry(auraRadius, 48, 48);
     
     function createAuraTexture(color1, color2) {
@@ -588,12 +586,10 @@
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       side: THREE.BackSide
-      
     });
     
     const auraMesh = new THREE.Mesh(auraGeo, auraMat);
     auraMesh.userData = {
-      vertices: [],
       basePositions: null,
       noiseOffsets: [],
       baseOpacity: 0.8
@@ -618,18 +614,6 @@
     auraMesh.userData.noiseOffsets = noiseOffsets;
     
     sunGroup.add(auraMesh);
-
-    // Glow do sol (desativado)
-    const glowGeo = new THREE.SphereGeometry(1.5, 32, 32);
-    const glowMat = new THREE.MeshBasicMaterial({
-      color: 0xff8800,
-      transparent: true,
-      opacity: 0.0,
-      wireframe: false
-    });
-    const glowMesh = new THREE.Mesh(glowGeo, glowMat);
-    glowMesh.visible = false;
-    sunGroup.add(glowMesh);
 
     scene.add(sunGroup);
 
@@ -691,16 +675,15 @@
     }
 
     const titleSprite = createTextSprite('₿ MONERO', 56, '#ffaa44');
-    titleSprite.position.set(0, 3.2, 0);
+    titleSprite.position.set(0, 3.8, 0);
     titleSprite.scale.set(7, 1.8, 1);
     scene.add(titleSprite);
 
-    // --- ÓRBITAS ---
+    // --- ÓRBITAS DOS PLANETAS ---
     function createOrbitLines() {
       const orbitGroup = new THREE.Group();
-      const maxOrbit = Math.max(...PLANET_DATA.map(p => p.orbitIndex || 0));
-      for (let orbit = 0; orbit <= maxOrbit; orbit++) {
-        const radius = SOLAR_SYSTEM_CONFIG.baseRadius + orbit * SOLAR_SYSTEM_CONFIG.orbitSpacing;
+      for (let orbit = 0; orbit < ORBIT_CONFIG.numPlanetOrbits; orbit++) {
+        const radius = ORBIT_CONFIG.sunRadius + 1.5 + orbit * ORBIT_CONFIG.planetOrbitSpacing;
         const points = [];
         const segments = 64;
         for (let i = 0; i <= segments; i++) {
@@ -711,7 +694,7 @@
         const material = new THREE.LineBasicMaterial({
           color: 0x334466,
           transparent: true,
-          opacity: 0.08 + (orbit / maxOrbit) * 0.12
+          opacity: 0.08 + (orbit / ORBIT_CONFIG.numPlanetOrbits) * 0.15
         });
         const orbitLine = new THREE.Line(geometry, material);
         orbitGroup.add(orbitLine);
@@ -722,9 +705,11 @@
     const orbitLines = createOrbitLines();
     scene.add(orbitLines);
 
-    // --- PLANETAS (CADA UM COM SUA PRÓPRIA TEXTURA INDIVIDUAL POR LINK DE IMAGEM) ---
+    // --- HIERARQUIA: PLANETAS E LUAS ---
     const planets = [];
     const planetMeshes = [];
+    const moonMeshes = [];
+    const moonDataStore = {};
 
     // Função para criar textura a partir de URL
     function createTextureFromUrl(url) {
@@ -732,12 +717,11 @@
     }
 
     PLANET_DATA.forEach((data, index) => {
-      const group = new THREE.Group();
+      // Grupo do planeta (órbita ao redor do sol)
+      const planetGroup = new THREE.Group();
       
-      // Cada planeta usa sua própria textura via URL individual
+      // Mesh do planeta
       const texture = createTextureFromUrl(data.textureUrl);
-      
-      // Cada planeta tem sua própria geometria e material (malha própria)
       const geo = new THREE.SphereGeometry(data.size, 32, 32);
       const mat = new THREE.MeshStandardMaterial({
         map: texture,
@@ -749,10 +733,15 @@
       const mesh = new THREE.Mesh(geo, mat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      mesh.userData = { index, isPlanet: true };
-      group.add(mesh);
+      mesh.userData = { 
+        index, 
+        isPlanet: true,
+        planetData: data
+      };
+      planetGroup.add(mesh);
+      planetMeshes.push(mesh);
 
-      // Atmosfera sutil para o Planeta docs
+      // Atmosfera para o Planeta Docs
       if (data.isDocs) {
         const atmosGeo = new THREE.SphereGeometry(data.size * 1.04, 24, 24);
         const atmosMat = new THREE.MeshBasicMaterial({
@@ -762,25 +751,17 @@
           wireframe: true
         });
         const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
-        group.add(atmosMesh);
-      } else {
-        const atmosGeo = new THREE.SphereGeometry(data.size * 1.02, 16, 16);
-        const atmosMat = new THREE.MeshBasicMaterial({
-          color: 0x888888,
-          transparent: true,
-          opacity: 0.03,
-          wireframe: true
-        });
-        const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
-        group.add(atmosMesh);
+        planetGroup.add(atmosMesh);
       }
 
-      group.position.set(
+      // Posicionar o planeta na órbita
+      planetGroup.position.set(
         Math.cos(data.angle) * data.distance,
         data.verticalOffset || 0,
         Math.sin(data.angle) * data.distance
       );
-      group.userData = {
+      
+      planetGroup.userData = {
         planetData: data,
         angle: data.angle,
         distance: data.distance,
@@ -788,9 +769,81 @@
         index,
         verticalOffset: data.verticalOffset || 0
       };
-      scene.add(group);
-      planets.push(group);
-      planetMeshes.push(mesh);
+      
+      scene.add(planetGroup);
+      planets.push(planetGroup);
+
+      // --- CRIAR LUAS COMO FILHOS DO PLANETA ---
+      const moons = data.moons || [];
+      const moonGroupList = [];
+
+      moons.forEach((moonData, moonIdx) => {
+        // Grupo da lua (filho do planeta)
+        const moonGroup = new THREE.Group();
+        const moonTexture = createTextureFromUrl(moonData.textureUrl);
+        const moonGeo = new THREE.SphereGeometry(moonData.size, 16, 16);
+        const moonMat = new THREE.MeshStandardMaterial({
+          map: moonTexture,
+          roughness: 0.7,
+          metalness: 0.1,
+        });
+        const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+        moonMesh.castShadow = true;
+        moonMesh.receiveShadow = true;
+        moonMesh.userData = {
+          isMoon: true,
+          planetIndex: index,
+          moonIndex: moonIdx,
+          moonData: moonData
+        };
+        moonGroup.add(moonMesh);
+
+        // Pequena aura para a lua
+        const auraMoonGeo = new THREE.SphereGeometry(moonData.size * 1.6, 8, 8);
+        const auraMoonMat = new THREE.MeshBasicMaterial({
+          color: 0x4488ff,
+          transparent: true,
+          opacity: 0.05,
+          wireframe: true
+        });
+        const auraMoonMesh = new THREE.Mesh(auraMoonGeo, auraMoonMat);
+        moonGroup.add(auraMoonMesh);
+
+        // Posicionar a lua em relação ao planeta (coordenadas locais)
+        const moonAngle = moonData.angle || Math.random() * Math.PI * 2;
+        const moonDist = moonData.distance || 0.3;
+        moonGroup.position.set(
+          Math.cos(moonAngle) * moonDist,
+          (Math.random() - 0.5) * 0.05,
+          Math.sin(moonAngle) * moonDist
+        );
+
+        moonGroup.userData = {
+          moonData: moonData,
+          angle: moonAngle,
+          distance: moonDist,
+          speed: moonData.speed || 0.5,
+          planetIndex: index,
+          moonIndex: moonIdx
+        };
+
+        // Adicionar a lua como filha do planeta
+        planetGroup.add(moonGroup);
+        moonGroupList.push(moonGroup);
+        moonMeshes.push(moonMesh);
+
+        // Armazenar dados da lua para exibição no card
+        if (!moonDataStore[index]) {
+          moonDataStore[index] = [];
+        }
+        moonDataStore[index].push({
+          ...moonData,
+          mesh: moonMesh,
+          group: moonGroup
+        });
+      });
+
+      planetGroup.userData.moonGroups = moonGroupList;
     });
 
     const sunMeshForRaycast = sunMesh;
@@ -804,8 +857,8 @@
     let zoomStartTarget = new THREE.Vector3();
     let zoomEndTarget = new THREE.Vector3();
     const ZOOM_DURATION = 1.5;
-    const ZOOM_DISTANCE_PLANET = 1.8;
-    const ZOOM_DISTANCE_SUN = 5.50;
+    const ZOOM_DISTANCE_PLANET = 2.0;
+    const ZOOM_DISTANCE_SUN = 5.0;
 
     const zoomIndicator = document.getElementById('zoom-indicator');
 
@@ -945,7 +998,7 @@
         mouse2.set(x, y);
         raycaster.setFromCamera(mouse2, camera);
         
-        const allMeshes = [...planetMeshes, sunMeshForRaycast];
+        const allMeshes = [...planetMeshes, ...moonMeshes, sunMeshForRaycast];
         const intersects = raycaster.intersectObjects(allMeshes);
         
         if (intersects.length === 0) {
@@ -1099,7 +1152,7 @@
         mouse2.set(x, y);
         raycaster.setFromCamera(mouse2, camera);
         
-        const allMeshes = [...planetMeshes, sunMeshForRaycast];
+        const allMeshes = [...planetMeshes, ...moonMeshes, sunMeshForRaycast];
         const intersects = raycaster.intersectObjects(allMeshes);
         
         if (intersects.length === 0) {
@@ -1143,6 +1196,12 @@
                 showPlanetCard(index);
                 selectedPlanetIndex = index;
               }
+            } else if (hit.userData.isMoon) {
+              const planetIdx = hit.userData.planetIndex;
+              const moonIdx = hit.userData.moonIndex;
+              if (planetIdx !== undefined && moonIdx !== undefined) {
+                showMoonCard(planetIdx, moonIdx);
+              }
             }
           } else {
             doubleClickTimer = setTimeout(() => {
@@ -1153,6 +1212,11 @@
                 const index = hit.userData.index;
                 if (index !== undefined) {
                   startZoomToPlanet(index);
+                }
+              } else if (hit.userData.isMoon) {
+                const planetIdx = hit.userData.planetIndex;
+                if (planetIdx !== undefined) {
+                  startZoomToPlanet(planetIdx);
                 }
               }
             }, 300);
@@ -1208,7 +1272,19 @@
       planetSubtitle.textContent = data.subtitle;
       planetDesc.textContent = data.desc;
       planetLink.innerHTML = `🔗 <a href="${data.link}" target="_blank">${data.link}</a>`;
-      // Oculta o preço do sol quando um planeta é mostrado
+      sunPrice.style.display = 'none';
+      card.classList.add('active');
+    }
+
+    function showMoonCard(planetIdx, moonIdx) {
+      const moons = moonDataStore[planetIdx];
+      if (!moons || !moons[moonIdx]) return;
+      const moon = moons[moonIdx];
+      const planetData = PLANET_DATA[planetIdx];
+      planetName.textContent = `🌙 ${moon.name}`;
+      planetSubtitle.textContent = `Lua de ${planetData.name}`;
+      planetDesc.textContent = moon.desc || `Lua orbitando o planeta ${planetData.name}.`;
+      planetLink.innerHTML = `🔗 <a href="${moon.link || planetData.link}" target="_blank">${moon.link || planetData.link}</a>`;
       sunPrice.style.display = 'none';
       card.classList.add('active');
     }
@@ -1218,7 +1294,6 @@
       planetSubtitle.textContent = SUN_DATA.subtitle;
       planetDesc.textContent = SUN_DATA.desc;
       planetLink.innerHTML = `🔗 <a href="https://docs.getmonero.org/" target="_blank">docs.getmonero.org</a>`;
-      // Mostra o preço do sol
       sunPrice.style.display = 'block';
       updateSunPriceDisplay();
       card.classList.add('active');
@@ -1226,7 +1301,6 @@
 
     closeBtn.addEventListener('click', () => {
       card.classList.remove('active');
-      // Restaura o preço do sol para o próximo card
       sunPrice.style.display = 'block';
     });
     document.addEventListener('keydown', (e) => {
@@ -1294,21 +1368,31 @@
         }
       }
 
-      // Movimento orbital dos planetas
+      // Movimento orbital dos planetas (ao redor do sol)
       planets.forEach((group, i) => {
         const data = group.userData;
         if (!data) return;
-        data.angle += delta * data.speed * 0.2;
+        data.angle += delta * data.speed * 0.15;
         group.position.x = Math.cos(data.angle) * data.distance;
         group.position.z = Math.sin(data.angle) * data.distance;
-        group.position.y = data.verticalOffset + Math.sin(time * 0.2 + i * 0.3) * 0.2;
+        group.position.y = data.verticalOffset + Math.sin(time * 0.2 + i * 0.3) * 0.15;
         const mesh = group.children[0];
-        if (mesh) mesh.rotation.y += delta * 0.15;
-      });
+        if (mesh) mesh.rotation.y += delta * 0.1;
 
-      // Pulso do glow solar (desativado)
-      glowMesh.scale.set(1, 1, 1);
-      glowMesh.material.opacity = 0;
+        // Movimento orbital das luas (filhas do planeta)
+        const moonGroups = data.moonGroups || [];
+        moonGroups.forEach((moonGroup, moonIdx) => {
+          const moonData = moonGroup.userData;
+          if (!moonData) return;
+          moonData.angle += delta * moonData.speed * 0.4;
+          const dist = moonData.distance || 0.3;
+          moonGroup.position.x = Math.cos(moonData.angle) * dist;
+          moonGroup.position.z = Math.sin(moonData.angle) * dist;
+          moonGroup.position.y = Math.sin(time * 0.3 + i * 0.5 + moonIdx) * 0.02;
+          const moonMesh = moonGroup.children[0];
+          if (moonMesh) moonMesh.rotation.y += delta * 0.1;
+        });
+      });
 
       sunMesh.rotation.y += delta * 0.05;
 
@@ -1346,7 +1430,7 @@
     }, 5000);
 
     updateCameraFromAngles();
-    console.log('🚀 Sistema Solar Monero - Cada planeta com textura única via link de imagem, cotação XMR apenas no Sol!');
+    console.log('🚀 Sistema Solar Monero com hierarquia matemática refinada!');
   </script>
 </body>
 </html>
