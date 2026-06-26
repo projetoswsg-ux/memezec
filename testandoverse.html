@@ -175,7 +175,7 @@
     import * as THREE from 'three';
 
     // ============================================================
-    // 1. MAPEAMENTO DE TEXTURAS - Estrutura centralizada
+    // 1. MAPEAMENTO DE TEXTURAS - Estrutura centralizada e fixa
     // ============================================================
     const TEXTURE_MAP = {
       sun: 'https://i.postimg.cc/FsTG7Tt1/Picsart-26-06-25-07-51-06-166.jpg',
@@ -257,7 +257,7 @@
     }
 
     // ============================================================
-    // 2. CONFIGURAÇÃO DO SISTEMA SOLAR
+    // 2. CONFIGURAÇÃO DO SISTEMA SOLAR (fixa)
     // ============================================================
     const ORBIT_CONFIG = {
       sunRadius: 1.2,
@@ -276,121 +276,183 @@
     };
 
     // ============================================================
-    // 3. DADOS DOS PLANETAS COM MAPEAMENTO DE TEXTURAS
+    // 3. DADOS DOS PLANETAS - CONSTANTES E FIXOS
     // ============================================================
+    // Lista fixa de nomes, descrições e links
+    const PLANET_NAMES = [
+      'Planeta Docs', 'Aurora', 'Krypton', 'Nebula', 'Solara',
+      'Vortex', 'Pulsar', 'Quasar', 'Nova', 'Cosmos',
+      'Eclipse', 'Zenith', 'Orion', 'Lyra', 'Andromeda',
+      'Cassiopeia', 'Draco', 'Phoenix', 'Titan', 'Rhea',
+      'Themis', 'Mnemosyne', 'Crius', 'Hyperion', 'Iapetus',
+      'Phoebe', 'Janus', 'Epimetheus', 'Pandora', 'Prometheus',
+      'Atlas', 'Calypso', 'Telesto', 'Helene', 'Polydeuces',
+      'Daphnis', 'Pan', 'Mimas', 'Enceladus', 'Tethys',
+      'Dione', 'Astraea', 'Ceres', 'Pallas', 'Juno',
+      'Vesta', 'Hygiea', 'Interamnia', 'Europa', 'Ganymede',
+      'Callisto', 'Io', 'Triton'
+    ];
+
+    const PLANET_DESCRIPTIONS = [
+      'Planeta Docs: o centro de documentação do sistema. Explore a wiki interativa e os manuais da rede Monero.',
+      'Mundo congelado de dados criptografados, onde a privacidade é absoluta.',
+      'Planeta vulcânico de mineração intensa, forjando novos blocos a cada segundo.',
+      'Nebulosa pulsante de mercado volátil, refletindo as flutuações do XMR.',
+      'Estrela brilhante de prova de trabalho, iluminando a rede com sua energia.',
+      'Vórtice de transações rápidas, onde o anonimato flui como um rio.',
+      'Pulsar de energia blockchain, emitindo pulsos de segurança.',
+      'Quasar de privacidade absoluta, onde cada transação é um mistério.',
+      'Supernova de inovação financeira, explodindo com novas ideias.',
+      'Cosmos descentralizado e seguro, a base de toda a rede.',
+      'Eclipse de dados e anonimato, escondendo informações valiosas.',
+      'Zênite da computação distribuída, o auge da tecnologia.',
+      'Constelação de nós validadores, garantindo a integridade da rede.',
+      'Lira de transações harmônicas, um equilíbrio perfeito.',
+      'Andrômeda de escalabilidade infinita, pronta para o futuro.',
+      'Cassiopéia de contratos inteligentes, automação segura.',
+      'Dragão de proteção de dados, guardião da privacidade.',
+      'Fênix de renovação de blocos, renascendo a cada ciclo.',
+      'Titã de processamento massivo, suportando a carga da rede.',
+      'Rhea de estabilidade monetária, a âncora do sistema.',
+      'Themis: justiça e equilíbrio na validação de blocos.',
+      'Mnemosyne: memória imutável da blockchain.',
+      'Crius: poder de processamento bruto.',
+      'Hyperion: iluminação dos nós da rede.',
+      'Iapetus: guardião das chaves privadas.',
+      'Phoebe: mensageira das transações.',
+      'Janus: porta de entrada para a rede.',
+      'Epimetheus: provedor de dados.',
+      'Pandora: caixa de ferramentas do desenvolvedor.',
+      'Prometheus: inovação e experimentação.',
+      'Atlas: suporte da infraestrutura.',
+      'Calypso: camada de privacidade.',
+      'Telesto: segurança de ponta.',
+      'Helene: harmonia dos contratos.',
+      'Polydeuces: redundância e confiabilidade.',
+      'Daphnis: velocidade de transação.',
+      'Pan: conectividade total.',
+      'Mimas: proteção contra ataques.',
+      'Enceladus: geração de energia.',
+      'Tethys: estabilidade financeira.',
+      'Dione: inteligência da rede.',
+      'Astraea: justiça e transparência.',
+      'Ceres: fertilidade de dados.',
+      'Pallas: sabedoria de mercado.',
+      'Juno: governança.',
+      'Vesta: segurança doméstica.',
+      'Hygiea: saúde da rede.',
+      'Interamnia: interconexão.',
+      'Europa: oceanos de dados.',
+      'Ganymede: maior centro de processamento.',
+      'Callisto: arquivo histórico.',
+      'Io: atividade vulcânica de mineração.',
+      'Triton: resfriamento de dados.'
+    ];
+
+    const PLANET_LINKS = [
+      'https://docs.getmonero.org/',
+      'https://www.getmonero.org/',
+      'https://www.reddit.com/r/Monero/',
+      'https://monerobase.com/',
+      'https://moneroecosystem.org/',
+      'https://monero.stackexchange.com/',
+      'https://moneromaps.com/',
+      'https://xmr.pt/',
+      'https://monero.how/',
+      'https://monerochan.news/',
+      'https://monero.observer/',
+      'https://monerolink.com/',
+      'https://moneroj.com/',
+      'https://monero.network/',
+      'https://monero.social/',
+      'https://monero.media/',
+      'https://monero.news/',
+      'https://monero.space/',
+      'https://monero.world/',
+      'https://monero.life/',
+      'https://monero.guide/',
+      'https://monero.design/',
+      'https://monero.audio/',
+      'https://monero.video/',
+      'https://monero.chat/',
+      'https://monero.forum/',
+      'https://monero.blog/',
+      'https://monero.press/',
+      'https://monero.review/',
+      'https://monero.tools/',
+      'https://monero.dev/',
+      'https://monero.cloud/',
+      'https://monero.host/',
+      'https://monero.net/',
+      'https://monero.org/',
+      'https://monero.io/',
+      'https://monero.co/',
+      'https://monero.com/',
+      'https://monero.me/',
+      'https://monero.us/',
+      'https://monero.eu/',
+      'https://monero.uk/',
+      'https://monero.ca/',
+      'https://monero.au/',
+      'https://monero.jp/',
+      'https://monero.kr/',
+      'https://monero.br/',
+      'https://monero.ar/',
+      'https://monero.za/',
+      'https://monero.in/',
+      'https://monero.ng/',
+      'https://monero.eg/',
+      'https://monero.sa/'
+    ];
+
+    // Índices de planetas que terão luas (fixos)
+    const PLANETS_WITH_MOONS = [0, 2, 3, 5, 8, 10, 12, 15, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70];
+    const MOON_NAMES = ['Lua A', 'Lua B', 'Lua C', 'Lua D', 'Lua E', 'Lua F', 'Lua G', 'Lua H', 'Lua I', 'Lua J'];
+
     function generateOrganizedPlanetData() {
       const planets = [];
-      const planetNames = [
-        'Planeta Docs', 'Wallets', 'Exchanges', 'Nebula', 'Solara',
-        'Vortex', 'Pulsar', 'Quasar', 'Nova', 'Cosmos',
-        'Eclipse', 'Zenith', 'Orion', 'Lyra', 'Andromeda',
-        'Cassiopeia', 'Draco', 'Phoenix', 'Titan', 'Rhea',
-        'Themis', 'Mnemosyne', 'Crius', 'Hyperion', 'Iapetus',
-        'Phoebe', 'Janus', 'Epimetheus', 'Pandora', 'Prometheus',
-        'Atlas', 'Calypso', 'Telesto', 'Helene', 'Polydeuces',
-        'Daphnis', 'Pan', 'Mimas', 'Enceladus', 'Tethys',
-        'Dione', 'Rhea', 'Titan', 'Iapetus', 'Phoebe',
-        'Janus', 'Epimetheus', 'Pandora', 'Prometheus', 'Atlas',
-        'Calypso', 'Telesto', 'Helene', 'Polydeuces', 'Daphnis',
-        'Pan', 'Mimas', 'Enceladus', 'Tethys', 'Dione',
-        'Astraea', 'Ceres', 'Pallas', 'Juno', 'Vesta',
-        'Hygiea', 'Interamnia', 'Europa', 'Ganymede', 'Callisto',
-        'Io', 'Triton'
-      ];
-      
-      const descriptions = [
-        'Planeta Docs: o centro de documentação do sistema. Explore a wiki interativa e os manuais da rede Monero.',
-        'Mundo congelado de dados criptografados, onde a privacidade é absoluta.',
-        'Planeta vulcânico de mineração intensa, forjando novos blocos a cada segundo.',
-        'Nebulosa pulsante de mercado volátil, refletindo as flutuações do XMR.',
-        'Estrela brilhante de prova de trabalho, iluminando a rede com sua energia.',
-        'Vórtice de transações rápidas, onde o anonimato flui como um rio.',
-        'Pulsar de energia blockchain, emitindo pulsos de segurança.',
-        'Quasar de privacidade absoluta, onde cada transação é um mistério.',
-        'Supernova de inovação financeira, explodindo com novas ideias.',
-        'Cosmos descentralizado e seguro, a base de toda a rede.',
-        'Eclipse de dados e anonimato, escondendo informações valiosas.',
-        'Zênite da computação distribuída, o auge da tecnologia.',
-        'Constelação de nós validadores, garantindo a integridade da rede.',
-        'Lira de transações harmônicas, um equilíbrio perfeito.',
-        'Andrômeda de escalabilidade infinita, pronta para o futuro.',
-        'Cassiopéia de contratos inteligentes, automação segura.',
-        'Dragão de proteção de dados, guardião da privacidade.',
-        'Fênix de renovação de blocos, renascendo a cada ciclo.',
-        'Titã de processamento massivo, suportando a carga da rede.',
-        'Rhea de estabilidade monetária, a âncora do sistema.'
-      ];
-      
-      const links = [
-        'https://docs.getmonero.org/',
-        'https://www.getmonero.org/',
-        'https://www.reddit.com/r/Monero/',
-        'https://monerobase.com/',
-        'https://moneroecosystem.org/',
-        'https://monero.stackexchange.com/',
-        'https://moneromaps.com/',
-        'https://xmr.pt/',
-        'https://monero.how/',
-        'https://monerochan.news/',
-        'https://monero.observer/',
-        'https://monerolink.com/',
-        'https://moneroj.com/',
-        'https://monero.network/',
-        'https://monero.social/',
-        'https://monero.media/',
-        'https://monero.news/',
-        'https://monero.space/',
-        'https://monero.world/',
-        'https://monero.life/',
-        'https://monero.guide/'
-      ];
-
-      const planetsWithMoons = [0, 2, 3, 5, 8, 10, 12, 15, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70];
-      const moonNames = ['Lua A', 'Lua B', 'Lua C', 'Lua D', 'Lua E', 'Lua F', 'Lua G', 'Lua H', 'Lua I', 'Lua J'];
-      
       let planetIndex = 0;
-      
+
       for (let orbit = 0; orbit < ORBIT_CONFIG.numPlanetOrbits; orbit++) {
         const radius = ORBIT_CONFIG.sunRadius + 1.5 + orbit * ORBIT_CONFIG.planetOrbitSpacing;
         const numPlanets = ORBIT_CONFIG.planetsPerOrbit[orbit % ORBIT_CONFIG.planetsPerOrbit.length];
         const angularSpacing = (Math.PI * 2) / numPlanets;
-        const startAngle = Math.random() * angularSpacing * 0.5;
-        
+        const startAngle = 0; // Fixo para consistência
+
         for (let pos = 0; pos < numPlanets; pos++) {
-          if (planetIndex >= planetNames.length) break;
-          
-          const angle = startAngle + pos * angularSpacing;
+          if (planetIndex >= PLANET_NAMES.length) break;
+
+          const angle = startAngle + pos * angularSpacing + (orbit * 0.3);
           const speed = 0.04 + (0.12 / (orbit + 1));
-          const size = ORBIT_CONFIG.planetMinRadius + 
-                      (ORBIT_CONFIG.planetMaxRadius - ORBIT_CONFIG.planetMinRadius) * 
-                      (1 - orbit / ORBIT_CONFIG.numPlanetOrbits) * 0.8 + 
-                      Math.random() * 0.05;
-          
-          const name = planetNames[planetIndex % planetNames.length];
-          const desc = descriptions[planetIndex % descriptions.length];
-          const link = links[planetIndex % links.length];
-          
+          const size = ORBIT_CONFIG.planetMinRadius +
+                      (ORBIT_CONFIG.planetMaxRadius - ORBIT_CONFIG.planetMinRadius) *
+                      (1 - orbit / ORBIT_CONFIG.numPlanetOrbits) * 0.8 +
+                      (planetIndex % 5) * 0.015;
+
+          const name = PLANET_NAMES[planetIndex];
+          const desc = PLANET_DESCRIPTIONS[planetIndex % PLANET_DESCRIPTIONS.length];
+          const link = PLANET_LINKS[planetIndex % PLANET_LINKS.length];
           const textureUrl = getPlanetTexture(name);
-          
-          const hasMoons = planetsWithMoons.includes(planetIndex);
-          const numMoons = hasMoons ? 1 + Math.floor(Math.random() * 2.5) : 0;
-          
+
+          const hasMoons = PLANETS_WITH_MOONS.includes(planetIndex);
+          const numMoons = hasMoons ? 2 + (planetIndex % 3) : 0; // Fixo: 2, 3 ou 4 luas
+
           const moons = [];
           if (hasMoons && numMoons > 0) {
-            const moonOrbitRadius = ORBIT_CONFIG.moonOrbitMin + Math.random() * (ORBIT_CONFIG.moonOrbitMax - ORBIT_CONFIG.moonOrbitMin);
+            const moonOrbitRadius = ORBIT_CONFIG.moonOrbitMin + (planetIndex % 5) * 0.05;
             const moonAngularSpacing = (Math.PI * 2) / numMoons;
-            const moonStartAngle = Math.random() * moonAngularSpacing;
-            
+            const moonStartAngle = (planetIndex * 0.7) % (Math.PI * 2);
+
             for (let m = 0; m < numMoons; m++) {
-              const moonAngle = moonStartAngle + m * moonAngularSpacing + Math.random() * 0.2;
-              const moonSize = ORBIT_CONFIG.moonMinRadius + Math.random() * (ORBIT_CONFIG.moonMaxRadius - ORBIT_CONFIG.moonMinRadius);
-              const moonSpeed = 0.3 + Math.random() * 0.4;
-              const moonName = moonNames[m % moonNames.length];
-              
+              const moonAngle = moonStartAngle + m * moonAngularSpacing + (orbit * 0.2);
+              const moonSize = ORBIT_CONFIG.moonMinRadius + (m * 0.01) + (planetIndex % 3) * 0.005;
+              const moonSpeed = 0.3 + (m * 0.05) + (planetIndex % 4) * 0.02;
+              const moonName = MOON_NAMES[m % MOON_NAMES.length];
+
               moons.push({
                 name: moonName,
-                desc: `Lua natural orbitando ${name}. Superfície coberta de dados criptografados.`,
-                link: link + '/moon',
+                desc: `Lua ${m+1} de ${name}. Superfície coberta de dados criptografados e minerais raros.`,
+                link: link + '/moon/' + (m+1),
                 textureUrl: getMoonTexture(moonName),
                 size: moonSize,
                 distance: moonOrbitRadius + m * ORBIT_CONFIG.moonOrbitSpacing,
@@ -399,13 +461,18 @@
               });
             }
           }
-          
+
           const orbitType = ['Interna', 'Média', 'Externa', 'Periférica', 'Distante'][Math.min(orbit, 4)];
-          const subtitle = (planetIndex === 0) ? '📘 Centro de Documentação' : 
+          const subtitle = (planetIndex === 0) ? '📘 Centro de Documentação' :
                           `Sistema Monero • Órbita ${orbit + 1} • ${orbitType}`;
-          
+
           planets.push({
-            name, subtitle, desc, size, link, textureUrl,
+            name,
+            subtitle,
+            desc,
+            size,
+            link,
+            textureUrl,
             distance: radius,
             speed: speed,
             angle: angle,
@@ -413,19 +480,20 @@
             index: planetIndex,
             isDocs: (planetIndex === 0),
             moons: moons,
-            verticalOffset: (planetIndex === 0) ? 0 : (Math.random() - 0.5) * 0.3
+            verticalOffset: (planetIndex % 5) * 0.06 - 0.12
           });
-          
+
           planetIndex++;
         }
       }
-      
+
       return planets;
     }
 
+    // Dados dos planetas (gerados uma vez, fixos)
     const PLANET_DATA = generateOrganizedPlanetData();
 
-    // Dados do Sol
+    // Dados do Sol (fixos)
     const SUN_DATA = {
       name: 'Sol Monero',
       subtitle: 'Sistema Central • Estrela Mãe',
@@ -827,8 +895,8 @@
       const geo = new THREE.SphereGeometry(data.size, 32, 32);
       const mat = new THREE.MeshStandardMaterial({
         map: texture,
-        roughness: data.isDocs ? 0.3 : 0.5 + Math.random() * 0.3,
-        metalness: data.isDocs ? 0.1 : 0.2 + Math.random() * 0.3,
+        roughness: data.isDocs ? 0.3 : 0.5 + (index % 3) * 0.15,
+        metalness: data.isDocs ? 0.1 : 0.2 + (index % 4) * 0.1,
         emissive: data.isDocs ? new THREE.Color(0xff8800) : new THREE.Color(0x222222),
         emissiveIntensity: data.isDocs ? 0.15 : 0.02
       });
@@ -845,7 +913,6 @@
 
       // --- TEXTO 3D COM O NOME DO PLANETA ---
       const label = createPlanetLabel(data.name, 28, '#ffaa66');
-      // Posiciona o texto acima do planeta (altura baseada no tamanho do planeta)
       label.position.set(0, data.size + 0.25, 0);
       planetGroup.add(label);
 
@@ -1535,7 +1602,7 @@
     }, 5000);
 
     updateCameraFromAngles();
-    console.log('🚀 Sistema Solar Monero com mapeamento de texturas centralizado!');
+    console.log('🚀 Sistema Solar Monero com dados fixos!');
   </script>
 </body>
 </html>
