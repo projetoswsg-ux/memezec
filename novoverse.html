@@ -558,12 +558,104 @@
     }
 
     // ============================================================
-    // 6. CRIAÇÃO DO BURACO NEGRO (ÓRBITA LENTA, INTERIOR RÁPIDO)
+    // 6. CRIAÇÃO DO CINTURÃO DE ASTEROIDES
+    // ============================================================
+    function createAsteroidBelt() {
+      const count = 8000;
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      const sizes = new Float32Array(count);
+
+      const innerRadius = ORBIT_CONFIG.sunRadius + 2.0 + 3 * ORBIT_CONFIG.planetOrbitSpacing + 0.4;
+      const outerRadius = ORBIT_CONFIG.sunRadius + 2.0 + 4 * ORBIT_CONFIG.planetOrbitSpacing - 0.4;
+      const width = outerRadius - innerRadius;
+      const heightSpread = 0.8;
+
+      for (let i = 0; i < count; i++) {
+        const r = innerRadius + width * (0.3 + 0.4 * Math.pow(Math.random(), 0.6) + 0.3 * Math.random());
+        const theta = Math.random() * Math.PI * 2;
+        const y = (Math.random() - 0.5) * heightSpread * (1 + 0.3 * Math.sin(theta * 2));
+
+        positions[i*3] = Math.cos(theta) * r;
+        positions[i*3+1] = y;
+        positions[i*3+2] = Math.sin(theta) * r;
+
+        const colorType = Math.random();
+        let rCol, gCol, bCol;
+        if (colorType < 0.5) {
+          const c = 0.3 + 0.4 * Math.random();
+          rCol = c + 0.1 * Math.random();
+          gCol = c + 0.05 * Math.random();
+          bCol = c;
+        } else if (colorType < 0.8) {
+          rCol = 0.4 + 0.3 * Math.random();
+          gCol = 0.2 + 0.25 * Math.random();
+          bCol = 0.1 + 0.2 * Math.random();
+        } else {
+          rCol = 0.5 + 0.4 * Math.random();
+          gCol = 0.2 + 0.2 * Math.random();
+          bCol = 0.1 + 0.2 * Math.random();
+        }
+        colors[i*3] = rCol;
+        colors[i*3+1] = gCol;
+        colors[i*3+2] = bCol;
+
+        sizes[i] = 0.04 + 0.11 * Math.pow(Math.random(), 1.5);
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 32;
+      canvas.height = 32;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+      gradient.addColorStop(0, 'rgba(255,255,255,1)');
+      gradient.addColorStop(0.4, 'rgba(200,200,200,0.9)');
+      gradient.addColorStop(0.7, 'rgba(150,150,150,0.6)');
+      gradient.addColorStop(1, 'rgba(100,100,100,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 32, 32);
+      const imageData = ctx.getImageData(0, 0, 32, 32);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        if (Math.random() < 0.05) {
+          data[i] = 255;
+          data[i+1] = 255;
+          data[i+2] = 255;
+          data[i+3] = 255;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      const texture = new THREE.CanvasTexture(canvas);
+
+      const material = new THREE.PointsMaterial({
+        size: 0.08,
+        map: texture,
+        blending: THREE.NormalBlending,
+        depthWrite: true,
+        transparent: true,
+        opacity: 0.9,
+        vertexColors: true,
+        sizeAttenuation: true
+      });
+
+      const belt = new THREE.Points(geometry, material);
+      belt.userData = {
+        rotationSpeed: 0.015 + Math.random() * 0.005
+      };
+      return belt;
+    }
+
+    // ============================================================
+    // 7. CRIAÇÃO DO BURACO NEGRO
     // ============================================================
     function createBlackHole() {
       const group = new THREE.Group();
 
-      // --- Horizonte de eventos ---
       const eventHorizonGeo = new THREE.SphereGeometry(0.8, 32, 32);
       const eventHorizonMat = new THREE.MeshStandardMaterial({
         color: 0x000000,
@@ -578,7 +670,6 @@
       horizon.userData = { isBlackHole: true };
       group.add(horizon);
 
-      // --- Anel de acreção (disco de partículas) ---
       const accretionCount = 2000;
       const accretionPos = new Float32Array(accretionCount * 3);
       const accretionColors = new Float32Array(accretionCount * 3);
@@ -612,7 +703,6 @@
       const accretionDisk = new THREE.Points(accretionGeo, accretionMat);
       group.add(accretionDisk);
 
-      // --- Disco interno mais brilhante ---
       const innerAccretionCount = 800;
       const innerPos = new Float32Array(innerAccretionCount * 3);
       const innerColors = new Float32Array(innerAccretionCount * 3);
@@ -643,7 +733,6 @@
       const innerDisk = new THREE.Points(innerGeo, innerMat);
       group.add(innerDisk);
 
-      // --- Espaguetificação: fluxo de partículas esticadas (rápido) ---
       const spaghettiCount = 1500;
       const spaghettiPos = new Float32Array(spaghettiCount * 3);
       const spaghettiColors = new Float32Array(spaghettiCount * 3);
@@ -653,7 +742,7 @@
         const angle = Math.random() * Math.PI * 2;
         const radius = 0.3 + Math.random() * 2.0;
         const height = (Math.random() - 0.5) * 0.3;
-        const speed = 1.0 + Math.random() * 1.0; // mais rápido
+        const speed = 1.0 + Math.random() * 1.0;
         const phase = Math.random() * Math.PI * 2;
         spaghettiData.push({ angle, radius, height, speed, phase, life: Math.random() });
         spaghettiPos[i*3] = Math.cos(angle) * radius;
@@ -682,7 +771,6 @@
       const spaghettiPoints = new THREE.Points(spaghettiGeo, spaghettiMat);
       group.add(spaghettiPoints);
 
-      // Guardar referências para animação
       group.userData = {
         horizon,
         accretionDisk,
@@ -692,16 +780,13 @@
         angleOffset: Math.random() * Math.PI * 2,
         speed: 0.8 + Math.random() * 0.4,
         orbitRadius: 28 + Math.random() * 4,
-        // --- ÓRBITA LENTA (igual aos planetas) ---
         orbitSpeed: 0.02 + Math.random() * 0.03,
-        // --- ROTAÇÃO INTERNA RÁPIDA ---
         rotationSpeed: 1.0 + Math.random() * 0.5,
         orbitAngle: Math.random() * Math.PI * 2,
         verticalOscillation: (Math.random() - 0.5) * 1.5,
         verticalSpeed: 0.3 + Math.random() * 0.2
       };
 
-      // Lente gravitacional (anel brilhante)
       const lensRingGeo = new THREE.RingGeometry(0.85, 1.0, 64);
       const lensRingMat = new THREE.MeshBasicMaterial({
         color: 0x88aaff,
@@ -716,6 +801,201 @@
       group.add(lensRing);
 
       return group;
+    }
+
+    // ============================================================
+    // 8. CRIAÇÃO DO COMETA (CAUDA COM CRESCIMENTO ACELERADO)
+    // ============================================================
+    function createComet() {
+      const group = new THREE.Group();
+
+      // Núcleo reduzido
+      const nucleusGeo = new THREE.SphereGeometry(0.075, 16, 16);
+      const nucleusMat = new THREE.MeshStandardMaterial({
+        color: 0xff8800,
+        emissive: 0xff4400,
+        emissiveIntensity: 3.0,
+        roughness: 0.3,
+        metalness: 0.1
+      });
+      const nucleus = new THREE.Mesh(nucleusGeo, nucleusMat);
+      nucleus.castShadow = false;
+      nucleus.receiveShadow = false;
+
+      const glowGeo = new THREE.SphereGeometry(0.125, 16, 16);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0xff6600,
+        transparent: true,
+        opacity: 0.4,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const glow = new THREE.Mesh(glowGeo, glowMat);
+      nucleus.add(glow);
+
+      const glowTextureCanvas = document.createElement('canvas');
+      glowTextureCanvas.width = 64;
+      glowTextureCanvas.height = 64;
+      const gctx = glowTextureCanvas.getContext('2d');
+      const gradient = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gradient.addColorStop(0, 'rgba(255, 200, 100, 1)');
+      gradient.addColorStop(0.2, 'rgba(255, 150, 50, 0.8)');
+      gradient.addColorStop(0.6, 'rgba(200, 100, 20, 0.3)');
+      gradient.addColorStop(1, 'rgba(200, 80, 0, 0)');
+      gctx.fillStyle = gradient;
+      gctx.fillRect(0, 0, 64, 64);
+      const glowTexture = new THREE.CanvasTexture(glowTextureCanvas);
+      const spriteMat = new THREE.SpriteMaterial({
+        map: glowTexture,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.9
+      });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(0.6, 0.6, 1);
+      nucleus.add(sprite);
+
+      group.add(nucleus);
+
+      // Cauda - mais longa (600 partículas)
+      const maxTailLength = 600;
+      const positions = new Float32Array(maxTailLength * 3);
+      const colors = new Float32Array(maxTailLength * 3);
+      const sizes = new Float32Array(maxTailLength);
+      for (let i = 0; i < maxTailLength; i++) {
+        positions[i*3] = 0;
+        positions[i*3+1] = 0;
+        positions[i*3+2] = 0;
+        colors[i*3] = 1.0;
+        colors[i*3+1] = 0.6;
+        colors[i*3+2] = 0.2;
+        sizes[i] = 0.06 * (1 - i / maxTailLength);
+      }
+
+      const tailGeo = new THREE.BufferGeometry();
+      tailGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      tailGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      tailGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const tailMat = new THREE.PointsMaterial({
+        size: 0.05,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true,
+        map: (() => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 16;
+          canvas.height = 16;
+          const ctx = canvas.getContext('2d');
+          const grad = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+          grad.addColorStop(0, 'rgba(255,255,255,1)');
+          grad.addColorStop(0.5, 'rgba(255,200,150,0.7)');
+          grad.addColorStop(1, 'rgba(255,100,0,0)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 16, 16);
+          return new THREE.CanvasTexture(canvas);
+        })()
+      });
+      const tailPoints = new THREE.Points(tailGeo, tailMat);
+      group.add(tailPoints);
+
+      // Histórico de posições
+      const history = [];
+      const maxHistory = maxTailLength;
+
+      let currentPos = new THREE.Vector3();
+
+      const PERIOD = 120;
+
+      function update(time, miningPos) {
+        const t = ((time % PERIOD) / PERIOD);
+        const startPos = miningPos.clone();
+        const dist = startPos.length();
+        const radial = startPos.clone().normalize();
+        const up = new THREE.Vector3(0, 1, 0);
+        const dir = new THREE.Vector3().addVectors(radial.multiplyScalar(0.5), up).normalize();
+        const finalPos = dir.multiplyScalar(80);
+
+        // Curva de interpolação com aceleração no início
+        const smooth = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+        const pos = new THREE.Vector3().lerpVectors(startPos, finalPos, smooth);
+        group.position.copy(pos);
+        currentPos.copy(pos);
+
+        history.push(pos.clone());
+        if (history.length > maxHistory) {
+          history.shift();
+        }
+
+        // --- CRESCIMENTO ACELERADO DA CAUDA ---
+        // Usa uma curva potência para crescer rápido no início e atingir 1.8x no final
+        const tailGrowth = Math.pow(smooth, 0.6) * 1.8;
+        // Limita a 1.8 para não ultrapassar muito
+        const effectiveGrowth = Math.min(tailGrowth, 1.8);
+        const visibleCount = Math.floor(maxHistory * effectiveGrowth);
+
+        const tailGeo = tailPoints.geometry;
+        const posAttr = tailGeo.attributes.position;
+        const colorAttr = tailGeo.attributes.color;
+        const sizeAttr = tailGeo.attributes.size;
+        const posArray = posAttr.array;
+        const colorArray = colorAttr.array;
+        const sizeArray = sizeAttr.array;
+
+        const len = history.length;
+        for (let i = 0; i < maxHistory; i++) {
+          const idx = i * 3;
+          if (i < len && i < visibleCount) {
+            const p = history[len - 1 - i];
+            const dx = p.x - pos.x;
+            const dy = p.y - pos.y;
+            const dz = p.z - pos.z;
+            posArray[idx] = dx;
+            posArray[idx+1] = dy;
+            posArray[idx+2] = dz;
+
+            const tFade = i / maxHistory;
+            const brightness = (1 - tFade * 0.95) * effectiveGrowth;
+            colorArray[idx] = (1.0 - tFade * 0.4) * brightness;
+            colorArray[idx+1] = (0.6 - tFade * 0.4) * brightness;
+            colorArray[idx+2] = (0.2 - tFade * 0.3) * brightness;
+            sizeArray[i] = 0.06 * (1 - tFade * 0.9) * effectiveGrowth;
+          } else {
+            posArray[idx] = 0;
+            posArray[idx+1] = 0;
+            posArray[idx+2] = 0;
+            colorArray[idx] = 0;
+            colorArray[idx+1] = 0;
+            colorArray[idx+2] = 0;
+            sizeArray[i] = 0;
+          }
+        }
+        posAttr.needsUpdate = true;
+        colorAttr.needsUpdate = true;
+        sizeAttr.needsUpdate = true;
+
+        // Brilho
+        const distToSun = pos.length();
+        const brightnessFactor = Math.min(1, 1.5 / (distToSun + 0.5));
+        nucleus.material.emissiveIntensity = 1.0 + brightnessFactor * 3.0;
+        sprite.scale.setScalar(0.4 + brightnessFactor * 0.6);
+        glow.material.opacity = 0.2 + brightnessFactor * 0.6;
+
+        // Escala da cauda
+        const tailScale = (1 + brightnessFactor * 1.5) * (0.5 + 0.5 * effectiveGrowth);
+        tailPoints.scale.set(tailScale, tailScale, tailScale);
+      }
+
+      function getPosition() {
+        return currentPos.clone();
+      }
+
+      return { group, update, getPosition };
     }
 
     // --- CENA 3D ---
@@ -876,6 +1156,10 @@
     // --- POEIRA ESTELAR ---
     const stardust = createStardust();
     scene.add(stardust);
+
+    // --- CINTURÃO DE ASTEROIDES ---
+    const asteroidBelt = createAsteroidBelt();
+    scene.add(asteroidBelt);
 
     // --- BURACO NEGRO ---
     const blackHole = createBlackHole();
@@ -1091,6 +1375,7 @@
     const planetMeshes = [];
     const moonMeshes = [];
     const moonDataStore = {};
+    let miningPlanetGroup = null;
 
     PLANET_DATA.forEach((data, index) => {
       const planetGroup = new THREE.Group();
@@ -1136,6 +1421,10 @@
       
       scene.add(planetGroup);
       planets.push(planetGroup);
+
+      if (data.name === 'Mining') {
+        miningPlanetGroup = planetGroup;
+      }
 
       // Anéis do Explorer
       if (data.name === 'Explorer') {
@@ -1255,8 +1544,11 @@
       planetGroup.userData.moonGroups = moonGroupList;
     });
 
-    // Obter o mesh do horizonte do buraco negro para raycast
     const blackHoleMesh = blackHole.children.find(c => c.userData && c.userData.isBlackHole) || null;
+
+    // --- CRIAÇÃO DO COMETA ---
+    const comet = createComet();
+    scene.add(comet.group);
 
     // --- NAVEGAÇÃO ---
     let isZooming = false;
@@ -1387,7 +1679,6 @@
       camera.lookAt(targetPosition);
     }
 
-    // --- FUNÇÕES DA CÂMARA ---
     function updateCameraFromAngles() {
       if (isZooming) return;
       const offset = new THREE.Vector3(
@@ -1795,7 +2086,12 @@
         const delta = clock.getDelta();
         const time = clock.getElapsedTime();
 
-        // Atualizar aura do sol
+        if (miningPlanetGroup) {
+          const miningPos = new THREE.Vector3();
+          miningPlanetGroup.getWorldPosition(miningPos);
+          comet.update(time, miningPos);
+        }
+
         if (auraMat.opacity > 0) {
           const positions = auraGeo.attributes.position;
           const array = positions.array;
@@ -1846,7 +2142,6 @@
           }
         }
 
-        // Movimento orbital dos planetas
         planets.forEach((group, i) => {
           const data = group.userData;
           if (!data) return;
@@ -1878,20 +2173,17 @@
 
         sunMesh.rotation.y += delta * 0.05;
 
-        // --- MOVIMENTO DO BURACO NEGRO (ÓRBITA LENTA) ---
         const bhData = blackHole.userData;
-        bhData.orbitAngle += delta * bhData.orbitSpeed * 0.8; // agora lento
+        bhData.orbitAngle += delta * bhData.orbitSpeed * 0.8;
         const orbitR = bhData.orbitRadius;
         const x = Math.cos(bhData.orbitAngle) * orbitR;
         const z = Math.sin(bhData.orbitAngle) * orbitR;
         const y = Math.sin(time * bhData.verticalSpeed + bhData.angleOffset) * bhData.verticalOscillation;
         blackHole.position.set(x, y, z);
 
-        // ROTAÇÃO INTERNA RÁPIDA (disco de acreção, anéis)
         blackHole.rotation.y += delta * bhData.rotationSpeed * 1.5;
         blackHole.rotation.x = Math.sin(time * 0.15) * 0.1;
 
-        // --- ESPAGUETIFICAÇÃO RÁPIDA ---
         const spaghettiPoints = bhData.spaghettiPoints;
         if (spaghettiPoints) {
           const geometry = spaghettiPoints.geometry;
@@ -1905,7 +2197,7 @@
             
             for (let i = 0; i < count; i++) {
               const d = dataArray[i];
-              d.radius = Math.max(0.1, d.radius - delta * d.speed * 0.12); // queda mais rápida
+              d.radius = Math.max(0.1, d.radius - delta * d.speed * 0.12);
               d.angle += delta * (0.5 + d.speed * 0.3);
               d.height *= 0.98;
               
@@ -1932,7 +2224,10 @@
           }
         }
 
-        // Rotação da poeira estelar
+        if (asteroidBelt) {
+          asteroidBelt.rotation.y += delta * asteroidBelt.userData.rotationSpeed;
+        }
+
         if (stardust) {
           stardust.rotation.y += delta * stardust.userData.rotationSpeed;
         }
@@ -1953,19 +2248,16 @@
 
     animate();
 
-    // --- RESPONSIVIDADE ---
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // --- LOADING ---
     setTimeout(() => {
       document.getElementById('loading').classList.add('hide');
     }, 1200);
 
-    // --- BUSCAR PREÇO ---
     fetchPrice();
     setInterval(fetchPrice, 30000);
 
@@ -1976,7 +2268,7 @@
     }, 5000);
 
     updateCameraFromAngles();
-    console.log('🚀 Sistema Solar com buraco negro: órbita lenta, interior rápido!');
+    console.log('🚀 Cometa com cauda de crescimento acelerado!');
   </script>
 </body>
 </html>
