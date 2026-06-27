@@ -463,7 +463,6 @@
           const t = dist / maxRadius;
           const idx = (y * 512 + x) * 4;
 
-          // Deixa transparente fora do anel e no centro
           if (t > 1 || t < 0.05) {
             data[idx] = 0;
             data[idx + 1] = 0;
@@ -474,7 +473,6 @@
 
           const bandIndex = Math.floor(t * colors.length) % colors.length;
           const color = new THREE.Color(colors[bandIndex]);
-          // Adiciona uma pequena variação para dar textura
           const variation = 0.85 + 0.15 * Math.sin(t * 40 + bandIndex * 1.7);
           data[idx] = Math.min(255, color.r * 255 * variation);
           data[idx + 1] = Math.min(255, color.g * 255 * variation);
@@ -487,28 +485,23 @@
     }
 
     // ============================================================
-    // 5. CRIAÇÃO DA POEIRA ESTELAR (CINTURÃO DISTANTE)
+    // 5. CRIAÇÃO DA POEIRA ESTELAR
     // ============================================================
     function createStardust() {
       const particleCount = 12000;
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       
-      // Raio interno e externo do anel de poeira (bem além da última órbita)
       const innerRadius = ORBIT_CONFIG.sunRadius + 2.0 + (ORBIT_CONFIG.numPlanetOrbits - 1) * ORBIT_CONFIG.planetOrbitSpacing + 2.0;
       const outerRadius = innerRadius + 12.0;
       const heightSpread = 3.0;
 
       for (let i = 0; i < particleCount; i++) {
-        // Distribuição radial com densidade maior no centro do anel
         const r = innerRadius + (outerRadius - innerRadius) * (0.2 + 0.8 * Math.pow(Math.random(), 1.5));
         const theta = Math.random() * Math.PI * 2;
-        const phi = Math.asin((Math.random() * 2) - 1); // distribuição esférica achatada
-        
-        // Achatamento vertical: a maioria das partículas fica perto do plano, com algumas dispersas
+        const phi = Math.asin((Math.random() * 2) - 1);
         const verticalFactor = 0.3 + 0.7 * Math.pow(Math.random(), 2);
         const y = Math.sin(phi) * heightSpread * verticalFactor * (1 + 0.5 * Math.sin(theta * 3));
-        
         const x = Math.cos(theta) * r;
         const z = Math.sin(theta) * r;
         
@@ -516,21 +509,16 @@
         positions[i*3+1] = y;
         positions[i*3+2] = z;
         
-        // Cor: tons de branco, azul e lilás bem suaves
-        const colorVal = 0.6 + 0.4 * Math.random();
         const tint = Math.random();
         if (tint < 0.33) {
-          // branco-azulado
           colors[i*3] = 0.7 + 0.3 * Math.random();
           colors[i*3+1] = 0.7 + 0.3 * Math.random();
           colors[i*3+2] = 0.9 + 0.1 * Math.random();
         } else if (tint < 0.66) {
-          // lilás
           colors[i*3] = 0.8 + 0.2 * Math.random();
           colors[i*3+1] = 0.6 + 0.3 * Math.random();
           colors[i*3+2] = 0.9 + 0.1 * Math.random();
         } else {
-          // branco puro com leve amarelado
           colors[i*3] = 0.9 + 0.1 * Math.random();
           colors[i*3+1] = 0.85 + 0.15 * Math.random();
           colors[i*3+2] = 0.8 + 0.2 * Math.random();
@@ -541,7 +529,6 @@
       geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
       geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-      // Criar uma textura de ponto suave via canvas
       const canvas = document.createElement('canvas');
       canvas.width = 32;
       canvas.height = 32;
@@ -566,10 +553,169 @@
       });
 
       const dust = new THREE.Points(geometry, material);
-      dust.userData = {
-        rotationSpeed: 0.0003 + Math.random() * 0.0002
-      };
+      dust.userData = { rotationSpeed: 0.0003 + Math.random() * 0.0002 };
       return dust;
+    }
+
+    // ============================================================
+    // 6. CRIAÇÃO DO BURACO NEGRO (ÓRBITA LENTA, INTERIOR RÁPIDO)
+    // ============================================================
+    function createBlackHole() {
+      const group = new THREE.Group();
+
+      // --- Horizonte de eventos ---
+      const eventHorizonGeo = new THREE.SphereGeometry(0.8, 32, 32);
+      const eventHorizonMat = new THREE.MeshStandardMaterial({
+        color: 0x000000,
+        emissive: 0x220000,
+        emissiveIntensity: 0.3,
+        roughness: 0.1,
+        metalness: 0.9
+      });
+      const horizon = new THREE.Mesh(eventHorizonGeo, eventHorizonMat);
+      horizon.castShadow = false;
+      horizon.receiveShadow = false;
+      horizon.userData = { isBlackHole: true };
+      group.add(horizon);
+
+      // --- Anel de acreção (disco de partículas) ---
+      const accretionCount = 2000;
+      const accretionPos = new Float32Array(accretionCount * 3);
+      const accretionColors = new Float32Array(accretionCount * 3);
+      const innerRadius = 0.9;
+      const outerRadius = 2.2;
+      for (let i = 0; i < accretionCount; i++) {
+        const r = innerRadius + (outerRadius - innerRadius) * Math.pow(Math.random(), 0.7);
+        const theta = Math.random() * Math.PI * 2;
+        const spread = (Math.random() - 0.5) * 0.15;
+        accretionPos[i*3] = Math.cos(theta) * r;
+        accretionPos[i*3+1] = spread;
+        accretionPos[i*3+2] = Math.sin(theta) * r;
+        const t = (r - innerRadius) / (outerRadius - innerRadius);
+        const color = new THREE.Color().setHSL(0.05 + t * 0.1, 1, 0.4 + t * 0.3);
+        accretionColors[i*3] = color.r;
+        accretionColors[i*3+1] = color.g;
+        accretionColors[i*3+2] = color.b;
+      }
+      const accretionGeo = new THREE.BufferGeometry();
+      accretionGeo.setAttribute('position', new THREE.BufferAttribute(accretionPos, 3));
+      accretionGeo.setAttribute('color', new THREE.BufferAttribute(accretionColors, 3));
+      const accretionMat = new THREE.PointsMaterial({
+        size: 0.06,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.9,
+        sizeAttenuation: true
+      });
+      const accretionDisk = new THREE.Points(accretionGeo, accretionMat);
+      group.add(accretionDisk);
+
+      // --- Disco interno mais brilhante ---
+      const innerAccretionCount = 800;
+      const innerPos = new Float32Array(innerAccretionCount * 3);
+      const innerColors = new Float32Array(innerAccretionCount * 3);
+      for (let i = 0; i < innerAccretionCount; i++) {
+        const r = 0.5 + Math.random() * 0.8;
+        const theta = Math.random() * Math.PI * 2;
+        const spread = (Math.random() - 0.5) * 0.08;
+        innerPos[i*3] = Math.cos(theta) * r;
+        innerPos[i*3+1] = spread;
+        innerPos[i*3+2] = Math.sin(theta) * r;
+        const color = new THREE.Color().setHSL(0.08, 1, 0.7 + Math.random() * 0.3);
+        innerColors[i*3] = color.r;
+        innerColors[i*3+1] = color.g;
+        innerColors[i*3+2] = color.b;
+      }
+      const innerGeo = new THREE.BufferGeometry();
+      innerGeo.setAttribute('position', new THREE.BufferAttribute(innerPos, 3));
+      innerGeo.setAttribute('color', new THREE.BufferAttribute(innerColors, 3));
+      const innerMat = new THREE.PointsMaterial({
+        size: 0.04,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true
+      });
+      const innerDisk = new THREE.Points(innerGeo, innerMat);
+      group.add(innerDisk);
+
+      // --- Espaguetificação: fluxo de partículas esticadas (rápido) ---
+      const spaghettiCount = 1500;
+      const spaghettiPos = new Float32Array(spaghettiCount * 3);
+      const spaghettiColors = new Float32Array(spaghettiCount * 3);
+      const spaghettiSizes = new Float32Array(spaghettiCount);
+      const spaghettiData = [];
+      for (let i = 0; i < spaghettiCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.3 + Math.random() * 2.0;
+        const height = (Math.random() - 0.5) * 0.3;
+        const speed = 1.0 + Math.random() * 1.0; // mais rápido
+        const phase = Math.random() * Math.PI * 2;
+        spaghettiData.push({ angle, radius, height, speed, phase, life: Math.random() });
+        spaghettiPos[i*3] = Math.cos(angle) * radius;
+        spaghettiPos[i*3+1] = height;
+        spaghettiPos[i*3+2] = Math.sin(angle) * radius;
+        const t = radius / 2.0;
+        const color = new THREE.Color().setHSL(0.1 + t * 0.2, 1, 0.3 + t * 0.5);
+        spaghettiColors[i*3] = color.r;
+        spaghettiColors[i*3+1] = color.g;
+        spaghettiColors[i*3+2] = color.b;
+        spaghettiSizes[i] = 0.02 + Math.random() * 0.03;
+      }
+      const spaghettiGeo = new THREE.BufferGeometry();
+      spaghettiGeo.setAttribute('position', new THREE.BufferAttribute(spaghettiPos, 3));
+      spaghettiGeo.setAttribute('color', new THREE.BufferAttribute(spaghettiColors, 3));
+      spaghettiGeo.setAttribute('size', new THREE.BufferAttribute(spaghettiSizes, 1));
+      const spaghettiMat = new THREE.PointsMaterial({
+        size: 0.05,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.7,
+        sizeAttenuation: true
+      });
+      const spaghettiPoints = new THREE.Points(spaghettiGeo, spaghettiMat);
+      group.add(spaghettiPoints);
+
+      // Guardar referências para animação
+      group.userData = {
+        horizon,
+        accretionDisk,
+        innerDisk,
+        spaghettiPoints,
+        spaghettiData,
+        angleOffset: Math.random() * Math.PI * 2,
+        speed: 0.8 + Math.random() * 0.4,
+        orbitRadius: 28 + Math.random() * 4,
+        // --- ÓRBITA LENTA (igual aos planetas) ---
+        orbitSpeed: 0.02 + Math.random() * 0.03,
+        // --- ROTAÇÃO INTERNA RÁPIDA ---
+        rotationSpeed: 1.0 + Math.random() * 0.5,
+        orbitAngle: Math.random() * Math.PI * 2,
+        verticalOscillation: (Math.random() - 0.5) * 1.5,
+        verticalSpeed: 0.3 + Math.random() * 0.2
+      };
+
+      // Lente gravitacional (anel brilhante)
+      const lensRingGeo = new THREE.RingGeometry(0.85, 1.0, 64);
+      const lensRingMat = new THREE.MeshBasicMaterial({
+        color: 0x88aaff,
+        transparent: true,
+        opacity: 0.2,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const lensRing = new THREE.Mesh(lensRingGeo, lensRingMat);
+      lensRing.rotation.x = Math.PI / 2.5;
+      group.add(lensRing);
+
+      return group;
     }
 
     // --- CENA 3D ---
@@ -727,9 +873,13 @@
     const nebula = createNebula();
     scene.add(nebula);
 
-    // --- POEIRA ESTELAR (ADICIONADA À CENA) ---
+    // --- POEIRA ESTELAR ---
     const stardust = createStardust();
     scene.add(stardust);
+
+    // --- BURACO NEGRO ---
+    const blackHole = createBlackHole();
+    scene.add(blackHole);
 
     // --- SOL ---
     const sunGroup = new THREE.Group();
@@ -945,7 +1095,6 @@
     PLANET_DATA.forEach((data, index) => {
       const planetGroup = new THREE.Group();
       
-      // Mesh do planeta
       const texture = textureLoader.load(data.textureUrl);
       const geo = new THREE.SphereGeometry(data.size, 32, 32);
       const mat = new THREE.MeshStandardMaterial({
@@ -966,12 +1115,10 @@
       planetGroup.add(mesh);
       planetMeshes.push(mesh);
 
-      // Label
       const label = createPlanetLabel(data.name, 28, '#ffaa66');
       label.position.set(0, data.size + 0.35, 0);
       planetGroup.add(label);
 
-      // Posicionar
       planetGroup.position.set(
         Math.cos(data.angle) * data.distance,
         data.verticalOffset || 0,
@@ -990,7 +1137,7 @@
       scene.add(planetGroup);
       planets.push(planetGroup);
 
-      // ---- ADICIONAR ANÉIS AO PLANETA EXPLORER ----
+      // Anéis do Explorer
       if (data.name === 'Explorer') {
         const ringGroup = new THREE.Group();
         const ringConfigs = [
@@ -1040,7 +1187,7 @@
         planetGroup.userData.ringGroup = ringGroup;
       }
 
-      // --- CRIAR LUAS ---
+      // Luas
       const moons = data.moons || [];
       const moonGroupList = [];
 
@@ -1108,7 +1255,8 @@
       planetGroup.userData.moonGroups = moonGroupList;
     });
 
-    const sunMeshForRaycast = sunMesh;
+    // Obter o mesh do horizonte do buraco negro para raycast
+    const blackHoleMesh = blackHole.children.find(c => c.userData && c.userData.isBlackHole) || null;
 
     // --- NAVEGAÇÃO ---
     let isZooming = false;
@@ -1121,6 +1269,7 @@
     const ZOOM_DURATION = 1.5;
     const ZOOM_DISTANCE_PLANET = 2.5;
     const ZOOM_DISTANCE_SUN = 6.0;
+    const ZOOM_DISTANCE_BLACKHOLE = 3.5;
 
     const zoomIndicator = document.getElementById('zoom-indicator');
 
@@ -1168,6 +1317,28 @@
       zoomTarget = 'sun';
       
       zoomIndicator.textContent = `🔭 Navegando para o Sol Monero...`;
+      zoomIndicator.classList.add('show');
+      
+      card.classList.remove('active');
+    }
+
+    function startZoomToBlackHole() {
+      const worldPos = new THREE.Vector3();
+      blackHole.getWorldPosition(worldPos);
+      
+      const direction = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
+      const finalPos = worldPos.clone().add(direction.multiplyScalar(ZOOM_DISTANCE_BLACKHOLE));
+      
+      zoomStartPos.copy(camera.position);
+      zoomEndPos.copy(finalPos);
+      zoomStartTarget.copy(targetPosition);
+      zoomEndTarget.copy(worldPos);
+      
+      zoomProgress = 0;
+      isZooming = true;
+      zoomTarget = 'blackhole';
+      
+      zoomIndicator.textContent = `🌀 Navegando para o Buraco Negro...`;
       zoomIndicator.classList.add('show');
       
       card.classList.remove('active');
@@ -1229,7 +1400,7 @@
       camera.lookAt(targetPosition);
     }
 
-    // --- CONTROLES (TOUCH / MOUSE) ---
+    // --- CONTROLES ---
     let touchStartX = 0, touchStartY = 0;
     let touchStartDist = 0;
     let isTouching = false;
@@ -1241,6 +1412,16 @@
     const MOVE_SENSITIVITY = 0.04;
     let touchClickCount = 0;
     let touchClickTimer = null;
+
+    const raycaster = new THREE.Raycaster();
+    const mouse2 = new THREE.Vector2();
+
+    function getInteractiveObjects() {
+      const all = [...planetMeshes, ...moonMeshes];
+      if (sunMesh) all.push(sunMesh);
+      if (blackHoleMesh) all.push(blackHoleMesh);
+      return all;
+    }
 
     renderer.domElement.addEventListener('touchstart', (e) => {
       if (isZooming) return;
@@ -1260,8 +1441,7 @@
         mouse2.set(x, y);
         raycaster.setFromCamera(mouse2, camera);
         
-        const allMeshes = [...planetMeshes, ...moonMeshes, sunMeshForRaycast];
-        const intersects = raycaster.intersectObjects(allMeshes);
+        const intersects = raycaster.intersectObjects(getInteractiveObjects());
         
         if (intersects.length === 0) {
           touchClickCount++;
@@ -1414,8 +1594,7 @@
         mouse2.set(x, y);
         raycaster.setFromCamera(mouse2, camera);
         
-        const allMeshes = [...planetMeshes, ...moonMeshes, sunMeshForRaycast];
-        const intersects = raycaster.intersectObjects(allMeshes);
+        const intersects = raycaster.intersectObjects(getInteractiveObjects());
         
         if (intersects.length === 0) {
           clickCount++;
@@ -1456,7 +1635,6 @@
               const index = hit.userData.index;
               if (index !== undefined) {
                 showPlanetCard(index);
-                selectedPlanetIndex = index;
               }
             } else if (hit.userData.isMoon) {
               const planetIdx = hit.userData.planetIndex;
@@ -1464,6 +1642,8 @@
               if (planetIdx !== undefined && moonIdx !== undefined) {
                 showMoonCard(planetIdx, moonIdx);
               }
+            } else if (hit.userData.isBlackHole) {
+              showBlackHoleCard();
             }
           } else {
             doubleClickTimer = setTimeout(() => {
@@ -1480,6 +1660,8 @@
                 if (planetIdx !== undefined) {
                   startZoomToPlanet(planetIdx);
                 }
+              } else if (hit.userData.isBlackHole) {
+                startZoomToBlackHole();
               }
             }, 300);
           }
@@ -1498,11 +1680,6 @@
       cameraRadius = Math.max(minRadius, Math.min(maxRadius, cameraRadius));
       updateCameraFromAngles();
     }, { passive: false });
-
-    // --- SELETORES ---
-    const raycaster = new THREE.Raycaster();
-    const mouse2 = new THREE.Vector2();
-    let selectedPlanetIndex = null;
 
     // --- CARD ---
     const card = document.getElementById('planet-card');
@@ -1533,7 +1710,7 @@
       }
       
       let html = '🔗 ';
-      links.forEach((link, index) => {
+      links.forEach((link) => {
         html += `<div class="link-item">`;
         if (link.nome) {
           html += `<span class="link-label">${link.nome}: </span>`;
@@ -1586,6 +1763,19 @@
       card.classList.add('active');
     }
 
+    function showBlackHoleCard() {
+      planetName.textContent = '🌀 Buraco Negro Supermassivo';
+      planetSubtitle.textContent = '⏳ Singularidade • Fronteira Final';
+      planetDesc.textContent = 'Um buraco negro de massa estelar que orbita nas bordas do sistema Monero. Sua imensa gravidade distorce o espaço-tempo, criando um efeito de espaguetificação que estica a matéria em direção ao horizonte de eventos. Observado pela primeira vez em 2026, este objeto misterioso desafia as leis da física conhecida.';
+      const bhLinks = [
+        { nome: '📡 Artigo Científico', url: '#' },
+        { nome: '🔭 Observatório Monero', url: '#' }
+      ];
+      planetLinksContainer.innerHTML = renderLinks(bhLinks);
+      sunPrice.style.display = 'none';
+      card.classList.add('active');
+    }
+
     closeBtn.addEventListener('click', () => {
       card.classList.remove('active');
       sunPrice.style.display = 'block';
@@ -1601,106 +1791,164 @@
     const clock = new THREE.Clock();
 
     function animate() {
-      const delta = clock.getDelta();
-      const time = clock.getElapsedTime();
+      try {
+        const delta = clock.getDelta();
+        const time = clock.getElapsedTime();
 
-      // Atualizar aura do sol
-      if (auraMat.opacity > 0) {
-        const positions = auraGeo.attributes.position;
-        const array = positions.array;
-        const base = auraMesh.userData.basePositions;
-        const offsets = auraMesh.userData.noiseOffsets;
-        
-        for (let i = 0; i < vertexCount; i++) {
-          const i3 = i * 3;
-          const noise = offsets[i];
-          const wave1 = Math.sin(time * noise.speed + noise.x) * noise.amplitude;
-          const wave2 = Math.cos(time * noise.speed * 0.7 + noise.y) * noise.amplitude * 0.6;
-          const wave3 = Math.sin(time * noise.speed * 0.5 + noise.z) * noise.amplitude * 0.4;
+        // Atualizar aura do sol
+        if (auraMat.opacity > 0) {
+          const positions = auraGeo.attributes.position;
+          const array = positions.array;
+          const base = auraMesh.userData.basePositions;
+          const offsets = auraMesh.userData.noiseOffsets;
           
-          const x = base[i3];
-          const y = base[i3+1];
-          const z = base[i3+2];
-          const len = Math.sqrt(x*x + y*y + z*z);
-          const normX = x / len;
-          const normY = y / len;
-          const normZ = z / len;
+          for (let i = 0; i < vertexCount; i++) {
+            const i3 = i * 3;
+            const noise = offsets[i];
+            const wave1 = Math.sin(time * noise.speed + noise.x) * noise.amplitude;
+            const wave2 = Math.cos(time * noise.speed * 0.7 + noise.y) * noise.amplitude * 0.6;
+            const wave3 = Math.sin(time * noise.speed * 0.5 + noise.z) * noise.amplitude * 0.4;
+            
+            const x = base[i3];
+            const y = base[i3+1];
+            const z = base[i3+2];
+            const len = Math.sqrt(x*x + y*y + z*z);
+            const normX = x / len;
+            const normY = y / len;
+            const normZ = z / len;
+            
+            const displacement = wave1 + wave2 + wave3;
+            array[i3] = x + normX * displacement;
+            array[i3+1] = y + normY * displacement;
+            array[i3+2] = z + normZ * displacement;
+          }
+          positions.needsUpdate = true;
           
-          const displacement = wave1 + wave2 + wave3;
-          array[i3] = x + normX * displacement;
-          array[i3+1] = y + normY * displacement;
-          array[i3+2] = z + normZ * displacement;
-        }
-        positions.needsUpdate = true;
-        
-        const pulse = Math.sin(time * 1.5) * 0.15 + 0.85;
-        auraMat.opacity = (auraMesh.userData.baseOpacity || 0.8) * pulse;
-        
-        const scalePulse = 1 + Math.sin(time * 0.8) * 0.02;
-        auraMesh.scale.set(scalePulse, scalePulse, scalePulse);
-      }
-
-      if (isZooming) {
-        updateZoom(delta);
-      }
-
-      if (!isTouching && !mouseDown && !isPinching && !isZooming) {
-        if (Math.abs(velocityX) > 0.0001 || Math.abs(velocityY) > 0.0001) {
-          cameraTheta += velocityX;
-          cameraPhi += velocityY * 0.3;
-          cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
-          velocityX *= DAMPING;
-          velocityY *= DAMPING;
-          updateCameraFromAngles();
-        }
-      }
-
-      // Movimento orbital dos planetas
-      planets.forEach((group, i) => {
-        const data = group.userData;
-        if (!data) return;
-        data.angle += delta * data.speed * 0.15;
-        group.position.x = Math.cos(data.angle) * data.distance;
-        group.position.z = Math.sin(data.angle) * data.distance;
-        group.position.y = data.verticalOffset + Math.sin(time * 0.2 + i * 0.3) * 0.15;
-        const mesh = group.children[0];
-        if (mesh) mesh.rotation.y += delta * 0.1;
-
-        // Rotação dos anéis do Explorer
-        const ringGroup = group.userData.ringGroup;
-        if (ringGroup) {
-          ringGroup.rotation.y += delta * 0.04;
+          const pulse = Math.sin(time * 1.5) * 0.15 + 0.85;
+          auraMat.opacity = (auraMesh.userData.baseOpacity || 0.8) * pulse;
+          
+          const scalePulse = 1 + Math.sin(time * 0.8) * 0.02;
+          auraMesh.scale.set(scalePulse, scalePulse, scalePulse);
         }
 
-        // Movimento orbital das luas
-        const moonGroups = data.moonGroups || [];
-        moonGroups.forEach((moonGroup, moonIdx) => {
-          const moonData = moonGroup.userData;
-          if (!moonData) return;
-          moonData.angle += delta * moonData.speed * 0.4;
-          const dist = moonData.distance || 0.3;
-          moonGroup.position.x = Math.cos(moonData.angle) * dist;
-          moonGroup.position.z = Math.sin(moonData.angle) * dist;
-          moonGroup.position.y = Math.sin(time * 0.3 + i * 0.5 + moonIdx) * 0.02;
-          const moonMesh = moonGroup.children[0];
-          if (moonMesh) moonMesh.rotation.y += delta * 0.1;
+        if (isZooming) {
+          updateZoom(delta);
+        }
+
+        if (!isTouching && !mouseDown && !isPinching && !isZooming) {
+          if (Math.abs(velocityX) > 0.0001 || Math.abs(velocityY) > 0.0001) {
+            cameraTheta += velocityX;
+            cameraPhi += velocityY * 0.3;
+            cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi));
+            velocityX *= DAMPING;
+            velocityY *= DAMPING;
+            updateCameraFromAngles();
+          }
+        }
+
+        // Movimento orbital dos planetas
+        planets.forEach((group, i) => {
+          const data = group.userData;
+          if (!data) return;
+          data.angle += delta * data.speed * 0.15;
+          group.position.x = Math.cos(data.angle) * data.distance;
+          group.position.z = Math.sin(data.angle) * data.distance;
+          group.position.y = data.verticalOffset + Math.sin(time * 0.2 + i * 0.3) * 0.15;
+          const mesh = group.children[0];
+          if (mesh) mesh.rotation.y += delta * 0.1;
+
+          const ringGroup = group.userData.ringGroup;
+          if (ringGroup) {
+            ringGroup.rotation.y += delta * 0.04;
+          }
+
+          const moonGroups = data.moonGroups || [];
+          moonGroups.forEach((moonGroup, moonIdx) => {
+            const moonData = moonGroup.userData;
+            if (!moonData) return;
+            moonData.angle += delta * moonData.speed * 0.4;
+            const dist = moonData.distance || 0.3;
+            moonGroup.position.x = Math.cos(moonData.angle) * dist;
+            moonGroup.position.z = Math.sin(moonData.angle) * dist;
+            moonGroup.position.y = Math.sin(time * 0.3 + i * 0.5 + moonIdx) * 0.02;
+            const moonMesh = moonGroup.children[0];
+            if (moonMesh) moonMesh.rotation.y += delta * 0.1;
+          });
         });
-      });
 
-      sunMesh.rotation.y += delta * 0.05;
+        sunMesh.rotation.y += delta * 0.05;
 
-      // Rotação da poeira estelar
-      if (stardust) {
-        stardust.rotation.y += delta * stardust.userData.rotationSpeed;
+        // --- MOVIMENTO DO BURACO NEGRO (ÓRBITA LENTA) ---
+        const bhData = blackHole.userData;
+        bhData.orbitAngle += delta * bhData.orbitSpeed * 0.8; // agora lento
+        const orbitR = bhData.orbitRadius;
+        const x = Math.cos(bhData.orbitAngle) * orbitR;
+        const z = Math.sin(bhData.orbitAngle) * orbitR;
+        const y = Math.sin(time * bhData.verticalSpeed + bhData.angleOffset) * bhData.verticalOscillation;
+        blackHole.position.set(x, y, z);
+
+        // ROTAÇÃO INTERNA RÁPIDA (disco de acreção, anéis)
+        blackHole.rotation.y += delta * bhData.rotationSpeed * 1.5;
+        blackHole.rotation.x = Math.sin(time * 0.15) * 0.1;
+
+        // --- ESPAGUETIFICAÇÃO RÁPIDA ---
+        const spaghettiPoints = bhData.spaghettiPoints;
+        if (spaghettiPoints) {
+          const geometry = spaghettiPoints.geometry;
+          const posAttr = geometry.attributes.position;
+          const colorAttr = geometry.attributes.color;
+          if (posAttr && colorAttr) {
+            const posArray = posAttr.array;
+            const colorArray = colorAttr.array;
+            const dataArray = bhData.spaghettiData;
+            const count = dataArray.length;
+            
+            for (let i = 0; i < count; i++) {
+              const d = dataArray[i];
+              d.radius = Math.max(0.1, d.radius - delta * d.speed * 0.12); // queda mais rápida
+              d.angle += delta * (0.5 + d.speed * 0.3);
+              d.height *= 0.98;
+              
+              if (d.radius < 0.15) {
+                d.radius = 0.8 + Math.random() * 1.2;
+                d.angle = Math.random() * Math.PI * 2;
+                d.height = (Math.random() - 0.5) * 0.2;
+                d.speed = 1.0 + Math.random() * 1.0;
+              }
+              
+              const idx = i * 3;
+              posArray[idx] = Math.cos(d.angle) * d.radius;
+              posArray[idx+1] = d.height;
+              posArray[idx+2] = Math.sin(d.angle) * d.radius;
+              
+              const t = d.radius / 2.0;
+              const color = new THREE.Color().setHSL(0.08 + t * 0.15, 1, 0.2 + (1 - t) * 0.6);
+              colorArray[idx] = color.r;
+              colorArray[idx+1] = color.g;
+              colorArray[idx+2] = color.b;
+            }
+            posAttr.needsUpdate = true;
+            colorAttr.needsUpdate = true;
+          }
+        }
+
+        // Rotação da poeira estelar
+        if (stardust) {
+          stardust.rotation.y += delta * stardust.userData.rotationSpeed;
+        }
+
+        starField.rotation.y += delta * 0.001;
+        starField.rotation.x += delta * 0.0005;
+        nebula.rotation.y += delta * 0.0008;
+        nebula.rotation.x += delta * 0.0004;
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+
+      } catch (error) {
+        console.error('Erro na animação:', error);
+        requestAnimationFrame(animate);
       }
-
-      starField.rotation.y += delta * 0.001;
-      starField.rotation.x += delta * 0.0005;
-      nebula.rotation.y += delta * 0.0008;
-      nebula.rotation.x += delta * 0.0004;
-
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
     }
 
     animate();
@@ -1728,7 +1976,7 @@
     }, 5000);
 
     updateCameraFromAngles();
-    console.log('🚀 Sistema Solar Monero com anéis no Explorer e poeira estelar distante!');
+    console.log('🚀 Sistema Solar com buraco negro: órbita lenta, interior rápido!');
   </script>
 </body>
 </html>
