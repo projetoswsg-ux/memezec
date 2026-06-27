@@ -867,9 +867,9 @@
         positions[i*3] = 0;
         positions[i*3+1] = 0;
         positions[i*3+2] = 0;
-        colors[i*3]     = t;
-        colors[i*3 + 1] = 0.0;
-        colors[i*3 + 2] = 1.0;
+        colors[i*3]     = 1.0;          // Vermelho sempre máximo
+        colors[i*3 + 1] = 0.6 * (1 - t);
+        colors[i*3 + 2] = 0.2 * (1 - t);
         sizes[i] = 0.06 * (1 - i / maxTailLength);
       }
 
