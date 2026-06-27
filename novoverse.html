@@ -160,14 +160,14 @@
   </style>
 </head>
 <body>
-  <div id="loading"><span>₿ MONERO SYSTEM</span></div>
+  <div id="loading"><span> MONERO SYSTEM</span></div>
   <div id="planet-card">
     <button class="close-btn" id="close-card">✕</button>
     <h2 id="planet-name">Planeta</h2>
     <div class="subtitle" id="planet-subtitle">Sistema</div>
     <p id="planet-desc">Descrição do planeta.</p>
     <div class="planet-links" id="planet-links-info"></div>
-    <div class="sun-price" id="sun-price-info">☀️ Preço XMR: ---</div>
+    <div class="sun-price" id="sun-price-info">Quote: ---</div>
   </div>
   <div id="zoom-indicator">🔭 Navegando para o planeta...</div>
 
@@ -417,9 +417,9 @@
     const PLANET_DATA = generateOrganizedPlanetData();
 
     const SUN_DATA = {
-      name: 'Sol Monero',
-      subtitle: 'Sistema Central • Estrela Mãe',
-      desc: '  ' ,
+      name: 'Sun Monero',
+      subtitle: 'Central System • Mother Star',
+      desc: 'The Monero Sun represents the vital energy of the Monero ecosystem. It was born in 2014 through the efforts of a group of anonymous developers who built it upon a groundbreaking cryptographic protocol known as CryptoNote, created under the pseudonym Nicolas van Saberhagen.' ,
       size: ORBIT_CONFIG.sunRadius,
       textureUrl: TEXTURE_MAP.sun
     };
@@ -438,7 +438,7 @@
           updateSunPriceDisplay();
         }
       } catch (e) {
-        console.warn('Erro ao buscar preço:', e);
+        console.warn('Error:', e);
       }
     }
 
