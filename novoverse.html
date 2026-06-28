@@ -163,13 +163,13 @@
   <div id="loading"><span> MONERO SYSTEM</span></div>
   <div id="planet-card">
     <button class="close-btn" id="close-card">✕</button>
-    <h2 id="planet-name">Planeta</h2>
-    <div class="subtitle" id="planet-subtitle">Sistema</div>
-    <p id="planet-desc">Descrição do planeta.</p>
+    <h2 id="planet-name">Planet</h2>
+    <div class="subtitle" id="planet-subtitle">System</div>
+    <p id="planet-desc">Description of the planet.</p>
     <div class="planet-links" id="planet-links-info"></div>
-    <div class="sun-price" id="sun-price-info">Quote: ---</div>
+    <div class="sun-price" id="sun-price-info"> Quote: ---</div>
   </div>
-  <div id="zoom-indicator">🔭 Navegando para o planeta...</div>
+  <div id="zoom-indicator">Browsing...</div>
 
   <script type="importmap">
     {
@@ -419,7 +419,7 @@
     const SUN_DATA = {
       name: 'Sun Monero',
       subtitle: 'Central System • Mother Star',
-      desc: 'The Monero Sun represents the vital energy of the Monero ecosystem. It was born in 2014 through the efforts of a group of anonymous developers who built it upon a groundbreaking cryptographic protocol known as CryptoNote, created under the pseudonym Nicolas van Saberhagen.                      <br>      💡secret: Aura' ,
+      desc: 'The Monero Sun represents the vital energy of the Monero ecosystem. It was born in 2014 through the efforts of a group of anonymous developers who built it upon a groundbreaking cryptographic protocol known as CryptoNote, created under the pseudonym Nicolas van Saberhagen. ' ,
       size: ORBIT_CONFIG.sunRadius,
       textureUrl: TEXTURE_MAP.sun
     };
@@ -1306,7 +1306,7 @@
       return sprite;
     }
 
-    const titleSprite = createTextSprite('₿ MONERO', 56, '#ffaa44');
+    const titleSprite = createTextSprite('MONERO SYSTEM', 56, '#ffaa44');
     titleSprite.position.set(0, 4.5, 0);
     titleSprite.scale.set(7, 1.8, 1);
     scene.add(titleSprite);
