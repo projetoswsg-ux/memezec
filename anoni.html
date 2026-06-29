@@ -24,24 +24,23 @@
 
         #game-container {
             position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 800px;
-            max-height: 1000px;
-            aspect-ratio: 4/5;
+            width: min(100vw, 800px);
+            height: min(100vh, 1000px);
+            aspect-ratio: 4 / 5;
             background-color: #000;
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
-            border: clamp(2px, 0.5vw, 4px) solid #222;
+            box-shadow: 0 0 clamp(20px, 4vw, 40px) rgba(255, 255, 255, 0.1);
+            border: clamp(2px, 0.3vw, 4px) solid #222;
         }
 
         #character-image {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             z-index: 1;
             opacity: 1;
             filter: blur(20px);
@@ -81,26 +80,26 @@
             100% { height: 0%; opacity: 0; }
         }
 
-     #dialog-wrapper {
-    position: absolute;
-    bottom: clamp(30%, 40vh, 45%);
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(55%, 380px);
-    z-index: 5;
-    opacity: 0;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    transition: opacity 0.5s;
-}
+        #dialog-wrapper {
+            position: absolute;
+            bottom: clamp(25%, 30vh, 40%);
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(55%, 380px);
+            z-index: 5;
+            opacity: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
 
         .dialog-box {
             background: #fceb6b;
-            border: clamp(2px, 0.4vw, 4px) solid #000;
-            border-radius: clamp(6px, 1.2vw, 10px);
-            padding: clamp(8px, 1.5vh, 16px) clamp(10px, 2vw, 20px);
-            box-shadow: clamp(3px, 0.6vw, 6px) clamp(3px, 0.6vw, 6px) 0px #000;
+            border: clamp(2px, 0.3vw, 4px) solid #000;
+            border-radius: clamp(6px, 1vw, 10px);
+            padding: clamp(8px, 1.2vh, 16px) clamp(10px, 1.5vw, 20px);
+            box-shadow: clamp(3px, 0.5vw, 6px) clamp(3px, 0.5vw, 6px) 0px #000;
             position: relative;
             width: 100%;
         }
@@ -110,8 +109,8 @@
             position: absolute;
             bottom: 100%;
             left: 50%;
-            margin-left: clamp(-6px, -1.2vw, -10px);
-            border-width: 0 clamp(6px, 1.2vw, 10px) clamp(10px, 1.8vw, 15px) clamp(6px, 1.2vw, 10px);
+            margin-left: clamp(-6px, -1vw, -10px);
+            border-width: 0 clamp(6px, 1vw, 10px) clamp(10px, 1.5vw, 15px) clamp(6px, 1vw, 10px);
             border-style: solid;
             border-color: transparent transparent #000 transparent;
         }
@@ -121,38 +120,38 @@
             position: absolute;
             bottom: 100%;
             left: 50%;
-            margin-left: clamp(-5px, -1vw, -9px);
-            border-width: 0 clamp(5px, 1vw, 9px) clamp(8px, 1.5vw, 13px) clamp(5px, 1vw, 9px);
+            margin-left: clamp(-5px, -0.8vw, -9px);
+            border-width: 0 clamp(5px, 0.8vw, 9px) clamp(8px, 1.2vw, 13px) clamp(5px, 0.8vw, 9px);
             border-style: solid;
             border-color: transparent transparent #fceb6b transparent;
         }
 
         #dialog-text {
             font-family: 'Bangers', cursive;
-            font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+            font-size: clamp(0.75rem, 2vw, 1.2rem);
             line-height: 1.2;
             color: #000;
             text-transform: uppercase;
             letter-spacing: 1px;
-            min-height: clamp(30px, 5vh, 50px);
+            min-height: clamp(30px, 4vh, 50px);
             word-wrap: break-word;
         }
 
         .pill-hitbox {
             position: absolute;
-            width: clamp(14%, 18%, 22%);
-            height: clamp(18%, 22%, 28%);
+            width: clamp(14%, 17%, 20%);
+            height: clamp(18%, 21%, 25%);
             z-index: 7;
             cursor: pointer;
             pointer-events: none;
             border-radius: 50%;
             transition: all 0.2s ease;
-            border: clamp(2px, 0.3vw, 3px) solid transparent;
+            border: clamp(2px, 0.25vw, 3px) solid transparent;
         }
 
         .pill-hitbox:hover {
             border-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 clamp(15px, 3vw, 35px) rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 clamp(15px, 2.5vw, 35px) rgba(255, 255, 255, 0.7);
             transform: scale(1.1);
         }
 
@@ -162,19 +161,19 @@
         }
 
         @keyframes pulseHitbox {
-            0%, 100% { box-shadow: 0 0 clamp(5px, 1vw, 10px) rgba(255, 255, 255, 0.2); }
-            50% { box-shadow: 0 0 clamp(12px, 2.5vw, 25px) rgba(255, 255, 255, 0.8); }
+            0%, 100% { box-shadow: 0 0 clamp(5px, 0.8vw, 10px) rgba(255, 255, 255, 0.2); }
+            50% { box-shadow: 0 0 clamp(12px, 2vw, 25px) rgba(255, 255, 255, 0.8); }
         }
 
         #blue-pill { 
-    bottom: clamp(6%, 10vh, 14%);
-    left: clamp(8%, 10vw, 14%);
-}
-
-#orange-pill { 
-    bottom: clamp(6%, 10vh, 14%);
-    right: clamp(8%, 10vw, 14%);
-}
+            bottom: clamp(12%, 14vh, 18%);
+            left: clamp(6%, 8vw, 12%);
+        }
+        
+        #orange-pill { 
+            bottom: clamp(12%, 14vh, 18%);
+            right: clamp(6%, 8vw, 12%);
+        }
 
         #result-screen {
             position: absolute;
@@ -189,7 +188,7 @@
             flex-direction: column;
             font-size: clamp(1.2rem, 3vw, 2.5rem);
             text-align: center;
-            padding: clamp(10px, 3vh, 30px);
+            padding: clamp(10px, 2vh, 30px);
             animation: blinkResult 0.3s forwards;
         }
 
@@ -212,54 +211,101 @@
         }
 
         #result-text {
-            border: clamp(2px, 0.4vw, 4px) solid currentColor;
-            padding: clamp(12px, 3vh, 25px);
+            border: clamp(2px, 0.3vw, 4px) solid currentColor;
+            padding: clamp(12px, 2.5vh, 25px);
             background: rgba(0,0,0,0.6);
             max-width: 90%;
-            font-size: clamp(1rem, 2.5vw, 2rem);
+            font-size: clamp(0.9rem, 2.2vw, 2rem);
             line-height: 1.4;
         }
 
-        /* Ajustes específicos para telas muito pequenas */
+        /* Ajustes para telas muito pequenas (celulares) */
         @media (max-width: 480px) {
             #dialog-wrapper {
-                bottom: 10%;
-                width: 70%;
+                bottom: clamp(15%, 18vh, 22%);
+                width: min(75%, 320px);
             }
             
             #dialog-text {
-                font-size: 0.85rem;
-                min-height: 30px;
+                font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+                min-height: 28px;
             }
             
             .pill-hitbox {
-                width: 20%;
-                height: 20%;
+                width: clamp(18%, 20%, 22%);
+                height: clamp(18%, 20%, 22%);
             }
             
-            #blue-pill { bottom: 15%; left: 10%; }
-            #orange-pill { bottom: 15%; right: 10%; }
+            #blue-pill { 
+                bottom: clamp(10%, 12vh, 15%); 
+                left: clamp(5%, 6vw, 8%); 
+            }
+            
+            #orange-pill { 
+                bottom: clamp(10%, 12vh, 15%); 
+                right: clamp(5%, 6vw, 8%); 
+            }
             
             #result-text {
-                font-size: 0.9rem;
-                padding: 15px;
+                font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+                padding: clamp(10px, 1.5vh, 15px);
+            }
+            
+            .dialog-box {
+                padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 14px);
             }
         }
 
         /* Ajustes para tablets */
         @media (min-width: 481px) and (max-width: 1024px) {
             #dialog-wrapper {
-                width: 50%;
-                bottom: 14%;
+                width: min(50%, 350px);
+                bottom: clamp(20%, 25vh, 30%);
             }
             
             #dialog-text {
-                font-size: 1rem;
+                font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+            }
+            
+            .pill-hitbox {
+                width: clamp(15%, 17%, 19%);
+                height: clamp(19%, 21%, 23%);
             }
         }
 
         /* Ajustes para telas grandes (desktop) */
         @media (min-width: 1025px) {
+            #game-container {
+                max-width: 800px;
+                max-height: 1000px;
+            }
+            
+            #dialog-wrapper {
+                bottom: clamp(30%, 35vh, 40%);
+            }
+            
+            #dialog-text {
+                font-size: clamp(1rem, 1.5vw, 1.2rem);
+            }
+        }
+
+        /* Ajustes para telas muito altas (celulares em portrait) */
+        @media (max-height: 700px) {
+            #dialog-wrapper {
+                bottom: clamp(20%, 22vh, 28%);
+            }
+            
+            .pill-hitbox {
+                height: clamp(16%, 18%, 20%);
+            }
+            
+            #blue-pill, #orange-pill {
+                bottom: clamp(8%, 10vh, 14%);
+            }
+        }
+
+        /* Ajustes para telas muito largas */
+        @media (min-aspect-ratio: 1/1) {
             #game-container {
                 max-width: 800px;
                 max-height: 1000px;
