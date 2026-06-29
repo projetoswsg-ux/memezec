@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Escolha sua Pílula</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <style>
@@ -12,38 +12,36 @@
             box-sizing: border-box;
         }
 
-        body {
-            background-color: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Bangers', cursive;
+        html, body {
+            width: 100%;
+            height: 100%;
             overflow: hidden;
+            background-color: #0a0a0a;
+            font-family: 'Bangers', cursive;
         }
 
         #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 800px;
-            max-height: 1000px;
-            aspect-ratio: 4/5;
+            width: 100%;
+            height: 100%;
+            max-width: 500px;
+            max-height: 900px;
+            margin: 0 auto;
             background-color: #000;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
-            border: clamp(2px, 0.5vw, 4px) solid #222;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Área da imagem ocupa a maior parte */
+        /* ===== ÁREA DA IMAGEM ===== */
         #image-area {
             position: relative;
             flex: 1;
             min-height: 0;
             overflow: hidden;
             background: #000;
+            width: 100%;
         }
 
         #character-image {
@@ -53,12 +51,14 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center center;
             z-index: 1;
             opacity: 1;
             filter: blur(20px);
             transition: filter 4s ease-out;
         }
 
+        /* Cortinas */
         #top-curtain, #bottom-curtain {
             position: absolute;
             left: 0;
@@ -92,26 +92,26 @@
             100% { height: 0%; opacity: 0; }
         }
 
+        /* ===== DIÁLOGO ===== */
         #dialog-wrapper {
             position: absolute;
-            bottom: clamp(10%, 15vh, 20%);
+            bottom: 8%;
             left: 50%;
             transform: translateX(-50%);
-            width: min(55%, 380px);
+            width: 80%;
+            max-width: 340px;
             z-index: 5;
             opacity: 0;
             display: none;
-            flex-direction: column;
-            align-items: center;
-            transition: opacity 0.5s;
+            transition: opacity 0.5s ease;
         }
 
         .dialog-box {
             background: #fceb6b;
-            border: clamp(2px, 0.4vw, 4px) solid #000;
-            border-radius: clamp(6px, 1.2vw, 10px);
-            padding: clamp(8px, 1.5vh, 16px) clamp(10px, 2vw, 20px);
-            box-shadow: clamp(3px, 0.6vw, 6px) clamp(3px, 0.6vw, 6px) 0px #000;
+            border: 2px solid #000;
+            border-radius: 10px;
+            padding: 12px 16px;
+            box-shadow: 4px 4px 0px #000;
             position: relative;
             width: 100%;
         }
@@ -121,8 +121,8 @@
             position: absolute;
             bottom: 100%;
             left: 50%;
-            margin-left: clamp(-6px, -1.2vw, -10px);
-            border-width: 0 clamp(6px, 1.2vw, 10px) clamp(10px, 1.8vw, 15px) clamp(6px, 1.2vw, 10px);
+            margin-left: -8px;
+            border-width: 0 8px 12px 8px;
             border-style: solid;
             border-color: transparent transparent #000 transparent;
         }
@@ -132,39 +132,41 @@
             position: absolute;
             bottom: 100%;
             left: 50%;
-            margin-left: clamp(-5px, -1vw, -9px);
-            border-width: 0 clamp(5px, 1vw, 9px) clamp(8px, 1.5vw, 13px) clamp(5px, 1vw, 9px);
+            margin-left: -7px;
+            border-width: 0 7px 10px 7px;
             border-style: solid;
             border-color: transparent transparent #fceb6b transparent;
         }
 
         #dialog-text {
             font-family: 'Bangers', cursive;
-            font-size: clamp(0.8rem, 2.5vw, 1.2rem);
-            line-height: 1.2;
+            font-size: clamp(0.75rem, 2.8vw, 1.1rem);
+            line-height: 1.3;
             color: #000;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            min-height: clamp(30px, 5vh, 50px);
+            letter-spacing: 0.5px;
+            min-height: 28px;
             word-wrap: break-word;
+            text-align: center;
         }
 
-        /* === ÁREA DOS BOTÕES (abaixo da imagem) === */
+        /* ===== ÁREA DOS BOTÕES (abaixo da imagem) ===== */
         #buttons-area {
             position: relative;
             z-index: 15;
-            background: #0a0a0a;
-            padding: clamp(8px, 2vh, 20px) clamp(10px, 3vw, 30px);
+            background: linear-gradient(180deg, #0a0a0a 0%, #141414 100%);
+            padding: clamp(6px, 1.8vh, 18px) clamp(10px, 4vw, 30px);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: clamp(12px, 3vw, 30px);
+            gap: clamp(8px, 3vw, 25px);
             border-top: 2px solid #222;
-            min-height: clamp(80px, 18vh, 160px);
             flex-shrink: 0;
+            min-height: clamp(70px, 18vh, 140px);
             opacity: 0;
             transition: opacity 0.8s ease;
             pointer-events: none;
+            width: 100%;
         }
 
         #buttons-area.visible {
@@ -174,57 +176,62 @@
 
         .pill-btn {
             flex: 1;
-            max-width: clamp(120px, 28vw, 200px);
             aspect-ratio: 1/1;
+            max-width: clamp(80px, 22vw, 160px);
             border-radius: 50%;
             cursor: pointer;
-            border: 3px solid rgba(255,255,255,0.2);
-            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 -8px 12px rgba(0,0,0,0.5);
+            border: 3px solid rgba(255,255,255,0.15);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 -8px 12px rgba(0,0,0,0.6);
             transition: all 0.25s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Bangers', cursive;
-            font-size: clamp(0.9rem, 2vw, 1.6rem);
-            letter-spacing: 2px;
+            font-size: clamp(0.7rem, 2vw, 1.3rem);
+            letter-spacing: 1px;
             text-transform: uppercase;
             color: #fff;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
             background: radial-gradient(circle at 30% 30%, #fff, #888);
             background-blend-mode: overlay;
             margin: 0 auto;
             transition: all 0.3s ease;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .pill-btn:hover {
-            transform: scale(1.08);
-            border-color: rgba(255,255,240,0.9);
-            box-shadow: 0 0 50px rgba(255,255,200,0.5);
+            transform: scale(1.06);
+            border-color: rgba(255,255,240,0.8);
+            box-shadow: 0 0 40px rgba(255,255,200,0.4);
         }
 
         .pill-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
 
         #blue-btn {
             background: radial-gradient(circle at 30% 30%, #6ab0ff, #0033aa);
-            border-color: #8ac4ff;
+            border-color: #4a8fd4;
         }
 
         #orange-btn {
             background: radial-gradient(circle at 30% 30%, #ffb347, #cc5500);
-            border-color: #ffa500;
+            border-color: #e08a00;
         }
 
         .pill-btn .label {
-            background: rgba(0,0,0,0.35);
-            padding: 4px 12px;
-            border-radius: 40px;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 10px;
+            border-radius: 30px;
             backdrop-filter: blur(2px);
             border: 1px solid rgba(255,255,255,0.15);
+            font-size: clamp(0.6rem, 1.6vw, 1rem);
+            letter-spacing: 1.5px;
         }
 
-        /* Resultado cobre tudo */
+        /* ===== RESULTADO ===== */
         #result-screen {
             position: absolute;
             top: 0;
@@ -236,9 +243,9 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            font-size: clamp(1.2rem, 3vw, 2.5rem);
+            font-size: clamp(1rem, 3vw, 2rem);
             text-align: center;
-            padding: clamp(10px, 3vh, 30px);
+            padding: 20px;
             animation: blinkResult 0.3s forwards;
         }
 
@@ -248,85 +255,202 @@
         }
 
         #result-screen.blue-screen {
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.97);
             color: #00ff41;
             font-family: monospace;
             text-shadow: 0 0 15px #00ff41;
         }
 
         #result-screen.orange-screen {
-            background: rgba(10, 10, 10, 0.95);
+            background: rgba(10, 10, 10, 0.97);
             color: #ff8800;
             text-shadow: 0 0 20px #ff8800, 0 0 40px #ff2200;
         }
 
         #result-text {
-            border: clamp(2px, 0.4vw, 4px) solid currentColor;
-            padding: clamp(12px, 3vh, 25px);
-            background: rgba(0,0,0,0.6);
+            border: 2px solid currentColor;
+            padding: clamp(15px, 4vh, 30px);
+            background: rgba(0,0,0,0.7);
             max-width: 90%;
-            font-size: clamp(1rem, 2.5vw, 2rem);
-            line-height: 1.4;
+            font-size: clamp(0.9rem, 2.5vw, 1.8rem);
+            line-height: 1.5;
+            border-radius: 4px;
         }
 
-        /* Ajustes responsivos */
-        @media (max-width: 480px) {
+        /* ===== RESPONSIVIDADE EXTREMA ===== */
+        /* Telas muito pequenas (até 360px) */
+        @media (max-width: 360px) {
             #dialog-wrapper {
-                bottom: 8%;
-                width: 75%;
+                width: 85%;
+                bottom: 6%;
+            }
+            #dialog-text {
+                font-size: 0.7rem;
+                min-height: 24px;
+            }
+            .dialog-box {
+                padding: 8px 10px;
+            }
+            #buttons-area {
+                min-height: 60px;
+                padding: 4px 8px;
+                gap: 6px;
+            }
+            .pill-btn {
+                max-width: 60px;
+                border-width: 2px;
+            }
+            .pill-btn .label {
+                font-size: 0.5rem;
+                padding: 1px 5px;
+            }
+            #result-text {
+                font-size: 0.75rem;
+                padding: 10px;
+            }
+        }
+
+        /* Telas pequenas (361px - 480px) */
+        @media (min-width: 361px) and (max-width: 480px) {
+            #dialog-wrapper {
+                width: 78%;
+                bottom: 7%;
             }
             #dialog-text {
                 font-size: 0.8rem;
-                min-height: 30px;
             }
             #buttons-area {
-                padding: 8px 12px;
                 min-height: 70px;
+                padding: 8px 12px;
                 gap: 10px;
             }
             .pill-btn {
-                max-width: 70px;
-                font-size: 0.6rem;
+                max-width: 72px;
             }
             .pill-btn .label {
-                padding: 2px 6px;
-            }
-            #result-text {
-                font-size: 0.85rem;
-                padding: 12px;
+                font-size: 0.6rem;
             }
         }
 
-        @media (min-width: 481px) and (max-width: 1024px) {
+        /* Telas médias (481px - 768px) */
+        @media (min-width: 481px) and (max-width: 768px) {
+            #game-container {
+                max-width: 450px;
+                max-height: 800px;
+            }
             #dialog-wrapper {
-                width: 55%;
+                width: 70%;
+                bottom: 10%;
+            }
+            #dialog-text {
+                font-size: 0.95rem;
+            }
+            #buttons-area {
+                min-height: 90px;
+                padding: 12px 20px;
+                gap: 15px;
+            }
+            .pill-btn {
+                max-width: 100px;
+            }
+            .pill-btn .label {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Tablets (769px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            #game-container {
+                max-width: 550px;
+                max-height: 900px;
+            }
+            #dialog-wrapper {
+                width: 60%;
                 bottom: 12%;
             }
             #dialog-text {
-                font-size: 1rem;
+                font-size: 1.05rem;
             }
             #buttons-area {
-                min-height: 100px;
-                padding: 12px 20px;
+                min-height: 110px;
+                padding: 15px 25px;
+                gap: 20px;
             }
             .pill-btn {
-                max-width: 110px;
-                font-size: 1rem;
+                max-width: 130px;
+            }
+            .pill-btn .label {
+                font-size: 0.95rem;
             }
         }
 
+        /* Desktop (1025px+) */
         @media (min-width: 1025px) {
             #game-container {
-                max-width: 800px;
-                max-height: 1000px;
+                max-width: 500px;
+                max-height: 900px;
+                border-radius: 12px;
+            }
+            #dialog-wrapper {
+                width: 55%;
+                bottom: 12%;
+                max-width: 340px;
+            }
+            #dialog-text {
+                font-size: 1.1rem;
             }
             #buttons-area {
-                min-height: 140px;
+                min-height: 130px;
                 padding: 18px 30px;
+                gap: 25px;
             }
             .pill-btn {
-                max-width: 160px;
-                font-size: 1.4rem;
+                max-width: 150px;
+            }
+            .pill-btn .label {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Telas muito largas (aspect ratio > 1.5) */
+        @media (min-aspect-ratio: 3/2) {
+            #game-container {
+                max-width: 45vh;
+                max-height: 90vh;
+            }
+        }
+
+        /* Telas muito estreitas (aspect ratio < 0.6) */
+        @media (max-aspect-ratio: 3/5) {
+            #game-container {
+                max-width: 100vw;
+                max-height: 100vh;
+            }
+            #dialog-wrapper {
+                width: 75%;
+                bottom: 6%;
+            }
+            #buttons-area {
+                min-height: 60px;
+                padding: 4px 8px;
+                gap: 6px;
+            }
+            .pill-btn {
+                max-width: 55px;
+            }
+            .pill-btn .label {
+                font-size: 0.45rem;
+                padding: 1px 4px;
+            }
+            #dialog-text {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Ajuste para iPhone notch / barra de segurança */
+        @supports (padding: max(0px)) {
+            #buttons-area {
+                padding-bottom: max(clamp(6px, 1.8vh, 18px), env(safe-area-inset-bottom));
             }
         }
     </style>
@@ -337,7 +461,7 @@
         
         <!-- Área da imagem -->
         <div id="image-area">
-            <img id="character-image" src="https://i.postimg.cc/FFJYB674/8d585bb7-f119-42fd-9ba0-2a3e749a50b1.png" alt="Personagem Mascarado">
+            <img id="character-image" src="https://i.postimg.cc/FFJYB674/8d585bb7-f119-42fd-9ba0-2a3e749a50b1.png" alt="Personagem Mascarado" loading="lazy">
 
             <div id="top-curtain"></div>
             <div id="bottom-curtain"></div>
@@ -367,90 +491,100 @@
     </div>
 
     <script>
-        const dialogTextEl = document.getElementById('dialog-text');
-        const dialogWrapper = document.getElementById('dialog-wrapper');
-        const buttonsArea = document.getElementById('buttons-area');
-        const resultScreen = document.getElementById('result-screen');
-        const resultText = document.getElementById('result-text');
-        const characterImg = document.getElementById('character-image');
-        const blueBtn = document.getElementById('blue-btn');
-        const orangeBtn = document.getElementById('orange-btn');
+        (function() {
+            const dialogTextEl = document.getElementById('dialog-text');
+            const dialogWrapper = document.getElementById('dialog-wrapper');
+            const buttonsArea = document.getElementById('buttons-area');
+            const resultScreen = document.getElementById('result-screen');
+            const resultText = document.getElementById('result-text');
+            const characterImg = document.getElementById('character-image');
+            const blueBtn = document.getElementById('blue-btn');
+            const orangeBtn = document.getElementById('orange-btn');
 
-        const dialogPhrases = [
-            "A pílula laranja vai te revelar os segredos mais profundos",
-            "A azul você volta para sua casa e esqueça essa conversa",
-            "Você precisa fazer uma escolha"
-        ];
+            const dialogPhrases = [
+                "A pílula laranja vai te revelar os segredos mais profundos",
+                "A azul você volta para sua casa e esqueça essa conversa",
+                "Você precisa fazer uma escolha"
+            ];
 
-        let currentDialogIndex = 0;
-        let typingTimeout = null;
-        let dialogFinished = false;
+            let currentDialogIndex = 0;
+            let typingTimeout = null;
+            let dialogFinished = false;
+            let choiceMade = false;
 
-        // Desfoca a imagem após 1s
-        setTimeout(() => {
-            characterImg.style.filter = 'blur(0px)';
-        }, 1000);
-
-        // Inicia o diálogo após 5s
-        setTimeout(() => {
-            dialogWrapper.style.display = 'flex';
-            dialogWrapper.style.opacity = '1';
-            startNextDialog();
-        }, 5000);
-
-        function startNextDialog() {
-            if (currentDialogIndex >= dialogPhrases.length) {
-                // Diálogo terminado → mostrar botões
-                dialogFinished = true;
-                buttonsArea.classList.add('visible');
-                return;
-            }
-
-            dialogTextEl.innerHTML = '';
-            let index = 0;
-            const currentPhrase = dialogPhrases[currentDialogIndex];
-
-            function typeNextChar() {
-                if (index < currentPhrase.length) {
-                    dialogTextEl.innerHTML += currentPhrase.charAt(index);
-                    index++;
-                    typingTimeout = setTimeout(typeNextChar, 35);
-                } else {
-                    typingTimeout = setTimeout(() => {
-                        currentDialogIndex++;
-                        startNextDialog();
-                    }, 1000);
-                }
-            }
-
-            typeNextChar();
-        }
-
-        function makeChoice(color) {
-            // Impede múltiplos cliques
-            if (!dialogFinished) return;
-            
-            // Desativa os botões
-            buttonsArea.classList.remove('visible');
-            blueBtn.style.pointerEvents = 'none';
-            orangeBtn.style.pointerEvents = 'none';
-            
-            if (typingTimeout) clearTimeout(typingTimeout);
-            
-            characterImg.style.opacity = '0';
-            dialogWrapper.style.opacity = '0';
-
+            // Desfoca a imagem após 1s
             setTimeout(() => {
-                if (color === 'blue') {
-                    resultScreen.className = 'blue-screen';
-                    resultText.innerHTML = "VOCÊ TOMOU A PÍLULA AZUL.<br><br>SUA MENTE FOI APAGADA. VOCÊ NUNCA ESTEVE AQUI.<br>ACORDE.";
-                } else {
-                    resultScreen.className = 'orange-screen';
-                    resultText.innerHTML = "VOCÊ TOMOU A PÍLULA LARANJA.<br><br>BEM-VINDO À REALIDADE. O MUNDO NUNCA MAIS SERÁ O MESMO.";
-                }
-                resultScreen.style.display = 'flex';
+                characterImg.style.filter = 'blur(0px)';
             }, 1000);
-        }
+
+            // Inicia o diálogo após 5s
+            setTimeout(() => {
+                dialogWrapper.style.display = 'flex';
+                dialogWrapper.style.opacity = '1';
+                startNextDialog();
+            }, 5000);
+
+            function startNextDialog() {
+                if (currentDialogIndex >= dialogPhrases.length) {
+                    dialogFinished = true;
+                    buttonsArea.classList.add('visible');
+                    return;
+                }
+
+                dialogTextEl.innerHTML = '';
+                let index = 0;
+                const currentPhrase = dialogPhrases[currentDialogIndex];
+
+                function typeNextChar() {
+                    if (index < currentPhrase.length) {
+                        dialogTextEl.innerHTML += currentPhrase.charAt(index);
+                        index++;
+                        typingTimeout = setTimeout(typeNextChar, 35);
+                    } else {
+                        typingTimeout = setTimeout(() => {
+                            currentDialogIndex++;
+                            startNextDialog();
+                        }, 1200);
+                    }
+                }
+
+                typeNextChar();
+            }
+
+            window.makeChoice = function(color) {
+                if (!dialogFinished || choiceMade) return;
+                choiceMade = true;
+
+                // Desativa os botões visualmente
+                buttonsArea.classList.remove('visible');
+                blueBtn.style.pointerEvents = 'none';
+                orangeBtn.style.pointerEvents = 'none';
+                
+                if (typingTimeout) clearTimeout(typingTimeout);
+                
+                characterImg.style.opacity = '0';
+                dialogWrapper.style.opacity = '0';
+
+                setTimeout(() => {
+                    if (color === 'blue') {
+                        resultScreen.className = 'blue-screen';
+                        resultText.innerHTML = "VOCÊ TOMOU A PÍLULA AZUL.<br><br>SUA MENTE FOI APAGADA. VOCÊ NUNCA ESTEVE AQUI.<br>ACORDE.";
+                    } else {
+                        resultScreen.className = 'orange-screen';
+                        resultText.innerHTML = "VOCÊ TOMOU A PÍLULA LARANJA.<br><br>BEM-VINDO À REALIDADE. O MUNDO NUNCA MAIS SERÁ O MESMO.";
+                    }
+                    resultScreen.style.display = 'flex';
+                }, 1000);
+            };
+
+            // Previne duplo clique em dispositivos móveis
+            document.querySelectorAll('.pill-btn').forEach(btn => {
+                btn.addEventListener('touchstart', function(e) {
+                    // Pequeno delay para evitar duplo toque
+                }, { passive: true });
+            });
+
+        })();
     </script>
 </body>
 </html>
