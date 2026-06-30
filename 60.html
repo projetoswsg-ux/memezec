@@ -2335,15 +2335,15 @@
       else if (change < 0) changeClass = 'change-negative';
       else changeClass = 'change-neutral';
       
-      sunPrice.innerHTML = `☀️ Preço XMR: ${priceText} <span class="${changeClass}">(${changeText})</span>`;
+      sunPrice.innerHTML = `QUOTE: ${priceText} <span class="${changeClass}">(${changeText})</span>`;
     }
 
     function renderLinks(links) {
       if (!links || links.length === 0) {
-        return '<div style="color: rgba(255,255,255,0.4);">🔗 Nenhum link disponível</div>';
+        return '<div style="color: rgba(255,255,255,0.4);"> No link </div>';
       }
       
-      let html = '🔗 ';
+      let html = ' ';
       links.forEach((link) => {
         html += `<div class="link-item">`;
         if (link.nome) {
