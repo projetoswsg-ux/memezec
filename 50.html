@@ -29,6 +29,33 @@
     }
 
 
+    /* --- Fade In com Blur --- */
+@keyframes fadeInBlur {
+  0% {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+}
+
+/* Classe para aplicar o efeito */
+.fade-in-blur {
+  animation: fadeInBlur 2s ease-out forwards;
+}
+
+/* Exemplo de uso no container principal (opcional) */
+#scene-container {
+  opacity: 0; /* começa invisível */
+  animation: fadeInBlur 2s ease-out forwards;
+  animation-delay: 0.5s; /* se quiser um pequeno atraso */
+}
+
+
     /* --- Loading com barra de progresso --- */
     #loading {
       position: fixed;
