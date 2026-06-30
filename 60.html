@@ -1991,7 +1991,7 @@
       isZooming = true;
       zoomTarget = 'reset';
       
-      zoomIndicator.textContent = `🔭 Retornando à vista inicial...`;
+      zoomIndicator.textContent = `Returning...`;
       zoomIndicator.classList.add('show');
       
       card.classList.remove('active');
@@ -2335,7 +2335,7 @@
       else if (change < 0) changeClass = 'change-negative';
       else changeClass = 'change-neutral';
       
-      sunPrice.innerHTML = `QUOTE: ${priceText} <span class="${changeClass}">(${changeText})</span>`;
+      sunPrice.innerHTML = `XMR ${priceText} <span class="${changeClass}">(${changeText})</span>`;
     }
 
     function renderLinks(links) {
