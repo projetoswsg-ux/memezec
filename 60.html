@@ -239,16 +239,16 @@
     }
 
     /* ==========================================================
-       MODAL DE INSTRUÇÕES (estilo quadrinhos Marvel anos 90)
+       MODAL DE INSTRUÇÕES – ESTILO IGUAL AO CARD DOS PLANETAS
        ========================================================== */
-    .comic-modal{
+    .comic-modal {
       position: fixed;
       inset: 0;
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 2000;
-      animation: comicFadeIn 0.3s ease-out;
+      animation: modalFadeIn 0.4s ease-out;
     }
     .comic-modal.open {
       display: flex;
@@ -256,29 +256,28 @@
     .modal-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.6);
       backdrop-filter: blur(6px);
     }
     .modal-container {
       position: relative;
-      background: #ffcc00;
-      border: 6px solid #000;
-      box-shadow: 16px 16px 0 rgba(0,0,0,0.6);
+      background: rgba(8,8,20,0.92);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,150,50,0.2);
       border-radius: 24px;
-      max-width: 520px;
-      width: 92%;
-      padding: 28px 24px 24px;
-      font-family: 'Comic Sans MS', 'Impact', 'Arial Black', sans-serif;
-      color: #000;
-      animation: comicPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-      overflow: hidden;
+      padding: 28px 34px;
+      max-width: 460px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      color: #fff;
+      animation: modalPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
       z-index: 2;
     }
     .modal-container::before {
       content: '';
       position: absolute;
       inset: 0;
-      background-image: radial-gradient(circle, rgba(0,0,0,0.07) 2px, transparent 2px);
+      background-image: radial-gradient(circle, rgba(255,255,255,0.03) 2px, transparent 2px);
       background-size: 18px 18px;
       pointer-events: none;
       border-radius: 24px;
@@ -293,62 +292,50 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 5px solid #000;
+      border-bottom: 1px solid rgba(255,150,50,0.2);
       padding-bottom: 12px;
       margin-bottom: 18px;
     }
     .modal-title {
-      font-size: 30px;
-      font-weight: 900;
+      font-size: 26px;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
-      text-shadow: 4px 4px 0 rgba(255,255,255,0.5);
-      color: #000;
+      color: #ff8800;
       display: flex;
       align-items: center;
       gap: 8px;
     }
     .modal-title .lightning {
-      color: #ff3333;
-      font-size: 34px;
+      color: #ffaa44;
+      font-size: 28px;
     }
     .modal-close {
-      background: #ff3333;
-      border: 4px solid #000;
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      font-size: 26px;
-      font-weight: 900;
-      color: #fff;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 24px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
-      transition: transform 0.1s, box-shadow 0.1s;
+      transition: color 0.2s;
       line-height: 1;
+      padding: 0 4px;
     }
     .modal-close:hover {
-      transform: scale(1.08);
-      box-shadow: 5px 5px 0 rgba(0,0,0,0.6);
-    }
-    .modal-close:active {
-      transform: scale(0.92);
-      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+      color: #fff;
     }
 
     .modal-body {
-      padding: 8px 0 4px;
+      padding: 4px 0;
     }
     .instruction-item {
       display: flex;
       align-items: center;
       gap: 14px;
       padding: 14px 0;
-      border-bottom: 3px dashed #000;
-      font-size: 19px;
-      font-weight: bold;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 18px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.85);
       transition: background 0.15s;
       border-radius: 4px;
     }
@@ -356,54 +343,51 @@
       border-bottom: none;
     }
     .instruction-item:hover {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
     }
     .instruction-icon {
-      font-size: 32px;
-      min-width: 48px;
+      font-size: 28px;
+      min-width: 44px;
       text-align: center;
-      filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.15));
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
     }
     .instruction-text {
       flex: 1;
     }
+    .instruction-text strong {
+      color: #ffaa44;
+      font-weight: 600;
+    }
     .highlight {
-      background: #fff;
+      background: rgba(255,136,0,0.15);
       padding: 2px 10px;
       border-radius: 6px;
-      border: 3px solid #000;
-      color: #d32f2f;
-      font-weight: 900;
+      color: #ffaa44;
+      font-weight: 500;
       display: inline-block;
-      box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+      border-left: 2px solid #ff8800;
     }
     .modal-footer {
       margin-top: 16px;
       padding-top: 14px;
-      border-top: 5px solid #000;
+      border-top: 1px solid rgba(255,150,50,0.15);
       text-align: center;
     }
     .comic-bam {
-      font-size: 34px;
-      font-weight: 900;
-      color: #d32f2f;
-      text-shadow: 3px 3px 0 #000, 0 0 10px rgba(255,0,0,0.3);
-      letter-spacing: 3px;
-      display: inline-block;
-      animation: bamPulse 1.2s infinite alternate;
-    }
-    @keyframes bamPulse {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.04); }
+      font-size: 20px;
+      font-weight: 600;
+      color: #ff8800;
+      letter-spacing: 2px;
+      opacity: 0.7;
     }
 
-    @keyframes comicFadeIn {
+    @keyframes modalFadeIn {
       0% { opacity: 0; }
       100% { opacity: 1; }
     }
-    @keyframes comicPop {
-      0% { transform: scale(0.4) rotate(-6deg); opacity: 0; }
-      100% { transform: scale(1) rotate(0); opacity: 1; }
+    @keyframes modalPop {
+      0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
     }
 
     @media (max-width: 480px) {
@@ -418,24 +402,22 @@
         padding: 20px 16px 18px;
       }
       .modal-title {
-        font-size: 22px;
+        font-size: 20px;
       }
       .instruction-item {
-        font-size: 16px;
+        font-size: 15px;
         padding: 10px 0;
         gap: 10px;
       }
       .instruction-icon {
-        font-size: 26px;
-        min-width: 36px;
+        font-size: 22px;
+        min-width: 32px;
       }
       .modal-close {
-        width: 38px;
-        height: 38px;
-        font-size: 22px;
+        font-size: 20px;
       }
       .comic-bam {
-        font-size: 26px;
+        font-size: 16px;
       }
     }
   </style>
@@ -458,13 +440,13 @@
     />
   </div>
 
-  <!-- ===== MODAL DE INSTRUÇÕES ===== -->
+  <!-- ===== MODAL DE INSTRUÇÕES (estilo atualizado) ===== -->
   <div id="help-modal" class="comic-modal">
     <div class="modal-overlay"></div>
     <div class="modal-container">
       <div class="modal-header">
         <span class="modal-title">
-          <span class="lightning">⚡</span> INSTRUÇÕES!
+          <span class="lightning">⚡</span> INSTRUÇÕES
         </span>
         <button class="modal-close" id="modal-close-btn">✕</button>
       </div>
@@ -472,27 +454,27 @@
         <div class="instruction-item">
           <span class="instruction-icon">🖱️</span>
           <span class="instruction-text">
-            <strong>1 CLIQUE</strong> em um astro:<br />
+            <strong>1 clique</strong> em um astro:<br />
             <span class="highlight">você se aproxima!</span>
           </span>
         </div>
         <div class="instruction-item">
           <span class="instruction-icon">🖱️🖱️</span>
           <span class="instruction-text">
-            <strong>2 CLIQUES</strong> em um astro:<br />
+            <strong>2 cliques</strong> em um astro:<br />
             <span class="highlight">aprende sobre ele!</span>
           </span>
         </div>
         <div class="instruction-item">
           <span class="instruction-icon">🖱️🖱️🖱️</span>
           <span class="instruction-text">
-            <strong>3 CLIQUES</strong> em qualquer lugar:<br />
+            <strong>3 cliques</strong> em qualquer lugar:<br />
             <span class="highlight">volta ao início!</span>
           </span>
         </div>
       </div>
       <div class="modal-footer">
-        <span class="comic-bam">💥 BOOM! 💥</span>
+        <span class="comic-bam">✦ Explore o universo Monero ✦</span>
       </div>
     </div>
   </div>
@@ -2422,7 +2404,7 @@
     });
 
     // ============================================================
-    // CONTROLE DO MODAL DE AJUDA
+    // CONTROLE DO MODAL DE AJUDA (estilo já atualizado no CSS)
     // ============================================================
     const helpButton = document.getElementById('help-button');
     const helpModal = document.getElementById('help-modal');
@@ -2452,9 +2434,20 @@
     // ============================================================
     // MOSTRAR BOTÃO DE AJUDA APÓS O CARREGAMENTO
     // ============================================================
-    // O botão já começa com display:none no CSS.
-    // Quando o loading terminar e a cortina abrir, adicionamos a classe 'show'.
-    // Aproveitamos o mesmo fluxo que já existe no final do script.
+    const loadingEl = document.getElementById('loading');
+
+    function startCurtain() {
+      setTimeout(() => {
+        helpButton.classList.add('show');
+      }, 0);
+    }
+
+    setTimeout(() => {
+      loadingEl.classList.add('hide');
+      setTimeout(() => {
+        startCurtain();
+      }, 400);
+    }, 1200);
 
     // ============================================================
     // ANIMAÇÃO PRINCIPAL
@@ -2633,29 +2626,6 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
-
-    // ============================================================
-    // SEQUÊNCIA DE ABERTURA (CORTINA) + EXIBIÇÃO DO BOTÃO
-    // ============================================================
-    const loadingEl = document.getElementById('loading');
-
-    function startCurtain() {
-      // Inicia a animação da cortina (se houver)
-      // (as cortinas foram removidas do HTML, mas mantemos a lógica)
-      // Após a cortina, mostramos o botão
-      setTimeout(() => {
-        helpButton.classList.add('show');
-      }, 0); // pequeno delay para garantir que a cena já está visível
-    }
-
-    // Quando o loading terminar (após 1.2s + fade), inicia a cortina e mostra o botão
-    setTimeout(() => {
-      loadingEl.classList.add('hide');
-      // Pequeno delay para o fade do loading
-      setTimeout(() => {
-        startCurtain();
-      }, 400);
-    }, 1200);
 
     // --- Buscar preço e outros ---
     fetchPrice();
