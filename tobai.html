@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ambiente 3D com Tela de Vídeo - Primeira Pessoa</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #87CEEB;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: block;
+        }
+
+        #instrucoes {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 12px;
+            transition: opacity 0.5s ease-out;
+            z-index: 20;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .dica {
+            font-size: 16px;
+            margin: 10px 0;
+            line-height: 1.4;
+        }
+
+        .css3d-renderer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* impede que o toque no vídeo atrapalhe os controles de movimento */
+            z-index: 10;
+        }
+
+        /* O container do vídeo precisa ter tamanho definido */
+        #yt-player {
+            width: 1920px;
+            height: 1080px;
+            background: #000;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+    </style>
+
+    <!-- Three.js e Cannon.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS3DRenderer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <!-- API do YouTube -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+
+    <div id="instrucoes">
+        <h2>🎬 Ambiente com Vídeo</h2>
+        <div class="dica">👈 <b>Lado Esquerdo:</b> Arraste para Andar</div>
+        <div class="dica">👉 <b>Lado Direito:</b> Arraste para Olhar</div>
+        <div style="margin-top: 15px; font-size: 14px; color: #ccc;">Toque na tela para começar</div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script>
+        // ──────────────────────────────────────────────────────────────
+        // 1. VARIÁVEIS GLOBAIS
+        // ──────────────────────────────────────────────────────────────
+        let scene, camera, renderer, cssRenderer;
+        let clock = new THREE.Clock();
+
+        // Física
+        let world;
+        const objetosFisicos = [];
+
+        // Controles Touch
+        const touchEsquerdo = { ativo: false, id: null, inicioX: 0, inicioY: 0, deltaX: 0, deltaY: 0 };
+        const touchDireito = { ativo: false, id: null, ultimoX: 0, ultimoY: 0 };
+
+        // Configurações do Jogador
+        const velMovimento = 8.0;
+        const velVisao = 0.005;
+        const alturaOlhos = 1.6;
+        let cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+        // Objeto da tela de vídeo (CSS3D)
+        let telaVideo = null;
+        let player = null;          // player do YouTube
+        let videoPronto = false;    // indica se o player já está pronto
+
+        // ──────────────────────────────────────────────────────────────
+        // 2. INICIALIZAÇÃO
+        // ──────────────────────────────────────────────────────────────
+        function init() {
+            // 2a. Cena Three.js
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 20, 60);
+
+            // 2b. Câmera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, alturaOlhos, 0);
+
+            // 2c. Renderizador WebGL
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.domElement.style.position = 'absolute';
+            renderer.domElement.style.top = '0';
+            renderer.domElement.style.left = '0';
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // 2d. Renderizador CSS3D (para a tela de vídeo)
+            cssRenderer = new THREE.CSS3DRenderer();
+            cssRenderer.setSize(window.innerWidth, window.innerHeight);
+            cssRenderer.domElement.classList.add('css3d-renderer');
+            document.getElementById('canvas-container').appendChild(cssRenderer.domElement);
+
+            // 2e. Luzes
+            const luzAmbiente = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(luzAmbiente);
+
+            const luzDirecional = new THREE.DirectionalLight(0xffffff, 0.8);
+            luzDirecional.position.set(10, 20, 10);
+            luzDirecional.castShadow = true;
+            luzDirecional.shadow.camera.top = 20;
+            luzDirecional.shadow.camera.bottom = -20;
+            luzDirecional.shadow.camera.left = -20;
+            luzDirecional.shadow.camera.right = 20;
+            scene.add(luzDirecional);
+
+            // 2f. Mundo da Física
+            world = new CANNON.World();
+            world.gravity.set(0, -9.82, 0);
+            world.broadphase = new CANNON.NaiveBroadphase();
+            world.solver.iterations = 10;
+
+            // 2g. Chão
+            criarChao();
+
+            // 2h. Objetos com física
+            for (let i = 0; i < 40; i++) {
+                criarObjetoAleatorio();
+            }
+
+            // 2i. Tela de vídeo flutuante (CSS3D + YouTube API)
+            criarTelaVideo();
+
+            // 2j. Eventos
+            window.addEventListener('resize', onWindowResize, false);
+            const areaTouch = document.body;
+            areaTouch.addEventListener('touchstart', onTouchStart, { passive: false });
+            areaTouch.addEventListener('touchmove', onTouchMove, { passive: false });
+            areaTouch.addEventListener('touchend', onTouchEnd, { passive: false });
+            areaTouch.addEventListener('touchcancel', onTouchEnd, { passive: false });
+
+            // 2k. Ouvinte para garantir som no primeiro toque (caso o autoplay com som seja bloqueado)
+            document.addEventListener('touchstart', ativarSom, { once: true });
+            document.addEventListener('click', ativarSom, { once: true });
+
+            // Iniciar loop
+            animate();
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 3. CHÃO (visual + físico)
+        // ──────────────────────────────────────────────────────────────
+        function criarChao() {
+            const geometriaChao = new THREE.PlaneGeometry(100, 100);
+            const materialChao = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.8 });
+            const malhaChao = new THREE.Mesh(geometriaChao, materialChao);
+            malhaChao.rotation.x = -Math.PI / 2;
+            malhaChao.receiveShadow = true;
+            scene.add(malhaChao);
+
+            const grid = new THREE.GridHelper(100, 100, 0x000000, 0x444444);
+            grid.position.y = 0.01;
+            grid.material.opacity = 0.4;
+            grid.material.transparent = true;
+            scene.add(grid);
+
+            const chaoBody = new CANNON.Body({ mass: 0, material: new CANNON.Material() });
+            chaoBody.addShape(new CANNON.Plane());
+            chaoBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            world.addBody(chaoBody);
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 4. OBJETOS ALEATÓRIOS COM FÍSICA
+        // ──────────────────────────────────────────────────────────────
+        function criarObjetoAleatorio() {
+            const tipos = [
+                { shape: 'box', w: 0.5 + Math.random() * 1.5, h: 0.5 + Math.random() * 2.0, d: 0.5 + Math.random() * 1.5 },
+                { shape: 'cylinder', r: 0.3 + Math.random() * 0.8, h: 0.5 + Math.random() * 2.5 },
+                { shape: 'box', w: 0.5 + Math.random() * 2.0, h: 0.3 + Math.random() * 0.8, d: 0.5 + Math.random() * 2.0 }
+            ];
+            const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+
+            let geometria;
+            if (tipo.shape === 'box') {
+                geometria = new THREE.BoxGeometry(tipo.w, tipo.h, tipo.d);
+            } else {
+                geometria = new THREE.CylinderGeometry(tipo.r, tipo.r, tipo.h, 12);
+            }
+
+            const cores = [0xff5733, 0x33ff57, 0x3357ff, 0xffff33, 0xff33ff, 0x33ffff, 0xffaa33];
+            const material = new THREE.MeshStandardMaterial({
+                color: cores[Math.floor(Math.random() * cores.length)],
+                roughness: 0.5 + Math.random() * 0.4,
+                metalness: 0.1
+            });
+
+            const mesh = new THREE.Mesh(geometria, material);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+
+            let px, pz;
+            do {
+                px = (Math.random() - 0.5) * 40;
+                pz = (Math.random() - 0.5) * 40;
+            } while (Math.abs(px) < 5 && Math.abs(pz) < 5);
+
+            const alturaInicial = 2 + Math.random() * 8;
+            mesh.position.set(px, alturaInicial, pz);
+            scene.add(mesh);
+
+            let shape;
+            if (tipo.shape === 'box') {
+                shape = new CANNON.Box(new CANNON.Vec3(tipo.w / 2, tipo.h / 2, tipo.d / 2));
+            } else {
+                shape = new CANNON.Cylinder(tipo.r, tipo.r, tipo.h, 12);
+            }
+
+            const body = new CANNON.Body({ mass: 1 + Math.random() * 2 });
+            body.addShape(shape);
+            body.position.set(px, alturaInicial, pz);
+            body.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).unit(),
+                Math.random() * Math.PI * 2
+            );
+            body.material = new CANNON.Material();
+            body.linearDamping = 0.1;
+            body.angularDamping = 0.2;
+            world.addBody(body);
+
+            objetosFisicos.push({ mesh, body });
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 5. TELA DE VÍDEO FLUTUANTE (CSS3D + YouTube API)
+        // ──────────────────────────────────────────────────────────────
+        function criarTelaVideo() {
+            const videoId = 'jfKfPfyJRdk'; // Lofi hip hop – pode trocar por qualquer ID
+
+            // Cria a div que vai receber o player do YouTube
+            const div = document.createElement('div');
+            div.id = 'yt-player';          // usado pelo YouTube API
+            div.style.width = '1920px';
+            div.style.height = '1080px';
+            div.style.background = '#000';
+            div.style.borderRadius = '8px';
+            div.style.boxShadow = '0 0 40px rgba(0,0,0,0.8)';
+            div.style.overflow = 'hidden';
+
+            // Cria o CSS3DObject com essa div
+            telaVideo = new THREE.CSS3DObject(div);
+            telaVideo.position.set(0, 3, -12);   // flutua à frente do jogador
+            telaVideo.scale.set(0.005, 0.005, 0.005);
+            scene.add(telaVideo);
+
+            // Moldura 3D ao redor da tela (opcional)
+            const molduraGeo = new THREE.BoxGeometry(9.6 + 0.4, 5.4 + 0.4, 0.1);
+            const molduraMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.7 });
+            const moldura = new THREE.Mesh(molduraGeo, molduraMat);
+            moldura.position.copy(telaVideo.position);
+            moldura.position.z += 0.05;
+            scene.add(moldura);
+
+            // O player do YouTube será criado quando a API estiver pronta
+            // A função onYouTubeIframeAPIReady (definida abaixo) fará isso.
+            // Guardamos o ID do vídeo para uso posterior.
+            window._videoId = videoId;
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 6. YouTube API – Criação e controle do player
+        // ──────────────────────────────────────────────────────────────
+        function onYouTubeIframeAPIReady() {
+            const div = document.getElementById('yt-player');
+            if (!div) {
+                // Se a div ainda não existir (pode acontecer se a API carregar antes do DOM),
+                // tentamos novamente em alguns milissegundos.
+                setTimeout(onYouTubeIframeAPIReady, 100);
+                return;
+            }
+
+            player = new YT.Player('yt-player', {
+                height: '1080',
+                width: '1920',
+                videoId: window._videoId || 'jfKfPfyJRdk',
+                playerVars: {
+                    autoplay: 1,          // inicia automaticamente
+                    mute: 0,              // NÃO inicia mudo (som ativo)
+                    controls: 1,          // exibe controles
+                    loop: 1,              // loop ativado
+                    playlist: window._videoId || 'jfKfPfyJRdk',
+                    modestbranding: 1,    // sem logo do YouTube
+                    rel: 0                // não mostra vídeos relacionados
+                },
+                events: {
+                    onReady: onPlayerReady,
+                    onError: onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            videoPronto = true;
+            // Tenta dar play com som imediatamente
+            event.target.playVideo();
+            event.target.unMute();    // garante que o som esteja ativo
+            console.log('Player pronto, som ativado.');
+        }
+
+        function onPlayerError(event) {
+            console.warn('Erro no player do YouTube:', event.data);
+        }
+
+        // Função chamada no primeiro toque/clique para forçar som e play
+        function ativarSom() {
+            if (player && videoPronto) {
+                player.unMute();
+                player.playVideo();
+                console.log('Som ativado por interação do usuário.');
+            } else {
+                // Se o player ainda não estiver pronto, tentamos novamente depois
+                setTimeout(ativarSom, 200);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 7. EVENTOS DE TOQUE (movimento do jogador)
+        // ──────────────────────────────────────────────────────────────
+        function ocultarInstrucoes() {
+            const painel = document.getElementById('instrucoes');
+            if (painel.style.opacity !== '0') {
+                painel.style.opacity = '0';
+            }
+        }
+
+        function onTouchStart(e) {
+            e.preventDefault();
+            ocultarInstrucoes();
+            const meioTela = window.innerWidth / 2;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const toque = e.changedTouches[i];
+                if (toque.clientX < meioTela && !touchEsquerdo.ativo) {
+                    touchEsquerdo.ativo = true;
+                    touchEsquerdo.id = toque.identifier;
+                    touchEsquerdo.inicioX = toque.clientX;
+                    touchEsquerdo.inicioY = toque.clientY;
+                    touchEsquerdo.deltaX = 0;
+                    touchEsquerdo.deltaY = 0;
+                } else if (toque.clientX >= meioTela && !touchDireito.ativo) {
+                    touchDireito.ativo = true;
+                    touchDireito.id = toque.identifier;
+                    touchDireito.ultimoX = toque.clientX;
+                    touchDireito.ultimoY = toque.clientY;
+                }
+            }
+        }
+
+        function onTouchMove(e) {
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const toque = e.changedTouches[i];
+                if (touchEsquerdo.ativo && toque.identifier === touchEsquerdo.id) {
+                    touchEsquerdo.deltaX = toque.clientX - touchEsquerdo.inicioX;
+                    touchEsquerdo.deltaY = toque.clientY - touchEsquerdo.inicioY;
+                } else if (touchDireito.ativo && toque.identifier === touchDireito.id) {
+                    const difX = toque.clientX - touchDireito.ultimoX;
+                    const difY = toque.clientY - touchDireito.ultimoY;
+                    cameraEuler.setFromQuaternion(camera.quaternion);
+                    cameraEuler.y -= difX * velVisao;
+                    cameraEuler.x -= difY * velVisao;
+                    cameraEuler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraEuler.x));
+                    camera.quaternion.setFromEuler(cameraEuler);
+                    touchDireito.ultimoX = toque.clientX;
+                    touchDireito.ultimoY = toque.clientY;
+                }
+            }
+        }
+
+        function onTouchEnd(e) {
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const toque = e.changedTouches[i];
+                if (touchEsquerdo.ativo && toque.identifier === touchEsquerdo.id) {
+                    touchEsquerdo.ativo = false;
+                    touchEsquerdo.id = null;
+                    touchEsquerdo.deltaX = 0;
+                    touchEsquerdo.deltaY = 0;
+                } else if (touchDireito.ativo && toque.identifier === touchDireito.id) {
+                    touchDireito.ativo = false;
+                    touchDireito.id = null;
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (cssRenderer) {
+                cssRenderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 8. MOVIMENTO DO JOGADOR
+        // ──────────────────────────────────────────────────────────────
+        function atualizarMovimento(dt) {
+            if (!touchEsquerdo.ativo) return;
+
+            const limiteJoystick = 50;
+            let moveX = touchEsquerdo.deltaX / limiteJoystick;
+            let moveY = touchEsquerdo.deltaY / limiteJoystick;
+
+            moveX = Math.max(-1, Math.min(1, moveX));
+            moveY = Math.max(-1, Math.min(1, moveY));
+
+            if (moveX !== 0 || moveY !== 0) {
+                let direcao = new THREE.Vector3(moveX, 0, moveY);
+                cameraEuler.setFromQuaternion(camera.quaternion);
+                direcao.applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraEuler.y);
+                if (direcao.length() > 1) direcao.normalize();
+
+                const intensidade = Math.sqrt(moveX * moveX + moveY * moveY);
+                const velocidadeFinal = Math.min(1, intensidade) * velMovimento * dt;
+
+                camera.position.addScaledVector(direcao, velocidadeFinal);
+                camera.position.y = alturaOlhos;
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 9. LOOP PRINCIPAL
+        // ──────────────────────────────────────────────────────────────
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = Math.min(clock.getDelta(), 0.05);
+
+            // 9a. Atualizar física
+            world.step(1 / 60, dt, 3);
+
+            // 9b. Sincronizar objetos físicos
+            for (let par of objetosFisicos) {
+                par.mesh.position.copy(par.body.position);
+                par.mesh.quaternion.copy(par.body.quaternion);
+            }
+
+            // 9c. Movimento do jogador
+            atualizarMovimento(dt);
+
+            // 9d. Fazer a tela de vídeo sempre olhar para o jogador
+            if (telaVideo) {
+                telaVideo.lookAt(camera.position);
+            }
+
+            // 9e. Renderizar WebGL
+            renderer.render(scene, camera);
+
+            // 9f. Renderizar CSS3D (sobreposto)
+            cssRenderer.render(scene, camera);
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 10. INICIAR
+        // ──────────────────────────────────────────────────────────────
+        window.onload = init;
+    </script>
+</body>
+</html>
