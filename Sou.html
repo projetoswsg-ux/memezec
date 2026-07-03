@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sound of Market — Bitcoin sonificado</title>
+    <title>Sound of Monero — Perpétuo Binance</title>
     <style>
-        /* ─── RESET E BASE ─── */
         * {
             margin: 0;
             padding: 0;
@@ -14,13 +13,11 @@
         body {
             background: #0b0e14;
             color: #e0e4ed;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             overflow: hidden;
             height: 100vh;
             user-select: none;
         }
-
-        /* ─── CANVAS 3D (fundo) ─── */
         #canvas3d {
             position: fixed;
             top: 0;
@@ -30,8 +27,6 @@
             z-index: 0;
             display: block;
         }
-
-        /* ─── OVERLAY UI ─── */
         .ui-overlay {
             position: fixed;
             z-index: 10;
@@ -40,8 +35,6 @@
         .ui-overlay * {
             pointer-events: auto;
         }
-
-        /* Topo — título e status */
         .header {
             top: 24px;
             left: 0;
@@ -93,8 +86,6 @@
                 transform: scale(0.7);
             }
         }
-
-        /* Painel central — info do mercado */
         .market-panel {
             bottom: 120px;
             left: 50%;
@@ -123,7 +114,7 @@
             font-weight: 600;
             letter-spacing: 0.2px;
         }
-        .market-item .value.btc {
+        .market-item .value.xmr {
             color: #f7931a;
         }
         .market-item .value.volume {
@@ -141,8 +132,6 @@
         .market-item .value.bpm {
             color: #c084fc;
         }
-
-        /* Botão Play */
         .play-btn {
             bottom: 40px;
             left: 50%;
@@ -170,8 +159,6 @@
             color: #4ade80;
             background: rgba(74, 222, 128, 0.12);
         }
-
-        /* Rodapé — crédito */
         .footer {
             bottom: 100px;
             right: 32px;
@@ -181,8 +168,6 @@
             line-height: 1.6;
             pointer-events: none;
         }
-
-        /* ─── RESPONSIVO ─── */
         @media (max-width: 720px) {
             .header {
                 padding: 0 16px;
@@ -218,13 +203,10 @@
     </style>
 </head>
 <body>
-
-    <!-- CANVAS 3D -->
     <canvas id="canvas3d"></canvas>
 
-    <!-- UI OVERLAY -->
     <div class="ui-overlay header">
-        <h1>✦ <span>Sound</span> of Market</h1>
+        <h1>✦ <span>Sound</span> of Monero</h1>
         <div class="status">
             <span class="dot"></span>
             <span id="statusText">conectando...</span>
@@ -233,8 +215,8 @@
 
     <div class="ui-overlay market-panel">
         <div class="market-item">
-            <div class="label">BTC / USD</div>
-            <div class="value btc" id="priceDisplay">—</div>
+            <div class="label">XMR / USDT</div>
+            <div class="value xmr" id="priceDisplay">—</div>
         </div>
         <div class="market-item">
             <div class="label">Volume 24h</div>
@@ -251,41 +233,39 @@
     </div>
 
     <button class="ui-overlay play-btn" id="playBtn">▶ Iniciar</button>
+    <div class="ui-overlay footer">Dados: Binance · XMRUSDT Perpétuo</div>
 
-    <div class="ui-overlay footer">
-        Dados: CoinGecko API · Inspirado em Proof of Sound
-    </div>
-
-    <!-- ─── SCRIPT ─── -->
     <script>
         // ═══════════════════════════════════════════════════════════
-        //  1.  CONFIGURAÇÕES
+        //  CONFIGURAÇÕES
         // ═══════════════════════════════════════════════════════════
 
-        const COINGECKO_BASE = 'https://api.coingecko.com/api/v3';
-        const COIN_ID = 'bitcoin';
-        const VS_CURRENCY = 'usd';
+        const SYMBOL = 'XMRUSDT';
+        const BINANCE_TICKER = `https://api.binance.com/api/v3/ticker/24hr?symbol=${SYMBOL}`;
+        const BINANCE_KLINES = `https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=1d&limit=7`;
 
         // Mapeamento musical
         const NOTE_BASE = 48; // C3
         const NOTE_RANGE = 36; // 3 oitavas
-        const PRICE_MIN = 20000;
-        const PRICE_MAX = 120000;
+        const PRICE_MIN = 50;
+        const PRICE_MAX = 250;
 
         // Estado
         let isPlaying = false;
         let audioCtx = null;
         let gainNode = null;
-        let currentNote = null;
         let currentOsc = null;
         let bpm = 80;
         let price = 0;
         let volume = 0;
         let change24h = 0;
         let historicalPrices = [];
+        let melodyNotes = [];
         let melodyIndex = 0;
-        let melodyTimer = null;
-        let dataTimer = null;
+
+        // Timers
+        let dataInterval = null;
+        let melodyInterval = null;
         let animationId = null;
 
         // DOM
@@ -297,12 +277,11 @@
         const playBtn = document.getElementById('playBtn');
 
         // ═══════════════════════════════════════════════════════════
-        //  2.  CANVAS 3D — TERRA + PARTÍCULAS
+        //  CANVAS 3D (mesmo código de antes, mantido)
         // ═══════════════════════════════════════════════════════════
 
         const canvas = document.getElementById('canvas3d');
         const ctx = canvas.getContext('2d');
-
         let W, H;
 
         function resize() {
@@ -312,7 +291,6 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Pontos da "Terra" (esfera wireframe)
         const EARTH_POINTS = 600;
         const earthPoints = [];
         for (let i = 0; i < EARTH_POINTS; i++) {
@@ -327,7 +305,6 @@
             });
         }
 
-        // Partículas (estrelas / rede)
         const NUM_PARTICLES = 400;
         const particles = [];
         for (let i = 0; i < NUM_PARTICLES; i++) {
@@ -343,69 +320,45 @@
 
         let rotX = 0.3;
         let rotY = 0;
-        let targetRotY = 0;
 
         function project(x, y, z) {
             const cx = W / 2;
             const cy = H / 2;
             const fov = 500;
             const scale = fov / (fov + z);
-            return {
-                x: cx + x * scale,
-                y: cy + y * scale,
-                s: scale,
-            };
+            return { x: cx + x * scale, y: cy + y * scale, s: scale };
         }
 
         function drawEarth(time, intensity) {
             ctx.clearRect(0, 0, W, H);
-
-            // Fundo gradiente
             const grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 600);
             grad.addColorStop(0, '#141a24');
             grad.addColorStop(1, '#07090e');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, W, H);
 
-            // Rotação suave
             rotY += 0.002 + intensity * 0.001;
             const cosY = Math.cos(rotY);
             const sinY = Math.sin(rotY);
             const cosX = Math.cos(rotX);
             const sinX = Math.sin(rotX);
 
-            // ── Pontos da Terra ──
             const projected = [];
             for (const p of earthPoints) {
-                let x = p.x;
-                let y = p.y;
-                let z = p.z;
-
-                // Rotação Y
+                let x = p.x,
+                    y = p.y,
+                    z = p.z;
                 let x1 = x * cosY - z * sinY;
                 let z1 = x * sinY + z * cosY;
                 let y1 = y;
-
-                // Rotação X
                 let y2 = y1 * cosX - z1 * sinX;
                 let z2 = y1 * sinX + z1 * cosX;
                 let x2 = x1;
-
                 const proj = project(x2, y2, z2);
-                if (proj.s > 0) {
-                    projected.push({
-                        x: proj.x,
-                        y: proj.y,
-                        s: proj.s,
-                        z: z2,
-                    });
-                }
+                if (proj.s > 0) projected.push({ x: proj.x, y: proj.y, s: proj.s, z: z2 });
             }
-
-            // Ordenar por profundidade (Z)
             projected.sort((a, b) => a.z - b.z);
 
-            // Desenhar conexões (rede)
             ctx.strokeStyle = `rgba(247, 147, 26, ${0.04 + intensity * 0.06})`;
             ctx.lineWidth = 0.6;
             for (let i = 0; i < projected.length; i++) {
@@ -420,18 +373,14 @@
                     }
                 }
             }
-
-            // Desenhar pontos
             for (const p of projected) {
                 const size = (1.2 + intensity * 1.5) * p.s;
-                const alpha = 0.5 + intensity * 0.4;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(247, 147, 26, ${alpha})`;
+                ctx.fillStyle = `rgba(247, 147, 26, ${0.5 + intensity * 0.4})`;
                 ctx.fill();
             }
 
-            // ── Partículas (estrelas) ──
             const time2 = Date.now() * 0.0003;
             for (const p of particles) {
                 const x = p.x + Math.sin(time2 * p.speed + p.phase) * 30;
@@ -447,7 +396,6 @@
                 }
             }
 
-            // ── "Sol" no horizonte ──
             const sunX = W / 2 + 300;
             const sunY = H / 2 - 100;
             const sunRadius = 50 + intensity * 20;
@@ -461,7 +409,6 @@
             ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Brilho do sol
             const glow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius * 2.5);
             glow.addColorStop(0, `rgba(255, 200, 80, ${0.08 + intensity * 0.08})`);
             glow.addColorStop(1, `rgba(255, 200, 80, 0)`);
@@ -472,7 +419,7 @@
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  3.  ÁUDIO — Web Audio API
+        //  ÁUDIO
         // ═══════════════════════════════════════════════════════════
 
         function initAudio() {
@@ -489,81 +436,59 @@
 
         function playNote(pitch, velocity, duration) {
             if (!audioCtx || !isPlaying) return;
-
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-
-            // Tipo de onda: seno suave
             osc.type = 'sine';
             osc.frequency.value = pitch;
-
-            // Volume (velocity 0-1)
             const vol = 0.08 + velocity * 0.25;
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
             osc.connect(gain);
             gain.connect(gainNode);
-
             osc.start();
             osc.stop(audioCtx.currentTime + duration);
         }
 
         function playDrone(pitch, intensity) {
-            // Nota sustentada (drone) que acompanha o preço
             if (currentOsc) {
-                try {
-                    currentOsc.stop();
-                } catch (_) { /* ignore */ }
+                try { currentOsc.stop(); } catch (_) {}
             }
             if (!audioCtx || !isPlaying) return;
-
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-
             osc.type = 'sine';
             osc.frequency.value = pitch;
-
             const vol = 0.04 + intensity * 0.12;
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-
             osc.connect(gain);
             gain.connect(gainNode);
-
             osc.start();
             currentOsc = osc;
         }
 
         function stopDrone() {
             if (currentOsc) {
-                try {
-                    currentOsc.stop();
-                } catch (_) { /* ignore */ }
+                try { currentOsc.stop(); } catch (_) {}
                 currentOsc = null;
             }
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  4.  COLETA DE DADOS — CoinGecko
+        //  API BINANCE
         // ═══════════════════════════════════════════════════════════
 
         async function fetchMarketData() {
             try {
-                const url =
-                    `${COINGECKO_BASE}/coins/markets?vs_currency=${VS_CURRENCY}&ids=${COIN_ID}&order=market_cap_desc&per_page=1&page=1&sparkline=false&price_change_percentage=24h`;
-                const resp = await fetch(url);
+                const resp = await fetch(BINANCE_TICKER);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
-                if (!data || data.length === 0) throw new Error('Sem dados');
 
-                const item = data[0];
-                price = item.current_price || 0;
-                volume = item.total_volume || 0;
-                change24h = item.price_change_percentage_24h || 0;
+                price = parseFloat(data.lastPrice) || 0;
+                volume = parseFloat(data.quoteVolume) || 0;
+                change24h = parseFloat(data.priceChangePercent) || 0;
 
-                // Atualiza UI
-                priceDisplay.textContent = price ? `$${price.toLocaleString()}` : '—';
-                volumeDisplay.textContent = volume ? `$${(volume / 1e9).toFixed(2)}B` : '—';
+                priceDisplay.textContent = price ? `$${price.toFixed(2)}` : '—';
+                volumeDisplay.textContent = volume ? `$${(volume / 1e6).toFixed(2)}M` : '—';
 
                 const changeEl = changeDisplay;
                 if (change24h !== 0) {
@@ -576,29 +501,27 @@
                 statusText.textContent = 'ao vivo';
                 return { price, volume, change24h };
             } catch (err) {
-                console.warn('Erro na API:', err);
+                console.warn('Erro na Binance:', err);
                 statusText.textContent = '⚠️ erro';
                 return null;
             }
         }
 
-        async function fetchHistoricalPrices(days = 7) {
+        async function fetchHistoricalPrices() {
             try {
-                const url =
-                    `${COINGECKO_BASE}/coins/${COIN_ID}/market_chart?vs_currency=${VS_CURRENCY}&days=${days}&interval=daily`;
-                const resp = await fetch(url);
+                const resp = await fetch(BINANCE_KLINES);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
-                if (data && data.prices) {
-                    historicalPrices = data.prices.map(p => p[1]);
-                }
+                historicalPrices = data.map(candle => parseFloat(candle[4])); // close price
+                return historicalPrices;
             } catch (err) {
                 console.warn('Erro ao buscar histórico:', err);
+                return [];
             }
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  5.  LÓGICA MUSICAL
+        //  LÓGICA MUSICAL
         // ═══════════════════════════════════════════════════════════
 
         function mapPriceToNote(priceVal) {
@@ -608,124 +531,66 @@
         }
 
         function mapChangeToBpm(change) {
-            // Variação de -10% a +10% → BPM 60 a 140
             const clamped = Math.max(-15, Math.min(15, change));
-            const normalized = (clamped + 15) / 30; // 0..1
+            const normalized = (clamped + 15) / 30;
             return 60 + normalized * 80;
         }
 
         function mapVolumeToIntensity(vol) {
-            // Volume em USD, normaliza entre 0 e 1 (assumindo max ~50B)
-            const maxVol = 50e9;
+            const maxVol = 200e6; // ~200M USD de volume diário para XMR
             return Math.min(1, vol / maxVol);
         }
 
         function generateMelody() {
-            if (historicalPrices.length < 7) return;
-            // Pega os últimos 7 dias e interpola
+            if (historicalPrices.length < 7) return [];
             const recent = historicalPrices.slice(-7);
             const step = recent.length > 1 ? (recent.length - 1) / 16 : 1;
             const notes = [];
             for (let i = 0; i < 16; i++) {
                 const idx = Math.floor(i * step);
                 const val = recent[Math.min(idx, recent.length - 1)];
-                if (val) {
-                    const note = mapPriceToNote(val);
-                    notes.push(note);
-                }
+                if (val) notes.push(mapPriceToNote(val));
             }
             return notes;
         }
 
-        let melodyNotes = [];
-
         function playMelodyNote() {
             if (!isPlaying || !audioCtx) return;
             if (melodyNotes.length === 0) {
-                melodyNotes = generateMelody() || [];
+                melodyNotes = generateMelody();
                 if (melodyNotes.length === 0) return;
                 melodyIndex = 0;
             }
-
             const note = melodyNotes[melodyIndex % melodyNotes.length];
             const intensity = mapVolumeToIntensity(volume);
             const vel = 0.3 + intensity * 0.5;
             playNote(note, vel, 0.4);
-
             melodyIndex++;
             if (melodyIndex >= melodyNotes.length) {
-                // Regera a melodia a cada ciclo
                 melodyNotes = generateMelody() || melodyNotes;
                 melodyIndex = 0;
             }
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  6.  LOOP PRINCIPAL
-        // ═══════════════════════════════════════════════════════════
-
-        let lastDataUpdate = 0;
-        let lastMelodyTime = 0;
-
-        function mainLoop(timestamp) {
-            // Atualiza dados a cada 5 segundos
-            if (timestamp - lastDataUpdate > 5000) {
-                fetchMarketData().then(() => {
-                    // Atualiza BPM
-                    bpm = mapChangeToBpm(change24h);
-                    bpmDisplay.textContent = Math.round(bpm);
-
-                    // Atualiza drone (nota sustentada)
-                    if (isPlaying && price > 0) {
-                        const pitch = mapPriceToNote(price);
-                        const intensity = mapVolumeToIntensity(volume);
-                        playDrone(pitch, intensity);
-                    }
-
-                    // Regenera melodia com novos dados históricos
-                    fetchHistoricalPrices(7).then(() => {
-                        melodyNotes = generateMelody() || [];
-                        melodyIndex = 0;
-                    });
-                });
-                lastDataUpdate = timestamp;
-            }
-
-            // Toca nota da melodia a cada ~500ms (ajustado pelo BPM)
-            const interval = 60000 / bpm / 2; // semicolcheia
-            if (isPlaying && timestamp - lastMelodyTime > interval) {
-                playMelodyNote();
-                lastMelodyTime = timestamp;
-            }
-
-            // Renderiza a paisagem
-            const intensity = mapVolumeToIntensity(volume);
-            drawEarth(timestamp, intensity);
-
-            animationId = requestAnimationFrame(mainLoop);
-        }
-
-        // ═══════════════════════════════════════════════════════════
-        //  7.  PLAY / STOP
+        //  CONTROLE PLAY / STOP
         // ═══════════════════════════════════════════════════════════
 
         async function start() {
             if (isPlaying) return;
-
             initAudio();
             if (audioCtx && audioCtx.state === 'suspended') {
                 await audioCtx.resume();
             }
-
             isPlaying = true;
             playBtn.textContent = '⏹ Parar';
             playBtn.classList.add('playing');
-            statusText.textContent = 'conectando...';
+            statusText.textContent = 'carregando...';
 
             // Busca dados iniciais
             await fetchMarketData();
-            await fetchHistoricalPrices(7);
-            melodyNotes = generateMelody() || [];
+            await fetchHistoricalPrices();
+            melodyNotes = generateMelody();
             melodyIndex = 0;
 
             if (price > 0) {
@@ -736,12 +601,32 @@
                 bpmDisplay.textContent = Math.round(bpm);
             }
 
-            lastDataUpdate = performance.now();
-            lastMelodyTime = performance.now();
+            // Atualiza dados a cada 5s
+            if (dataInterval) clearInterval(dataInterval);
+            dataInterval = setInterval(async () => {
+                const result = await fetchMarketData();
+                if (result && result.price > 0) {
+                    const pitch = mapPriceToNote(result.price);
+                    const intensity = mapVolumeToIntensity(result.volume);
+                    playDrone(pitch, intensity);
+                    bpm = mapChangeToBpm(result.change24h);
+                    bpmDisplay.textContent = Math.round(bpm);
+                }
+                // Atualiza histórico a cada 30s
+                if (Math.random() < 0.2) { // a cada ~5 ciclos
+                    await fetchHistoricalPrices();
+                    melodyNotes = generateMelody();
+                    melodyIndex = 0;
+                }
+            }, 5000);
 
-            if (!animationId) {
-                mainLoop(performance.now());
-            }
+            // Toca melodia a cada ~500ms (baseado no BPM)
+            if (melodyInterval) clearInterval(melodyInterval);
+            melodyInterval = setInterval(() => {
+                playMelodyNote();
+            }, 500);
+
+            statusText.textContent = 'ao vivo';
         }
 
         function stop() {
@@ -749,68 +634,35 @@
             playBtn.textContent = '▶ Iniciar';
             playBtn.classList.remove('playing');
             stopDrone();
-            // Não para o loop de renderização, mas para de tocar
-            if (currentOsc) {
-                try { currentOsc.stop(); } catch (_) {}
-                currentOsc = null;
-            }
+            if (dataInterval) { clearInterval(dataInterval);
+                dataInterval = null; }
+            if (melodyInterval) { clearInterval(melodyInterval);
+                melodyInterval = null; }
             statusText.textContent = 'pausado';
         }
 
         playBtn.addEventListener('click', () => {
-            if (isPlaying) {
-                stop();
-            } else {
-                start();
-            }
+            if (isPlaying) stop();
+            else start();
         });
 
         // ═══════════════════════════════════════════════════════════
-        //  8.  INICIALIZAÇÃO
+        //  LOOP DE RENDERIZAÇÃO (sempre rodando)
         // ═══════════════════════════════════════════════════════════
 
-        // Já começa a renderizar (sem som)
-        function initRender() {
-            drawEarth(0, 0);
-            animationId = requestAnimationFrame(initRender);
+        function renderLoop(timestamp) {
+            const intensity = mapVolumeToIntensity(volume);
+            drawEarth(timestamp, intensity);
+            animationId = requestAnimationFrame(renderLoop);
         }
-        // Para não conflitar com o mainLoop, usamos um loop separado para o idle
-        let idleAnimId = null;
 
-        function idleRender(timestamp) {
-            drawEarth(timestamp, 0.2);
-            idleAnimId = requestAnimationFrame(idleRender);
-        }
-        idleRender(0);
-
-        // Sobrescreve o start/stop para gerenciar os loops
-        const origStart = start;
-        start = async function() {
-            if (idleAnimId) {
-                cancelAnimationFrame(idleAnimId);
-                idleAnimId = null;
-            }
-            await origStart();
-        };
-
-        const origStop = stop;
-        stop = function() {
-            origStop();
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-            }
-            // Volta ao idle
-            if (!idleAnimId) {
-                idleRender(0);
-            }
-        };
+        // Inicia o loop de renderização
+        renderLoop(0);
 
         // Atualiza status inicial
         statusText.textContent = 'pronto';
-
-        console.log('🎵 Sound of Market carregado!');
-        console.log('📊 Dados: CoinGecko API · Pressione "Iniciar" para começar a sonificar o mercado.');
+        console.log('🎵 Sound of Monero carregado (Binance)');
+        console.log('📊 Clique em "Iniciar" para sonificar o mercado XMRUSDT perpétuo.');
     </script>
 </body>
 </html>
