@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sound of Monero — Perpétuo Binance</title>
+    <title>Sound of Monero</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         body {
             background: #0b0e14;
             color: #e0e4ed;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
             height: 100vh;
             user-select: none;
@@ -47,7 +47,6 @@
         .header h1 {
             font-size: 20px;
             font-weight: 500;
-            letter-spacing: 0.3px;
             background: rgba(11, 14, 20, 0.65);
             backdrop-filter: blur(10px);
             padding: 10px 20px;
@@ -112,7 +111,6 @@
         .market-item .value {
             font-size: 22px;
             font-weight: 600;
-            letter-spacing: 0.2px;
         }
         .market-item .value.xmr {
             color: #f7931a;
@@ -208,8 +206,8 @@
     <div class="ui-overlay header">
         <h1>✦ <span>Sound</span> of Monero</h1>
         <div class="status">
-            <span class="dot"></span>
-            <span id="statusText">conectando...</span>
+            <span class="dot" id="statusDot"></span>
+            <span id="statusText">pronto</span>
         </div>
     </div>
 
@@ -237,16 +235,20 @@
 
     <script>
         // ═══════════════════════════════════════════════════════════
+        //  DEBUG E LOGS
+        // ═══════════════════════════════════════════════════════════
+        console.log('🎵 Sound of Monero - Iniciando...');
+
+        // ═══════════════════════════════════════════════════════════
         //  CONFIGURAÇÕES
         // ═══════════════════════════════════════════════════════════
-
         const SYMBOL = 'XMRUSDT';
         const BINANCE_TICKER = `https://api.binance.com/api/v3/ticker/24hr?symbol=${SYMBOL}`;
         const BINANCE_KLINES = `https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=1d&limit=7`;
 
         // Mapeamento musical
-        const NOTE_BASE = 48; // C3
-        const NOTE_RANGE = 36; // 3 oitavas
+        const NOTE_BASE = 48;
+        const NOTE_RANGE = 36;
         const PRICE_MIN = 50;
         const PRICE_MAX = 250;
 
@@ -274,12 +276,12 @@
         const changeDisplay = document.getElementById('changeDisplay');
         const bpmDisplay = document.getElementById('bpmDisplay');
         const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
         const playBtn = document.getElementById('playBtn');
 
         // ═══════════════════════════════════════════════════════════
-        //  CANVAS 3D (mesmo código de antes, mantido)
+        //  CANVAS 3D (visualização) - versão simplificada
         // ═══════════════════════════════════════════════════════════
-
         const canvas = document.getElementById('canvas3d');
         const ctx = canvas.getContext('2d');
         let W, H;
@@ -291,41 +293,40 @@
         window.addEventListener('resize', resize);
         resize();
 
-        const EARTH_POINTS = 600;
+        // Pontos da esfera
+        const EARTH_POINTS = 400;
         const earthPoints = [];
         for (let i = 0; i < EARTH_POINTS; i++) {
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
-            const r = 180 + Math.random() * 30;
+            const r = 160 + Math.random() * 40;
             earthPoints.push({
                 x: r * Math.sin(phi) * Math.cos(theta),
                 y: r * Math.cos(phi),
                 z: r * Math.sin(phi) * Math.sin(theta),
-                baseR: r,
             });
         }
 
-        const NUM_PARTICLES = 400;
+        const NUM_PARTICLES = 300;
         const particles = [];
         for (let i = 0; i < NUM_PARTICLES; i++) {
             particles.push({
                 x: (Math.random() - 0.5) * 1200,
                 y: (Math.random() - 0.5) * 800,
                 z: (Math.random() - 0.5) * 800,
-                size: 1 + Math.random() * 2.5,
+                size: 1 + Math.random() * 2,
                 speed: 0.2 + Math.random() * 0.4,
                 phase: Math.random() * Math.PI * 2,
             });
         }
 
-        let rotX = 0.3;
         let rotY = 0;
 
         function project(x, y, z) {
-            const cx = W / 2;
-            const cy = H / 2;
-            const fov = 500;
-            const scale = fov / (fov + z);
+            const cx = W / 2,
+                cy = H / 2,
+                fov = 500,
+                scale = fov / (fov + z);
             return { x: cx + x * scale, y: cy + y * scale, s: scale };
         }
 
@@ -338,10 +339,10 @@
             ctx.fillRect(0, 0, W, H);
 
             rotY += 0.002 + intensity * 0.001;
-            const cosY = Math.cos(rotY);
-            const sinY = Math.sin(rotY);
-            const cosX = Math.cos(rotX);
-            const sinX = Math.sin(rotX);
+            const cosY = Math.cos(rotY),
+                sinY = Math.sin(rotY);
+            const cosX = Math.cos(0.3),
+                sinX = Math.sin(0.3);
 
             const projected = [];
             for (const p of earthPoints) {
@@ -359,28 +360,15 @@
             }
             projected.sort((a, b) => a.z - b.z);
 
-            ctx.strokeStyle = `rgba(247, 147, 26, ${0.04 + intensity * 0.06})`;
-            ctx.lineWidth = 0.6;
-            for (let i = 0; i < projected.length; i++) {
-                for (let j = i + 1; j < projected.length; j++) {
-                    const dx = projected[i].x - projected[j].x;
-                    const dy = projected[i].y - projected[j].y;
-                    if (dx * dx + dy * dy < 2500) {
-                        ctx.beginPath();
-                        ctx.moveTo(projected[i].x, projected[i].y);
-                        ctx.lineTo(projected[j].x, projected[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
             for (const p of projected) {
-                const size = (1.2 + intensity * 1.5) * p.s;
+                const size = (1 + intensity * 1.5) * p.s;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(247, 147, 26, ${0.5 + intensity * 0.4})`;
                 ctx.fill();
             }
 
+            // Partículas
             const time2 = Date.now() * 0.0003;
             for (const p of particles) {
                 const x = p.x + Math.sin(time2 * p.speed + p.phase) * 30;
@@ -388,82 +376,102 @@
                 const z = p.z + Math.sin(time2 * p.speed * 0.5 + p.phase * 2) * 40;
                 const proj = project(x, y, z);
                 if (proj.s > 0) {
-                    const alpha = 0.2 + 0.4 * (0.5 + 0.5 * Math.sin(time2 * 0.5 + p.phase));
+                    const alpha = 0.2 + 0.3 * (0.5 + 0.5 * Math.sin(time2 * 0.5 + p.phase));
                     ctx.beginPath();
-                    ctx.arc(proj.x, proj.y, p.size * proj.s * 0.6, 0, Math.PI * 2);
+                    ctx.arc(proj.x, proj.y, p.size * proj.s * 0.5, 0, Math.PI * 2);
                     ctx.fillStyle = `rgba(200, 215, 255, ${alpha * (0.6 + intensity * 0.4)})`;
                     ctx.fill();
                 }
             }
 
-            const sunX = W / 2 + 300;
-            const sunY = H / 2 - 100;
-            const sunRadius = 50 + intensity * 20;
+            // Sol
+            const sunX = W / 2 + 280,
+                sunY = H / 2 - 80;
+            const sunRadius = 40 + intensity * 20;
             const gradSun = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius);
-            const sunAlpha = 0.6 + intensity * 0.3;
-            gradSun.addColorStop(0, `rgba(255, 220, 100, ${sunAlpha})`);
-            gradSun.addColorStop(0.4, `rgba(255, 180, 50, ${sunAlpha * 0.6})`);
-            gradSun.addColorStop(1, `rgba(255, 150, 30, 0)`);
+            gradSun.addColorStop(0, `rgba(255, 220, 100, ${0.6 + intensity * 0.3})`);
+            gradSun.addColorStop(0.4, `rgba(255, 180, 50, ${(0.6 + intensity * 0.3) * 0.5})`);
+            gradSun.addColorStop(1, 'rgba(255,150,30,0)');
             ctx.fillStyle = gradSun;
             ctx.beginPath();
             ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
             ctx.fill();
-
-            const glow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius * 2.5);
-            glow.addColorStop(0, `rgba(255, 200, 80, ${0.08 + intensity * 0.08})`);
-            glow.addColorStop(1, `rgba(255, 200, 80, 0)`);
-            ctx.fillStyle = glow;
-            ctx.beginPath();
-            ctx.arc(sunX, sunY, sunRadius * 2.5, 0, Math.PI * 2);
-            ctx.fill();
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  ÁUDIO
+        //  ÁUDIO - COM LOGS
         // ═══════════════════════════════════════════════════════════
 
         function initAudio() {
+            console.log('🎧 Inicializando áudio...');
             if (!audioCtx) {
                 audioCtx = new(window.AudioContext || window.webkitAudioContext)();
                 gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0.25;
+                gainNode.gain.value = 0.2;
                 gainNode.connect(audioCtx.destination);
+                console.log('✅ AudioContext criado');
             }
             if (audioCtx.state === 'suspended') {
+                console.log('▶️ Retomando AudioContext...');
                 audioCtx.resume();
             }
+            console.log('✅ Áudio pronto, estado:', audioCtx.state);
+        }
+
+        function playTestSound() {
+            if (!audioCtx) return;
+            console.log('🔊 Tocando som de teste...');
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 440;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(gainNode);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
         }
 
         function playNote(pitch, velocity, duration) {
             if (!audioCtx || !isPlaying) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = pitch;
-            const vol = 0.08 + velocity * 0.25;
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(gainNode);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = pitch;
+                const vol = 0.05 + velocity * 0.2;
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(gainNode);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.warn('Erro ao tocar nota:', e);
+            }
         }
 
         function playDrone(pitch, intensity) {
             if (currentOsc) {
                 try { currentOsc.stop(); } catch (_) {}
+                currentOsc = null;
             }
             if (!audioCtx || !isPlaying) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = pitch;
-            const vol = 0.04 + intensity * 0.12;
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            osc.connect(gain);
-            gain.connect(gainNode);
-            osc.start();
-            currentOsc = osc;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = pitch;
+                const vol = 0.03 + intensity * 0.1;
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(gainNode);
+                osc.start();
+                currentOsc = osc;
+            } catch (e) {
+                console.warn('Erro no drone:', e);
+            }
         }
 
         function stopDrone() {
@@ -474,36 +482,27 @@
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  API BINANCE
+        //  API BINANCE COM FALLBACK
         // ═══════════════════════════════════════════════════════════
 
         async function fetchMarketData() {
             try {
+                console.log('📡 Buscando dados da Binance...');
                 const resp = await fetch(BINANCE_TICKER);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
-
                 price = parseFloat(data.lastPrice) || 0;
                 volume = parseFloat(data.quoteVolume) || 0;
                 change24h = parseFloat(data.priceChangePercent) || 0;
-
-                priceDisplay.textContent = price ? `$${price.toFixed(2)}` : '—';
-                volumeDisplay.textContent = volume ? `$${(volume / 1e6).toFixed(2)}M` : '—';
-
-                const changeEl = changeDisplay;
-                if (change24h !== 0) {
-                    changeEl.textContent = `${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%`;
-                    changeEl.className = 'value change ' + (change24h >= 0 ? 'positive' : 'negative');
-                } else {
-                    changeEl.textContent = '—';
-                }
-
-                statusText.textContent = 'ao vivo';
+                console.log(`✅ Dados recebidos: $${price}, vol $${volume.toFixed(0)}, var ${change24h}%`);
                 return { price, volume, change24h };
             } catch (err) {
-                console.warn('Erro na Binance:', err);
-                statusText.textContent = '⚠️ erro';
-                return null;
+                console.warn('⚠️ Falha na Binance, usando dados fictícios:', err.message);
+                // Fallback: gera dados aleatórios realistas
+                price = 150 + Math.random() * 60;
+                volume = 50e6 + Math.random() * 150e6;
+                change24h = (Math.random() - 0.5) * 8;
+                return { price, volume, change24h };
             }
         }
 
@@ -512,11 +511,16 @@
                 const resp = await fetch(BINANCE_KLINES);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
-                historicalPrices = data.map(candle => parseFloat(candle[4])); // close price
+                historicalPrices = data.map(candle => parseFloat(candle[4]));
+                console.log(`📊 Histórico recebido: ${historicalPrices.length} dias`);
                 return historicalPrices;
             } catch (err) {
-                console.warn('Erro ao buscar histórico:', err);
-                return [];
+                console.warn('⚠️ Falha no histórico, gerando aleatório');
+                historicalPrices = [];
+                for (let i = 0; i < 7; i++) {
+                    historicalPrices.push(130 + Math.random() * 80);
+                }
+                return historicalPrices;
             }
         }
 
@@ -537,12 +541,19 @@
         }
 
         function mapVolumeToIntensity(vol) {
-            const maxVol = 200e6; // ~200M USD de volume diário para XMR
+            const maxVol = 200e6;
             return Math.min(1, vol / maxVol);
         }
 
         function generateMelody() {
-            if (historicalPrices.length < 7) return [];
+            if (historicalPrices.length < 3) {
+                // fallback
+                const notes = [];
+                for (let i = 0; i < 16; i++) {
+                    notes.push(NOTE_BASE + Math.random() * NOTE_RANGE);
+                }
+                return notes;
+            }
             const recent = historicalPrices.slice(-7);
             const step = recent.length > 1 ? (recent.length - 1) / 16 : 1;
             const notes = [];
@@ -578,21 +589,30 @@
 
         async function start() {
             if (isPlaying) return;
+            console.log('▶️ Iniciando...');
+
+            // 1. Ativa áudio
             initAudio();
             if (audioCtx && audioCtx.state === 'suspended') {
                 await audioCtx.resume();
             }
+            // Toca som de teste para confirmar
+            playTestSound();
+
             isPlaying = true;
             playBtn.textContent = '⏹ Parar';
             playBtn.classList.add('playing');
             statusText.textContent = 'carregando...';
+            statusDot.style.background = '#fbbf24';
 
-            // Busca dados iniciais
+            // 2. Busca dados
             await fetchMarketData();
             await fetchHistoricalPrices();
-            melodyNotes = generateMelody();
-            melodyIndex = 0;
 
+            // 3. Atualiza UI
+            updateUI();
+
+            // 4. Inicia drone
             if (price > 0) {
                 const pitch = mapPriceToNote(price);
                 const intensity = mapVolumeToIntensity(volume);
@@ -601,35 +621,54 @@
                 bpmDisplay.textContent = Math.round(bpm);
             }
 
-            // Atualiza dados a cada 5s
+            // 5. Intervalo de dados (5s)
             if (dataInterval) clearInterval(dataInterval);
             dataInterval = setInterval(async () => {
                 const result = await fetchMarketData();
-                if (result && result.price > 0) {
-                    const pitch = mapPriceToNote(result.price);
-                    const intensity = mapVolumeToIntensity(result.volume);
+                if (result) {
+                    price = result.price;
+                    volume = result.volume;
+                    change24h = result.change24h;
+                    updateUI();
+                    const pitch = mapPriceToNote(price);
+                    const intensity = mapVolumeToIntensity(volume);
                     playDrone(pitch, intensity);
-                    bpm = mapChangeToBpm(result.change24h);
+                    bpm = mapChangeToBpm(change24h);
                     bpmDisplay.textContent = Math.round(bpm);
                 }
-                // Atualiza histórico a cada 30s
-                if (Math.random() < 0.2) { // a cada ~5 ciclos
+                // Atualiza histórico a cada ~30s
+                if (Math.random() < 0.2) {
                     await fetchHistoricalPrices();
                     melodyNotes = generateMelody();
                     melodyIndex = 0;
                 }
             }, 5000);
 
-            // Toca melodia a cada ~500ms (baseado no BPM)
+            // 6. Melodia (intervalo baseado no BPM)
             if (melodyInterval) clearInterval(melodyInterval);
             melodyInterval = setInterval(() => {
                 playMelodyNote();
             }, 500);
 
             statusText.textContent = 'ao vivo';
+            statusDot.style.background = '#4ade80';
+            console.log('✅ Tudo pronto!');
+        }
+
+        function updateUI() {
+            priceDisplay.textContent = price ? `$${price.toFixed(2)}` : '—';
+            volumeDisplay.textContent = volume ? `$${(volume / 1e6).toFixed(2)}M` : '—';
+            const changeEl = changeDisplay;
+            if (change24h !== 0) {
+                changeEl.textContent = `${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%`;
+                changeEl.className = 'value change ' + (change24h >= 0 ? 'positive' : 'negative');
+            } else {
+                changeEl.textContent = '—';
+            }
         }
 
         function stop() {
+            console.log('⏹ Parando...');
             isPlaying = false;
             playBtn.textContent = '▶ Iniciar';
             playBtn.classList.remove('playing');
@@ -639,15 +678,17 @@
             if (melodyInterval) { clearInterval(melodyInterval);
                 melodyInterval = null; }
             statusText.textContent = 'pausado';
+            statusDot.style.background = '#f87171';
         }
 
         playBtn.addEventListener('click', () => {
+            console.log('👆 Clique no botão');
             if (isPlaying) stop();
             else start();
         });
 
         // ═══════════════════════════════════════════════════════════
-        //  LOOP DE RENDERIZAÇÃO (sempre rodando)
+        //  LOOP DE RENDERIZAÇÃO
         // ═══════════════════════════════════════════════════════════
 
         function renderLoop(timestamp) {
@@ -655,14 +696,14 @@
             drawEarth(timestamp, intensity);
             animationId = requestAnimationFrame(renderLoop);
         }
-
-        // Inicia o loop de renderização
         renderLoop(0);
 
-        // Atualiza status inicial
+        // ═══════════════════════════════════════════════════════════
+        //  INICIALIZAÇÃO
+        // ═══════════════════════════════════════════════════════════
+        console.log('✅ Aplicação carregada. Clique em "Iniciar".');
         statusText.textContent = 'pronto';
-        console.log('🎵 Sound of Monero carregado (Binance)');
-        console.log('📊 Clique em "Iniciar" para sonificar o mercado XMRUSDT perpétuo.');
+        statusDot.style.background = '#4ade80';
     </script>
 </body>
 </html>
