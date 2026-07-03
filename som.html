@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proof of Sound | XMR/USDT Futures</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700;800&display=swap');
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #020202;
+            color: #ffffff;
+            margin: 0;
+            overflow: hidden; /* Evitar scroll */
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+        }
+
+        .pointer-events-auto {
+            pointer-events: auto;
+        }
+
+        .text-glow-green { text-shadow: 0 0 15px rgba(34, 197, 94, 0.8); }
+        .text-glow-red { text-shadow: 0 0 15px rgba(239, 68, 68, 0.8); }
+
+        #start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.90);
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Overlay Inicial -->
+    <div id="start-overlay" class="pointer-events-auto">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 text-center tracking-tighter">PROOF OF SOUND</h1>
+        <p class="text-gray-400 mb-8 text-center max-w-md">Uma sinfonia em tempo real gerada por dados vivos de Futuros XMR/USDT.</p>
+        <button id="btn-start" class="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold rounded-full transition-transform transform hover:scale-105 shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+            OUVIR O MERCADO
+        </button>
+        <p class="mt-4 text-xs text-gray-500 text-center px-4 max-w-lg">
+            Gera melodias baseadas em escala pentatônica. <br>
+            Se o WebSocket for bloqueado pelo ambiente, usaremos REST API para buscar dados 100% reais em lotes.
+        </p>
+    </div>
+
+    <!-- Container do Canvas -->
+    <div id="canvas-container">
+        <canvas id="viz"></canvas>
+    </div>
+    
+    <div class="scanlines"></div>
+
+    <!-- Camada UI -->
+    <div id="ui-layer">
+        
+        <!-- Cabeçalho -->
+        <div class="flex justify-between items-start pointer-events-auto">
+            <div>
+                <h2 class="text-2xl font-black tracking-widest text-orange-500">XMR/USDT</h2>
+                <p class="text-sm text-gray-400 uppercase">Binance Futures</p>
+            </div>
+            <div class="flex flex-col items-end">
+                <button id="btn-mute" class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition-colors border border-gray-600 flex items-center gap-2">
+                    <span id="mute-icon">🔊</span> <span class="text-sm">Som Ligado</span>
+                </button>
+                <div class="mt-2 text-right">
+                    <span class="text-xs text-gray-500">Origem de Dados: </span>
+                    <span id="ws-status" class="text-xs text-yellow-500">Conectando...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Centro / Preço -->
+        <div class="flex flex-col items-center justify-center flex-grow pointer-events-auto mt-[-10vh]">
+            <div class="text-center">
+                <p class="text-gray-500 text-sm mb-2 uppercase tracking-widest">Preço Atual</p>
+                <h1 id="price-display" class="text-6xl md:text-8xl font-black tracking-tighter transition-colors duration-300">
+                    --.---
+                </h1>
+                <p id="price-diff" class="text-lg mt-2 font-bold opacity-0 transition-opacity">0.00</p>
+            </div>
+        </div>
+
+        <!-- Rodapé / Últimas Negociações -->
+        <div class="flex justify-between items-end pointer-events-auto">
+            <div class="w-1/3 min-w-[250px]">
+                <h3 class="text-sm text-gray-500 mb-2 border-b border-gray-800 pb-1">Últimas Negociações</h3>
+                <div id="trade-list" class="flex flex-col gap-1 text-sm h-32 overflow-hidden mask-image: linear-gradient(to bottom, black 50%, transparent 100%);">
+                    <!-- Trades aparecerão aqui -->
+                </div>
+            </div>
+            
+            <div class="text-right text-gray-600 text-xs hidden md:block">
+                Desenvolvido com Gemini <br> Baseado no conceito Proof of Sound
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- VARIÁVEIS GLOBAIS ---
+        let audioCtx;
+        let masterGain;
+        let compressor;
+        let delayNode;
+        let feedbackGain;
+        let isMuted = false;
+        let isRunning = false;
+        
+        let ws;
+        let currentPrice = 0;
+        let lastRestTradeId = 0;
+        let restIntervalId;
+        
+        // Escala Pentatônica (Harmonia garantida - Dó Maior Pentatônica / Lá Menor)
+        // Frequências mapeadas para gerar uma verdadeira sinfonia
+        const pentatonicScale = [
+            130.81, // C3
+            146.83, // D3
+            164.81, // E3
+            196.00, // G3
+            220.00, // A3
+            261.63, // C4
+            293.66, // D4
+            329.63, // E4
+            392.00, // G4
+            440.00, // A4
+            523.25, // C5
+            587.33, // D5
+            659.25, // E5
+            783.99, // G5
+            880.00, // A5
+            1046.50 // C6
+        ];
+
+        // Configurações do Canvas
+        const canvas = document.getElementById('viz');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let ripples = [];
+        let particles = [];
+
+        // Elementos DOM
+        const startOverlay = document.getElementById('start-overlay');
+        const btnStart = document.getElementById('btn-start');
+        const btnMute = document.getElementById('btn-mute');
+        const muteIcon = document.getElementById('mute-icon');
+        const wsStatus = document.getElementById('ws-status');
+        const priceDisplay = document.getElementById('price-display');
+        const priceDiff = document.getElementById('price-diff');
+        const tradeList = document.getElementById('trade-list');
+
+        // --- SISTEMA DE AUDIO SINFÔNICO ---
+        function initAudio() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                
+                // Compressor para unir os sons de forma coesa e evitar distorção
+                compressor = audioCtx.createDynamicsCompressor();
+                compressor.threshold.setValueAtTime(-24, audioCtx.currentTime);
+                compressor.knee.setValueAtTime(30, audioCtx.currentTime);
+                compressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+                compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+                compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
+
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.6; // Volume geral
+
+                // Efeito de Eco / Delay (Para o toque "Sinfônico" / Ambiência)
+                delayNode = audioCtx.createDelay();
+                delayNode.delayTime.value = 0.5; // Meio segundo de delay
+                
+                feedbackGain = audioCtx.createGain();
+                feedbackGain.gain.value = 0.3; // 30% de feedback do eco
+
+                // Roteamento do Delay
+                delayNode.connect(feedbackGain);
+                feedbackGain.connect(delayNode);
+                delayNode.connect(compressor); // O som do eco vai pro compressor
+
+                // O som mestre vai pro compressor e pro delay
+                masterGain.connect(compressor);
+                masterGain.connect(delayNode);
+                compressor.connect(audioCtx.destination);
+                
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            } catch (e) {
+                console.error("Web Audio API não suportada", e);
+            }
+        }
+
+        function playTradeSound(isBuy, qty, price) {
+            if (!audioCtx || isMuted || audioCtx.state !== 'running') return;
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+
+            // Mapeando o preço para uma nota da nossa Escala Pentatônica
+            // Pega as variações de centavos do preço para pular entre as notas
+            const priceMod = Math.floor(price * 100) % pentatonicScale.length;
+            let noteFreq = pentatonicScale[priceMod];
+
+            // Compras = Notas normais. Vendas = Uma oitava abaixo (notas mais graves)
+            if (!isBuy) noteFreq = noteFreq / 2;
+
+            osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
+
+            // Filtro para suavizar o som e deixá-lo mais "instrumental"
+            filter.type = 'lowpass';
+            // Compras têm um brilho maior, vendas são mais abafadas
+            filter.frequency.setValueAtTime(isBuy ? 2500 : 800, audioCtx.currentTime);
+
+            // Timbre
+            osc.type = isBuy ? 'sine' : 'triangle';
+
+            // Volume e Duração baseados na quantidade
+            const normalizedQty = Math.min(qty / 50, 1);
+            const maxVol = 0.05 + (Math.log10(qty + 1) * 0.1);
+            const duration = 0.2 + (normalizedQty * 1.5); // Notas duram mais
+
+            const now = audioCtx.currentTime;
+            
+            // Envelope Suave (Attack longo para parecer instrumento de sopro/corda, Release suave)
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(maxVol, now + 0.1);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            // Conexões: Oscilador -> Filtro -> Gain -> Master
+            osc.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(masterGain);
+
+            osc.start(now);
+            osc.stop(now + duration);
+        }
+
+        // --- SISTEMA VISUAL ---
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        class Ripple {
+            constructor(x, y, isBuy, qty, price) {
+                this.x = x;
+                this.y = y;
+                this.isBuy = isBuy;
+                this.qty = qty;
+                this.price = price;
+                this.radius = 0;
+                this.maxRadius = 50 + (Math.log(qty + 1) * 100); 
+                this.life = 1.0;
+                this.decayRate = 0.01 - (Math.min(qty / 500, 0.005));
+                this.color = isBuy ? '34, 197, 94' : '239, 68, 68'; 
+            }
+
+            update() {
+                this.radius += (this.maxRadius - this.radius) * 0.05; 
+                this.life -= this.decayRate;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${this.color}, ${this.life * 0.5})`;
+                ctx.lineWidth = 1 + (this.qty > 10 ? 2 : 0);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.color}, ${this.life * 0.1})`;
+                ctx.fill();
+            }
+        }
+
+        function createRipple(isBuy, qty, price) {
+            const padding = window.innerWidth * 0.2;
+            const randomX = padding + Math.random() * (width - padding * 2);
+            // Compras tendem a flutuar para cima, vendas para baixo visualmente
+            const yOffset = isBuy ? -50 : 50; 
+            const randomY = (height / 2) + yOffset + ((Math.random() - 0.5) * height * 0.4); 
+
+            ripples.push(new Ripple(randomX, randomY, isBuy, qty, price));
+            
+            for(let i=0; i<Math.min(qty, 15); i++) {
+                particles.push({
+                    x: randomX,
+                    y: randomY,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: isBuy ? -(Math.random() * 2 + 1) : (Math.random() * 2 + 1), // Compras sobem, vendas descem
+                    life: 1.0,
+                    color: isBuy ? '34, 197, 94' : '239, 68, 68'
+                });
+            }
+        }
+
+        function drawLoop() {
+            if (!isRunning) return;
+
+            // Fundo com "rastro" suave
+            ctx.fillStyle = 'rgba(2, 2, 2, 0.15)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Desenhar Partículas
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.015;
+                
+                ctx.fillStyle = `rgba(${p.color}, ${p.life})`;
+                ctx.fillRect(p.x, p.y, 2, 2);
+
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+
+            // Desenhar Ripples
+            for (let i = ripples.length - 1; i >= 0; i--) {
+                const r = ripples[i];
+                r.update();
+                r.draw(ctx);
+                if (r.life <= 0) ripples.splice(i, 1);
+            }
+
+            requestAnimationFrame(drawLoop);
+        }
+
+        // --- SISTEMA DE DADOS (WS + REST API FALLBACK REAL) ---
+        
+        // Esta função pega DADOS REAIS da API REST se o WebSocket falhar.
+        // O Fim da simulação falsa!
+        async function fetchRealDataREST() {
+            if (!isRunning) return;
+            try {
+                // Endpoint público oficial da Binance Futures
+                const response = await fetch('https://fapi.binance.com/fapi/v1/trades?symbol=XMRUSDT&limit=20');
+                const trades = await response.json();
+                
+                if (!Array.isArray(trades)) return;
+
+                // Filtrar apenas trades novos que ainda não tocamos
+                const newTrades = trades.filter(t => t.id > lastRestTradeId);
+                
+                if (newTrades.length > 0) {
+                    lastRestTradeId = newTrades[newTrades.length - 1].id;
+                    
+                    // Distribuir os trades para tocar ao longo de 2 segundos (intervalo da requisição)
+                    // para dar um sentimento de tempo real, ao invés de todos de uma vez
+                    const delayBetweenTrades = 2000 / (newTrades.length || 1);
+                    
+                    newTrades.forEach((trade, index) => {
+                        setTimeout(() => {
+                            if (!isRunning) return;
+                            const price = parseFloat(trade.price);
+                            const qty = parseFloat(trade.qty);
+                            const isBuy = !trade.isBuyerMaker;
+                            processTrade(price, qty, isBuy);
+                        }, index * delayBetweenTrades);
+                    });
+                }
+            } catch (error) {
+                console.error("Erro ao buscar REST API:", error);
+            }
+        }
+
+        function startRESTFallback() {
+            // Limpa conexões antigas
+            if (ws) { ws.onclose = null; ws.onerror = null; try { ws.close(); } catch(e){} }
+            
+            wsStatus.textContent = 'REST API (Dados Reais)';
+            wsStatus.className = 'text-xs text-blue-400';
+            
+            clearInterval(restIntervalId);
+            fetchRealDataREST(); // Chamada imediata
+            restIntervalId = setInterval(fetchRealDataREST, 2000); // Polling a cada 2 segundos
+        }
+
+        function initWebSocket() {
+            const wsUrl = 'wss://fstream.binance.com/ws/xmrusdt@aggTrade';
+            
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    wsStatus.textContent = 'WebSocket (Tempo Real)';
+                    wsStatus.className = 'text-xs text-green-500';
+                    clearInterval(restIntervalId); // Desativa o REST se o WS conectar
+                };
+
+                ws.onclose = () => {
+                    wsStatus.textContent = 'WS Desconectado - Alternando...';
+                    wsStatus.className = 'text-xs text-yellow-500';
+                    startRESTFallback(); 
+                };
+
+                ws.onerror = (err) => {
+                    console.warn("WebSocket bloqueado pelo Sandbox do Navegador. Usando REST API real.", err);
+                    startRESTFallback();
+                };
+
+                ws.onmessage = (event) => {
+                    if (!isRunning) return;
+                    const data = JSON.parse(event.data);
+                    const price = parseFloat(data.p);
+                    const qty = parseFloat(data.q);
+                    const isBuy = !data.m; 
+                    processTrade(price, qty, isBuy);
+                };
+            } catch (error) {
+                console.warn("Segurança do Canvas bloqueou WebSocket. Ativando busca REST API.", error);
+                startRESTFallback();
+            }
+        }
+
+        function processTrade(price, qty, isBuy) {
+            updatePriceUI(price, isBuy);
+            addTradeToList(price, qty, isBuy);
+            playTradeSound(isBuy, qty, price);
+            createRipple(isBuy, qty, price);
+        }
+
+        function updatePriceUI(newPrice, isBuy) {
+            if (currentPrice === 0) currentPrice = newPrice;
+            const diff = newPrice - currentPrice;
+            
+            priceDisplay.textContent = newPrice.toFixed(3);
+
+            if (newPrice > currentPrice) {
+                priceDisplay.className = "text-6xl md:text-8xl font-black tracking-tighter text-green-500 text-glow-green transition-colors duration-100";
+                priceDiff.textContent = `+${diff.toFixed(3)}`;
+                priceDiff.className = "text-lg mt-2 font-bold text-green-500 opacity-100";
+            } else if (newPrice < currentPrice) {
+                priceDisplay.className = "text-6xl md:text-8xl font-black tracking-tighter text-red-500 text-glow-red transition-colors duration-100";
+                priceDiff.textContent = `${diff.toFixed(3)}`;
+                priceDiff.className = "text-lg mt-2 font-bold text-red-500 opacity-100";
+            }
+
+            clearTimeout(window.priceResetTimeout);
+            window.priceResetTimeout = setTimeout(() => {
+                priceDisplay.className = "text-6xl md:text-8xl font-black tracking-tighter text-white transition-colors duration-1000";
+                priceDiff.className = "text-lg mt-2 font-bold opacity-0 transition-opacity duration-1000";
+            }, 1000);
+
+            currentPrice = newPrice;
+        }
+
+        function addTradeToList(price, qty, isBuy) {
+            const el = document.createElement('div');
+            el.className = `flex justify-between items-center py-1 border-b border-gray-800/50 ${isBuy ? 'text-green-400' : 'text-red-400'}`;
+            
+            const time = new Date().toLocaleTimeString('pt-BR', { hour12: false, fractionalSecondDigits: 1 });
+            
+            el.innerHTML = `
+                <span class="w-20 text-xs text-gray-500">${time}</span>
+                <span class="font-bold flex-1 text-left px-2">${price.toFixed(3)}</span>
+                <span class="text-right">${qty.toFixed(2)} XMR</span>
+            `;
+
+            tradeList.prepend(el);
+            if (tradeList.children.length > 12) tradeList.removeChild(tradeList.lastChild);
+        }
+
+        // --- INTERAÇÕES ---
+        btnStart.addEventListener('click', () => {
+            initAudio();
+            startOverlay.style.display = 'none';
+            isRunning = true;
+            resizeCanvas();
+            initWebSocket();
+            requestAnimationFrame(drawLoop);
+        });
+
+        btnMute.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                muteIcon.textContent = '🔈';
+                btnMute.querySelector('span:last-child').textContent = 'Som Mutado';
+                btnMute.classList.add('opacity-50');
+            } else {
+                muteIcon.textContent = '🔊';
+                btnMute.querySelector('span:last-child').textContent = 'Som Ligado';
+                btnMute.classList.remove('opacity-50');
+                if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            }
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
