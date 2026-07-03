@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sound of Monero</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound of Monero — Versão Turbo</title>
     <style>
         * {
             margin: 0;
@@ -12,435 +12,257 @@
         }
         body {
             background: #0b0e14;
-            color: #e0e4ed;
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            user-select: none;
-        }
-        #canvas3d {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-            display: block;
-        }
-        .ui-overlay {
-            position: fixed;
-            z-index: 10;
-            pointer-events: none;
-        }
-        .ui-overlay * {
-            pointer-events: auto;
-        }
-        .header {
-            top: 24px;
-            left: 0;
-            width: 100%;
+            color: #fff;
+            font-family: system-ui, sans-serif;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 0 32px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            transition: background 0.3s;
         }
-        .header h1 {
-            font-size: 20px;
-            font-weight: 500;
-            background: rgba(11, 14, 20, 0.65);
-            backdrop-filter: blur(10px);
-            padding: 10px 20px;
-            border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+        body.playing {
+            background: #1a1f2e;
         }
-        .header h1 span {
-            color: #f7931a;
-        }
-        .header .status {
-            font-size: 13px;
-            opacity: 0.6;
-            background: rgba(11, 14, 20, 0.5);
-            backdrop-filter: blur(10px);
-            padding: 8px 18px;
-            border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .header .status .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 8px;
-            background: #4ade80;
-            animation: pulse-dot 1.8s ease-in-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.3;
-                transform: scale(0.7);
-            }
-        }
-        .market-panel {
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 48px;
-            background: rgba(11, 14, 20, 0.6);
-            backdrop-filter: blur(16px);
-            padding: 20px 44px;
-            border-radius: 60px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        }
-        .market-item {
+        .container {
             text-align: center;
+            padding: 20px;
+            max-width: 600px;
         }
-        .market-item .label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            opacity: 0.4;
-            margin-bottom: 4px;
+        h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
         }
-        .market-item .value {
-            font-size: 22px;
-            font-weight: 600;
-        }
-        .market-item .value.xmr {
+        h1 span {
             color: #f7931a;
         }
-        .market-item .value.volume {
-            color: #60a5fa;
+        .sub {
+            opacity: 0.5;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
         }
-        .market-item .value.change {
-            font-size: 18px;
+        .price-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
-        .market-item .value.change.positive {
+        .price-box .label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.4;
+        }
+        .price-box .value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #f7931a;
+            margin: 8px 0;
+            transition: all 0.2s;
+        }
+        .price-box .change {
+            font-size: 1.2rem;
+        }
+        .price-box .change.positive {
             color: #4ade80;
         }
-        .market-item .value.change.negative {
+        .price-box .change.negative {
             color: #f87171;
         }
-        .market-item .value.bpm {
-            color: #c084fc;
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
-        .play-btn {
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
+        .status .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ade80;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        .status .dot.off {
+            background: #f87171;
+        }
+        .status .dot.pulse {
+            animation: pulse 1s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.4);
+                opacity: 0.6;
+            }
+        }
+        .btn {
             background: rgba(247, 147, 26, 0.15);
-            backdrop-filter: blur(12px);
             border: 1px solid rgba(247, 147, 26, 0.3);
             color: #f7931a;
-            padding: 14px 48px;
+            padding: 16px 48px;
             border-radius: 60px;
-            font-size: 16px;
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            letter-spacing: 0.5px;
+            transition: 0.3s;
+            letter-spacing: 1px;
         }
-        .play-btn:hover {
+        .btn:hover {
             background: rgba(247, 147, 26, 0.25);
-            border-color: #f7931a;
-            transform: translateX(-50%) scale(1.03);
-            box-shadow: 0 0 40px rgba(247, 147, 26, 0.15);
+            transform: scale(1.03);
         }
-        .play-btn.playing {
+        .btn.playing {
             border-color: #4ade80;
             color: #4ade80;
             background: rgba(74, 222, 128, 0.12);
         }
-        .footer {
-            bottom: 100px;
-            right: 32px;
-            font-size: 11px;
-            opacity: 0.25;
-            text-align: right;
+        .log-area {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+            max-height: 80px;
+            overflow-y: auto;
+            font-family: monospace;
+            text-align: left;
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
             line-height: 1.6;
-            pointer-events: none;
         }
-        @media (max-width: 720px) {
-            .header {
-                padding: 0 16px;
-                top: 16px;
-                flex-direction: column;
-                gap: 8px;
-            }
-            .header h1 {
-                font-size: 16px;
-                padding: 6px 14px;
-            }
-            .market-panel {
-                bottom: 100px;
-                padding: 14px 20px;
-                gap: 20px;
-                flex-wrap: wrap;
-                justify-content: center;
-                border-radius: 32px;
-                width: calc(100% - 32px);
-            }
-            .market-item .value {
-                font-size: 17px;
-            }
-            .play-btn {
-                padding: 12px 32px;
-                font-size: 14px;
-                bottom: 28px;
-            }
-            .footer {
-                display: none;
-            }
+        .log-area .log-entry {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 2px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.7rem;
+            opacity: 0.2;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas3d"></canvas>
 
-    <div class="ui-overlay header">
+    <div class="container">
         <h1>✦ <span>Sound</span> of Monero</h1>
+        <div class="sub">XMR/USDT · Binance Perpétuo</div>
+
+        <div class="price-box">
+            <div class="label">Preço atual</div>
+            <div class="value" id="priceDisplay">—</div>
+            <div class="change" id="changeDisplay">—</div>
+        </div>
+
         <div class="status">
             <span class="dot" id="statusDot"></span>
-            <span id="statusText">pronto</span>
+            <span id="statusText">Pronto</span>
         </div>
-    </div>
 
-    <div class="ui-overlay market-panel">
-        <div class="market-item">
-            <div class="label">XMR / USDT</div>
-            <div class="value xmr" id="priceDisplay">—</div>
-        </div>
-        <div class="market-item">
-            <div class="label">Volume 24h</div>
-            <div class="value volume" id="volumeDisplay">—</div>
-        </div>
-        <div class="market-item">
-            <div class="label">Variação 24h</div>
-            <div class="value change" id="changeDisplay">—</div>
-        </div>
-        <div class="market-item">
-            <div class="label">BPM</div>
-            <div class="value bpm" id="bpmDisplay">—</div>
-        </div>
-    </div>
+        <button class="btn" id="playBtn">▶ Iniciar</button>
 
-    <button class="ui-overlay play-btn" id="playBtn">▶ Iniciar</button>
-    <div class="ui-overlay footer">Dados: Binance · XMRUSDT Perpétuo</div>
+        <div class="log-area" id="logArea">
+            <div class="log-entry">📋 Aguardando ação...</div>
+        </div>
+
+        <div class="footer">Dados: Binance + fallback local · Áudio: Web Audio API</div>
+    </div>
 
     <script>
-        // ═══════════════════════════════════════════════════════════
-        //  DEBUG E LOGS
-        // ═══════════════════════════════════════════════════════════
-        console.log('🎵 Sound of Monero - Iniciando...');
-
-        // ═══════════════════════════════════════════════════════════
-        //  CONFIGURAÇÕES
-        // ═══════════════════════════════════════════════════════════
+        // ══════════════════════════════════════════════════════════
+        //  CONFIG
+        // ══════════════════════════════════════════════════════════
         const SYMBOL = 'XMRUSDT';
-        const BINANCE_TICKER = `https://api.binance.com/api/v3/ticker/24hr?symbol=${SYMBOL}`;
-        const BINANCE_KLINES = `https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=1d&limit=7`;
+        const BINANCE_URL = `https://api.binance.com/api/v3/ticker/24hr?symbol=${SYMBOL}`;
 
-        // Mapeamento musical
-        const NOTE_BASE = 48;
-        const NOTE_RANGE = 36;
-        const PRICE_MIN = 50;
-        const PRICE_MAX = 250;
+        // ══════════════════════════════════════════════════════════
+        //  DOM
+        // ══════════════════════════════════════════════════════════
+        const priceDisplay = document.getElementById('priceDisplay');
+        const changeDisplay = document.getElementById('changeDisplay');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const playBtn = document.getElementById('playBtn');
+        const logArea = document.getElementById('logArea');
 
-        // Estado
-        let isPlaying = false;
+        // ══════════════════════════════════════════════════════════
+        //  LOG
+        // ══════════════════════════════════════════════════════════
+        function addLog(msg) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = msg;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(msg);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        //  ÁUDIO (SIMPLES E GARANTIDO)
+        // ══════════════════════════════════════════════════════════
         let audioCtx = null;
         let gainNode = null;
+        let isPlaying = false;
         let currentOsc = null;
-        let bpm = 80;
-        let price = 0;
-        let volume = 0;
-        let change24h = 0;
-        let historicalPrices = [];
-        let melodyNotes = [];
-        let melodyIndex = 0;
-
-        // Timers
-        let dataInterval = null;
         let melodyInterval = null;
-        let animationId = null;
-
-        // DOM
-        const priceDisplay = document.getElementById('priceDisplay');
-        const volumeDisplay = document.getElementById('volumeDisplay');
-        const changeDisplay = document.getElementById('changeDisplay');
-        const bpmDisplay = document.getElementById('bpmDisplay');
-        const statusText = document.getElementById('statusText');
-        const statusDot = document.getElementById('statusDot');
-        const playBtn = document.getElementById('playBtn');
-
-        // ═══════════════════════════════════════════════════════════
-        //  CANVAS 3D (visualização) - versão simplificada
-        // ═══════════════════════════════════════════════════════════
-        const canvas = document.getElementById('canvas3d');
-        const ctx = canvas.getContext('2d');
-        let W, H;
-
-        function resize() {
-            W = canvas.width = window.innerWidth;
-            H = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Pontos da esfera
-        const EARTH_POINTS = 400;
-        const earthPoints = [];
-        for (let i = 0; i < EARTH_POINTS; i++) {
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos(2 * Math.random() - 1);
-            const r = 160 + Math.random() * 40;
-            earthPoints.push({
-                x: r * Math.sin(phi) * Math.cos(theta),
-                y: r * Math.cos(phi),
-                z: r * Math.sin(phi) * Math.sin(theta),
-            });
-        }
-
-        const NUM_PARTICLES = 300;
-        const particles = [];
-        for (let i = 0; i < NUM_PARTICLES; i++) {
-            particles.push({
-                x: (Math.random() - 0.5) * 1200,
-                y: (Math.random() - 0.5) * 800,
-                z: (Math.random() - 0.5) * 800,
-                size: 1 + Math.random() * 2,
-                speed: 0.2 + Math.random() * 0.4,
-                phase: Math.random() * Math.PI * 2,
-            });
-        }
-
-        let rotY = 0;
-
-        function project(x, y, z) {
-            const cx = W / 2,
-                cy = H / 2,
-                fov = 500,
-                scale = fov / (fov + z);
-            return { x: cx + x * scale, y: cy + y * scale, s: scale };
-        }
-
-        function drawEarth(time, intensity) {
-            ctx.clearRect(0, 0, W, H);
-            const grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 600);
-            grad.addColorStop(0, '#141a24');
-            grad.addColorStop(1, '#07090e');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, W, H);
-
-            rotY += 0.002 + intensity * 0.001;
-            const cosY = Math.cos(rotY),
-                sinY = Math.sin(rotY);
-            const cosX = Math.cos(0.3),
-                sinX = Math.sin(0.3);
-
-            const projected = [];
-            for (const p of earthPoints) {
-                let x = p.x,
-                    y = p.y,
-                    z = p.z;
-                let x1 = x * cosY - z * sinY;
-                let z1 = x * sinY + z * cosY;
-                let y1 = y;
-                let y2 = y1 * cosX - z1 * sinX;
-                let z2 = y1 * sinX + z1 * cosX;
-                let x2 = x1;
-                const proj = project(x2, y2, z2);
-                if (proj.s > 0) projected.push({ x: proj.x, y: proj.y, s: proj.s, z: z2 });
-            }
-            projected.sort((a, b) => a.z - b.z);
-
-            for (const p of projected) {
-                const size = (1 + intensity * 1.5) * p.s;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(247, 147, 26, ${0.5 + intensity * 0.4})`;
-                ctx.fill();
-            }
-
-            // Partículas
-            const time2 = Date.now() * 0.0003;
-            for (const p of particles) {
-                const x = p.x + Math.sin(time2 * p.speed + p.phase) * 30;
-                const y = p.y + Math.cos(time2 * p.speed * 0.7 + p.phase) * 20;
-                const z = p.z + Math.sin(time2 * p.speed * 0.5 + p.phase * 2) * 40;
-                const proj = project(x, y, z);
-                if (proj.s > 0) {
-                    const alpha = 0.2 + 0.3 * (0.5 + 0.5 * Math.sin(time2 * 0.5 + p.phase));
-                    ctx.beginPath();
-                    ctx.arc(proj.x, proj.y, p.size * proj.s * 0.5, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(200, 215, 255, ${alpha * (0.6 + intensity * 0.4)})`;
-                    ctx.fill();
-                }
-            }
-
-            // Sol
-            const sunX = W / 2 + 280,
-                sunY = H / 2 - 80;
-            const sunRadius = 40 + intensity * 20;
-            const gradSun = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius);
-            gradSun.addColorStop(0, `rgba(255, 220, 100, ${0.6 + intensity * 0.3})`);
-            gradSun.addColorStop(0.4, `rgba(255, 180, 50, ${(0.6 + intensity * 0.3) * 0.5})`);
-            gradSun.addColorStop(1, 'rgba(255,150,30,0)');
-            ctx.fillStyle = gradSun;
-            ctx.beginPath();
-            ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        // ═══════════════════════════════════════════════════════════
-        //  ÁUDIO - COM LOGS
-        // ═══════════════════════════════════════════════════════════
+        let dataInterval = null;
+        let price = 150;
+        let change = 0;
+        let bpm = 90;
 
         function initAudio() {
-            console.log('🎧 Inicializando áudio...');
             if (!audioCtx) {
                 audioCtx = new(window.AudioContext || window.webkitAudioContext)();
                 gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0.2;
+                gainNode.gain.value = 0.15;
                 gainNode.connect(audioCtx.destination);
-                console.log('✅ AudioContext criado');
+                addLog('🎧 AudioContext criado');
             }
             if (audioCtx.state === 'suspended') {
-                console.log('▶️ Retomando AudioContext...');
                 audioCtx.resume();
+                addLog('▶️ AudioContext retomado');
             }
-            console.log('✅ Áudio pronto, estado:', audioCtx.state);
+            return audioCtx;
         }
 
-        function playTestSound() {
-            if (!audioCtx) return;
-            console.log('🔊 Tocando som de teste...');
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = 440;
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-            osc.connect(gain);
-            gain.connect(gainNode);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.5);
+        // Som de teste (bip curto)
+        function playBeep(freq = 440, duration = 0.3) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(gainNode);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+                addLog(`🔊 Beep ${freq}Hz`);
+            } catch (e) {
+                addLog(`❌ Erro no beep: ${e.message}`);
+            }
         }
 
-        function playNote(pitch, velocity, duration) {
+        // Toca uma nota musical
+        function playNote(pitch, velocity = 0.5, duration = 0.4) {
             if (!audioCtx || !isPlaying) return;
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
                 osc.frequency.value = pitch;
-                const vol = 0.05 + velocity * 0.2;
+                const vol = 0.05 + velocity * 0.15;
                 gain.gain.setValueAtTime(vol, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
                 osc.connect(gain);
@@ -448,11 +270,12 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + duration);
             } catch (e) {
-                console.warn('Erro ao tocar nota:', e);
+                // silencioso
             }
         }
 
-        function playDrone(pitch, intensity) {
+        // Drone (nota sustentada)
+        function playDrone(pitch, intensity = 0.5) {
             if (currentOsc) {
                 try { currentOsc.stop(); } catch (_) {}
                 currentOsc = null;
@@ -463,15 +286,13 @@
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
                 osc.frequency.value = pitch;
-                const vol = 0.03 + intensity * 0.1;
+                const vol = 0.03 + intensity * 0.08;
                 gain.gain.setValueAtTime(vol, audioCtx.currentTime);
                 osc.connect(gain);
                 gain.connect(gainNode);
                 osc.start();
                 currentOsc = osc;
-            } catch (e) {
-                console.warn('Erro no drone:', e);
-            }
+            } catch (e) { /* ignora */ }
         }
 
         function stopDrone() {
@@ -481,229 +302,196 @@
             }
         }
 
-        // ═══════════════════════════════════════════════════════════
-        //  API BINANCE COM FALLBACK
-        // ═══════════════════════════════════════════════════════════
-
-        async function fetchMarketData() {
-            try {
-                console.log('📡 Buscando dados da Binance...');
-                const resp = await fetch(BINANCE_TICKER);
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const data = await resp.json();
-                price = parseFloat(data.lastPrice) || 0;
-                volume = parseFloat(data.quoteVolume) || 0;
-                change24h = parseFloat(data.priceChangePercent) || 0;
-                console.log(`✅ Dados recebidos: $${price}, vol $${volume.toFixed(0)}, var ${change24h}%`);
-                return { price, volume, change24h };
-            } catch (err) {
-                console.warn('⚠️ Falha na Binance, usando dados fictícios:', err.message);
-                // Fallback: gera dados aleatórios realistas
-                price = 150 + Math.random() * 60;
-                volume = 50e6 + Math.random() * 150e6;
-                change24h = (Math.random() - 0.5) * 8;
-                return { price, volume, change24h };
-            }
+        // ══════════════════════════════════════════════════════════
+        //  MAPEAMENTO MUSICAL
+        // ══════════════════════════════════════════════════════════
+        function priceToNote(p) {
+            // Mapeia preço (50~250) para nota MIDI (48~84)
+            const min = 50,
+                max = 250;
+            const clamped = Math.max(min, Math.min(max, p));
+            const norm = (clamped - min) / (max - min);
+            return 48 + norm * 36;
         }
 
-        async function fetchHistoricalPrices() {
+        function changeToBpm(c) {
+            const clamped = Math.max(-15, Math.min(15, c));
+            const norm = (clamped + 15) / 30;
+            return 60 + norm * 80;
+        }
+
+        // ══════════════════════════════════════════════════════════
+        //  API BINANCE (com fallback)
+        // ══════════════════════════════════════════════════════════
+        async function fetchPrice() {
             try {
-                const resp = await fetch(BINANCE_KLINES);
+                const resp = await fetch(BINANCE_URL);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
-                historicalPrices = data.map(candle => parseFloat(candle[4]));
-                console.log(`📊 Histórico recebido: ${historicalPrices.length} dias`);
-                return historicalPrices;
-            } catch (err) {
-                console.warn('⚠️ Falha no histórico, gerando aleatório');
-                historicalPrices = [];
-                for (let i = 0; i < 7; i++) {
-                    historicalPrices.push(130 + Math.random() * 80);
+                const newPrice = parseFloat(data.lastPrice);
+                const newChange = parseFloat(data.priceChangePercent);
+                if (!isNaN(newPrice) && newPrice > 0) {
+                    price = newPrice;
+                    change = newChange;
+                    addLog(`📡 Dados reais: $${price.toFixed(2)} (${change.toFixed(2)}%)`);
+                    return { price, change };
                 }
-                return historicalPrices;
+                throw new Error('Preço inválido');
+            } catch (err) {
+                // Fallback: variação aleatória realista
+                const variation = (Math.random() - 0.5) * 6;
+                price = Math.max(50, Math.min(250, price + variation));
+                change = (Math.random() - 0.5) * 10;
+                addLog(`🔄 Fallback: $${price.toFixed(2)} (${change.toFixed(2)}%)`);
+                return { price, change };
             }
         }
 
-        // ═══════════════════════════════════════════════════════════
-        //  LÓGICA MUSICAL
-        // ═══════════════════════════════════════════════════════════
-
-        function mapPriceToNote(priceVal) {
-            const clamped = Math.max(PRICE_MIN, Math.min(PRICE_MAX, priceVal));
-            const normalized = (clamped - PRICE_MIN) / (PRICE_MAX - PRICE_MIN);
-            return NOTE_BASE + normalized * NOTE_RANGE;
+        // ══════════════════════════════════════════════════════════
+        //  ATUALIZA UI
+        // ══════════════════════════════════════════════════════════
+        function updateUI() {
+            priceDisplay.textContent = `$${price.toFixed(2)}`;
+            const changeEl = changeDisplay;
+            if (change !== 0) {
+                changeEl.textContent = `${change > 0 ? '+' : ''}${change.toFixed(2)}%`;
+                changeEl.className = 'change ' + (change >= 0 ? 'positive' : 'negative');
+            } else {
+                changeEl.textContent = '—';
+            }
+            bpm = changeToBpm(change);
+            // Atualiza BPM no status (opcional)
         }
 
-        function mapChangeToBpm(change) {
-            const clamped = Math.max(-15, Math.min(15, change));
-            const normalized = (clamped + 15) / 30;
-            return 60 + normalized * 80;
-        }
-
-        function mapVolumeToIntensity(vol) {
-            const maxVol = 200e6;
-            return Math.min(1, vol / maxVol);
-        }
+        // ══════════════════════════════════════════════════════════
+        //  MELODIA (notas baseadas no histórico simulado)
+        // ══════════════════════════════════════════════════════════
+        let melodyNotes = [];
+        let melodyIndex = 0;
 
         function generateMelody() {
-            if (historicalPrices.length < 3) {
-                // fallback
-                const notes = [];
-                for (let i = 0; i < 16; i++) {
-                    notes.push(NOTE_BASE + Math.random() * NOTE_RANGE);
-                }
-                return notes;
-            }
-            const recent = historicalPrices.slice(-7);
-            const step = recent.length > 1 ? (recent.length - 1) / 16 : 1;
+            // Gera 8 notas baseadas no preço atual + variação
+            const base = priceToNote(price);
             const notes = [];
-            for (let i = 0; i < 16; i++) {
-                const idx = Math.floor(i * step);
-                const val = recent[Math.min(idx, recent.length - 1)];
-                if (val) notes.push(mapPriceToNote(val));
+            for (let i = 0; i < 8; i++) {
+                const offset = (Math.random() - 0.5) * 8;
+                notes.push(Math.max(36, Math.min(84, base + offset)));
             }
             return notes;
         }
 
         function playMelodyNote() {
-            if (!isPlaying || !audioCtx) return;
+            if (!isPlaying) return;
             if (melodyNotes.length === 0) {
                 melodyNotes = generateMelody();
-                if (melodyNotes.length === 0) return;
                 melodyIndex = 0;
             }
             const note = melodyNotes[melodyIndex % melodyNotes.length];
-            const intensity = mapVolumeToIntensity(volume);
-            const vel = 0.3 + intensity * 0.5;
-            playNote(note, vel, 0.4);
+            const intensity = Math.min(1, Math.abs(change) / 10);
+            playNote(note, 0.3 + intensity * 0.5, 0.3);
             melodyIndex++;
             if (melodyIndex >= melodyNotes.length) {
-                melodyNotes = generateMelody() || melodyNotes;
+                melodyNotes = generateMelody();
                 melodyIndex = 0;
             }
         }
 
-        // ═══════════════════════════════════════════════════════════
-        //  CONTROLE PLAY / STOP
-        // ═══════════════════════════════════════════════════════════
-
+        // ══════════════════════════════════════════════════════════
+        //  PLAY / STOP
+        // ══════════════════════════════════════════════════════════
         async function start() {
             if (isPlaying) return;
-            console.log('▶️ Iniciando...');
+            addLog('▶️ INICIANDO...');
 
-            // 1. Ativa áudio
-            initAudio();
-            if (audioCtx && audioCtx.state === 'suspended') {
-                await audioCtx.resume();
+            // 1. Ativa áudio (agora!)
+            const ctx = initAudio();
+            if (ctx.state === 'suspended') {
+                await ctx.resume();
             }
-            // Toca som de teste para confirmar
-            playTestSound();
 
+            // 2. Toca beep de confirmação
+            playBeep(523, 0.3); // Dó
+
+            // 3. Muda estado
             isPlaying = true;
             playBtn.textContent = '⏹ Parar';
             playBtn.classList.add('playing');
-            statusText.textContent = 'carregando...';
-            statusDot.style.background = '#fbbf24';
+            statusDot.className = 'dot pulse';
+            statusText.textContent = 'Tocando...';
+            document.body.classList.add('playing');
 
-            // 2. Busca dados
-            await fetchMarketData();
-            await fetchHistoricalPrices();
-
-            // 3. Atualiza UI
+            // 4. Busca dados iniciais
+            await fetchPrice();
             updateUI();
 
-            // 4. Inicia drone
-            if (price > 0) {
-                const pitch = mapPriceToNote(price);
-                const intensity = mapVolumeToIntensity(volume);
-                playDrone(pitch, intensity);
-                bpm = mapChangeToBpm(change24h);
-                bpmDisplay.textContent = Math.round(bpm);
-            }
+            // 5. Drone inicial
+            const initialPitch = priceToNote(price);
+            const intensity = Math.min(1, Math.abs(change) / 10);
+            playDrone(initialPitch, intensity);
 
-            // 5. Intervalo de dados (5s)
-            if (dataInterval) clearInterval(dataInterval);
-            dataInterval = setInterval(async () => {
-                const result = await fetchMarketData();
-                if (result) {
-                    price = result.price;
-                    volume = result.volume;
-                    change24h = result.change24h;
-                    updateUI();
-                    const pitch = mapPriceToNote(price);
-                    const intensity = mapVolumeToIntensity(volume);
-                    playDrone(pitch, intensity);
-                    bpm = mapChangeToBpm(change24h);
-                    bpmDisplay.textContent = Math.round(bpm);
-                }
-                // Atualiza histórico a cada ~30s
-                if (Math.random() < 0.2) {
-                    await fetchHistoricalPrices();
-                    melodyNotes = generateMelody();
-                    melodyIndex = 0;
-                }
-            }, 5000);
+            // 6. Gera melodia
+            melodyNotes = generateMelody();
+            melodyIndex = 0;
 
-            // 6. Melodia (intervalo baseado no BPM)
+            // 7. Intervalo da melodia (a cada 500ms)
             if (melodyInterval) clearInterval(melodyInterval);
             melodyInterval = setInterval(() => {
                 playMelodyNote();
             }, 500);
 
-            statusText.textContent = 'ao vivo';
-            statusDot.style.background = '#4ade80';
-            console.log('✅ Tudo pronto!');
-        }
+            // 8. Intervalo de dados (a cada 5s)
+            if (dataInterval) clearInterval(dataInterval);
+            dataInterval = setInterval(async () => {
+                await fetchPrice();
+                updateUI();
+                // Atualiza drone
+                const pitch = priceToNote(price);
+                const inten = Math.min(1, Math.abs(change) / 10);
+                playDrone(pitch, inten);
+                // Regenera melodia a cada 2 ciclos
+                if (Math.random() < 0.3) {
+                    melodyNotes = generateMelody();
+                    melodyIndex = 0;
+                }
+            }, 5000);
 
-        function updateUI() {
-            priceDisplay.textContent = price ? `$${price.toFixed(2)}` : '—';
-            volumeDisplay.textContent = volume ? `$${(volume / 1e6).toFixed(2)}M` : '—';
-            const changeEl = changeDisplay;
-            if (change24h !== 0) {
-                changeEl.textContent = `${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%`;
-                changeEl.className = 'value change ' + (change24h >= 0 ? 'positive' : 'negative');
-            } else {
-                changeEl.textContent = '—';
-            }
+            addLog('✅ Sistema em execução!');
         }
 
         function stop() {
-            console.log('⏹ Parando...');
+            if (!isPlaying) return;
+            addLog('⏹ PARANDO...');
             isPlaying = false;
             playBtn.textContent = '▶ Iniciar';
             playBtn.classList.remove('playing');
+            statusDot.className = 'dot off';
+            statusText.textContent = 'Pausado';
+            document.body.classList.remove('playing');
             stopDrone();
-            if (dataInterval) { clearInterval(dataInterval);
-                dataInterval = null; }
             if (melodyInterval) { clearInterval(melodyInterval);
                 melodyInterval = null; }
-            statusText.textContent = 'pausado';
-            statusDot.style.background = '#f87171';
+            if (dataInterval) { clearInterval(dataInterval);
+                dataInterval = null; }
+            playBeep(330, 0.2); // beep de parada
+            addLog('⏸ Sistema pausado');
         }
 
+        // ══════════════════════════════════════════════════════════
+        //  EVENTO DO BOTÃO
+        // ══════════════════════════════════════════════════════════
         playBtn.addEventListener('click', () => {
-            console.log('👆 Clique no botão');
             if (isPlaying) stop();
             else start();
         });
 
-        // ═══════════════════════════════════════════════════════════
-        //  LOOP DE RENDERIZAÇÃO
-        // ═══════════════════════════════════════════════════════════
-
-        function renderLoop(timestamp) {
-            const intensity = mapVolumeToIntensity(volume);
-            drawEarth(timestamp, intensity);
-            animationId = requestAnimationFrame(renderLoop);
-        }
-        renderLoop(0);
-
-        // ═══════════════════════════════════════════════════════════
+        // ══════════════════════════════════════════════════════════
         //  INICIALIZAÇÃO
-        // ═══════════════════════════════════════════════════════════
-        console.log('✅ Aplicação carregada. Clique em "Iniciar".');
-        statusText.textContent = 'pronto';
-        statusDot.style.background = '#4ade80';
+        // ══════════════════════════════════════════════════════════
+        addLog('✅ Aplicação carregada. Clique em "Iniciar".');
+        statusDot.className = 'dot';
+        statusText.textContent = 'Pronto';
+        priceDisplay.textContent = '—';
+        changeDisplay.textContent = '—';
     </script>
 </body>
 </html>
