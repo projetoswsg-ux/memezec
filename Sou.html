@@ -1,87 +1,148 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound of Monero — Versão Turbo</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sound of Monero — Market Tick</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0b0e14;
-            color: #fff;
-            font-family: system-ui, sans-serif;
+            color: #e0e4ed;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            padding: 20px;
             transition: background 0.3s;
         }
-        body.playing {
-            background: #1a1f2e;
-        }
+        body.bull { background: #0a1a0e; }
+        body.bear { background: #1a0a0a; }
         .container {
             text-align: center;
-            padding: 20px;
-            max-width: 600px;
+            max-width: 700px;
+            width: 100%;
         }
         h1 {
-            font-size: 2rem;
+            font-size: 2.4rem;
             font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
+            letter-spacing: 3px;
+            margin-bottom: 4px;
         }
-        h1 span {
-            color: #f7931a;
-        }
+        h1 span { color: #f7931a; }
         .sub {
-            opacity: 0.5;
+            opacity: 0.4;
+            font-size: 0.85rem;
             margin-bottom: 30px;
-            font-size: 0.9rem;
+            letter-spacing: 1px;
         }
-        .price-box {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 30px 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+        .card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(8px);
+            margin-bottom: 24px;
         }
-        .price-box .label {
-            font-size: 0.8rem;
+        .price-row {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .price-item .label {
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             opacity: 0.4;
         }
-        .price-box .value {
-            font-size: 3rem;
+        .price-item .value {
+            font-size: 2.8rem;
             font-weight: 700;
-            color: #f7931a;
-            margin: 8px 0;
-            transition: all 0.2s;
+            margin-top: 4px;
         }
-        .price-box .change {
-            font-size: 1.2rem;
+        .price-item .value.xmr { color: #f7931a; }
+        .price-item .value.change { font-size: 1.8rem; }
+        .price-item .value.change.positive { color: #4ade80; }
+        .price-item .value.change.negative { color: #f87171; }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 16px 0;
         }
-        .price-box .change.positive {
-            color: #4ade80;
+        .stat-item .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.4;
         }
-        .price-box .change.negative {
-            color: #f87171;
+        .stat-item .value {
+            font-size: 1.6rem;
+            font-weight: 600;
         }
-        .status {
+        .stat-item .value.buy { color: #4ade80; }
+        .stat-item .value.sell { color: #f87171; }
+
+        .guitar-visual {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 20px 0 10px;
+            height: 70px;
+            align-items: flex-end;
+        }
+        .string {
+            width: 4px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            transition: 0.15s;
+            height: 50px;
+            transform-origin: bottom;
+        }
+        .string.active-buy {
+            background: #4ade80;
+            box-shadow: 0 0 20px rgba(74,222,128,0.6);
+            height: 60px;
+        }
+        .string.active-sell {
+            background: #f87171;
+            box-shadow: 0 0 20px rgba(248,113,113,0.6);
+            height: 60px;
+        }
+        .string:nth-child(1) { height: 55px; }
+        .string:nth-child(2) { height: 50px; }
+        .string:nth-child(3) { height: 45px; }
+        .string:nth-child(4) { height: 40px; }
+        .string:nth-child(5) { height: 35px; }
+        .string:nth-child(6) { height: 30px; }
+        .string.active-buy:nth-child(1) { height: 65px; }
+        .string.active-buy:nth-child(2) { height: 60px; }
+        .string.active-buy:nth-child(3) { height: 55px; }
+        .string.active-buy:nth-child(4) { height: 50px; }
+        .string.active-buy:nth-child(5) { height: 45px; }
+        .string.active-buy:nth-child(6) { height: 40px; }
+        .string.active-sell:nth-child(1) { height: 65px; }
+        .string.active-sell:nth-child(2) { height: 60px; }
+        .string.active-sell:nth-child(3) { height: 55px; }
+        .string.active-sell:nth-child(4) { height: 50px; }
+        .string.active-sell:nth-child(5) { height: 45px; }
+        .string.active-sell:nth-child(6) { height: 40px; }
+
+        .status-bar {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin: 16px 0 10px;
             font-size: 0.9rem;
-            opacity: 0.7;
+            opacity: 0.6;
         }
-        .status .dot {
+        .dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
@@ -89,66 +150,57 @@
             display: inline-block;
             transition: 0.3s;
         }
-        .status .dot.off {
-            background: #f87171;
-        }
-        .status .dot.pulse {
-            animation: pulse 1s ease-in-out infinite;
-        }
+        .dot.off { background: #f87171; }
+        .dot.pulse { animation: pulse 1s ease-in-out infinite; }
         @keyframes pulse {
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.4);
-                opacity: 0.6;
-            }
+            0%,100% { transform: scale(1); opacity:1; }
+            50% { transform: scale(1.5); opacity:0.5; }
         }
         .btn {
-            background: rgba(247, 147, 26, 0.15);
-            border: 1px solid rgba(247, 147, 26, 0.3);
+            background: rgba(247,147,26,0.12);
+            border: 1px solid rgba(247,147,26,0.25);
             color: #f7931a;
-            padding: 16px 48px;
+            padding: 16px 50px;
             border-radius: 60px;
             font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
             letter-spacing: 1px;
+            margin-top: 8px;
         }
         .btn:hover {
-            background: rgba(247, 147, 26, 0.25);
-            transform: scale(1.03);
+            background: rgba(247,147,26,0.22);
+            transform: scale(1.02);
         }
         .btn.playing {
             border-color: #4ade80;
             color: #4ade80;
-            background: rgba(74, 222, 128, 0.12);
+            background: rgba(74,222,128,0.1);
         }
-        .log-area {
-            margin-top: 25px;
-            font-size: 0.8rem;
-            opacity: 0.5;
-            max-height: 80px;
-            overflow-y: auto;
+        .log {
+            margin-top: 16px;
+            font-size: 0.75rem;
+            opacity: 0.3;
             font-family: monospace;
+            max-height: 50px;
+            overflow-y: auto;
             text-align: left;
-            width: 100%;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.2);
             border-radius: 12px;
-            line-height: 1.6;
-        }
-        .log-area .log-entry {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            padding: 2px 0;
+            line-height: 1.5;
         }
         .footer {
-            margin-top: 30px;
-            font-size: 0.7rem;
-            opacity: 0.2;
+            margin-top: 20px;
+            font-size: 0.65rem;
+            opacity: 0.15;
+        }
+        @media (max-width:600px) {
+            .price-row { gap:12px; }
+            .price-item .value { font-size:2rem; }
+            .stats { gap:20px; }
+            .stat-item .value { font-size:1.2rem; }
         }
     </style>
 </head>
@@ -156,342 +208,491 @@
 
     <div class="container">
         <h1>✦ <span>Sound</span> of Monero</h1>
-        <div class="sub">XMR/USDT · Binance Perpétuo</div>
+        <div class="sub">XMR/USDT Perpétuo · WebSocket em tempo real</div>
 
-        <div class="price-box">
-            <div class="label">Preço atual</div>
-            <div class="value" id="priceDisplay">—</div>
-            <div class="change" id="changeDisplay">—</div>
+        <div class="card">
+            <div class="price-row">
+                <div class="price-item">
+                    <div class="label">Preço</div>
+                    <div class="value xmr" id="priceDisplay">—</div>
+                </div>
+                <div class="price-item">
+                    <div class="label">Variação 24h</div>
+                    <div class="value change" id="changeDisplay">—</div>
+                </div>
+                <div class="price-item">
+                    <div class="label">Último movimento</div>
+                    <div class="value" id="lastMoveDisplay" style="font-size:1.6rem;">—</div>
+                </div>
+            </div>
         </div>
 
-        <div class="status">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="label">Compras (▲)</div>
+                <div class="value buy" id="buyCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Vendas (▼)</div>
+                <div class="value sell" id="sellCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Notas/seg</div>
+                <div class="value" id="rateDisplay" style="color:#c084fc;">0</div>
+            </div>
+        </div>
+
+        <!-- Visual de cordas -->
+        <div class="guitar-visual" id="guitarVisual">
+            <div class="string" data-index="0"></div>
+            <div class="string" data-index="1"></div>
+            <div class="string" data-index="2"></div>
+            <div class="string" data-index="3"></div>
+            <div class="string" data-index="4"></div>
+            <div class="string" data-index="5"></div>
+        </div>
+
+        <div class="status-bar">
             <span class="dot" id="statusDot"></span>
-            <span id="statusText">Pronto</span>
+            <span id="statusText">Desconectado</span>
         </div>
 
-        <button class="btn" id="playBtn">▶ Iniciar</button>
+        <button class="btn" id="playBtn">▶ Conectar e Iniciar</button>
 
-        <div class="log-area" id="logArea">
-            <div class="log-entry">📋 Aguardando ação...</div>
-        </div>
-
-        <div class="footer">Dados: Binance + fallback local · Áudio: Web Audio API</div>
+        <div class="log" id="logArea">📋 Aguardando conexão...</div>
+        <div class="footer">WebSocket Binance · Cada centavo vira uma nota</div>
     </div>
 
     <script>
-        // ══════════════════════════════════════════════════════════
-        //  CONFIG
-        // ══════════════════════════════════════════════════════════
-        const SYMBOL = 'XMRUSDT';
-        const BINANCE_URL = `https://api.binance.com/api/v3/ticker/24hr?symbol=${SYMBOL}`;
+        // ════════════════════════════════════════════════════════════════
+        //  1.  CONFIGURAÇÕES
+        // ════════════════════════════════════════════════════════════════
 
-        // ══════════════════════════════════════════════════════════
-        //  DOM
-        // ══════════════════════════════════════════════════════════
+        const WS_URL = 'wss://stream.binance.com:9443/ws/xmrusdt@trade'; // trades em tempo real
+        // Escalas: maior para compras, menor para vendas
+        const MAJOR_SCALE = [60, 62, 64, 65, 67, 69, 71, 72]; // C4 maior
+        const MINOR_SCALE = [57, 59, 60, 62, 64, 65, 67, 69]; // F# menor (mais sombrio)
+
+        // Preço mínimo de movimento (centavo)
+        const TICK_SIZE = 0.01;
+
+        // Limite de notas por segundo (evita saturação)
+        const MAX_NOTES_PER_SEC = 12;
+        let noteTimestamps = [];
+
+        // ════════════════════════════════════════════════════════════════
+        //  2.  DOM E ESTADO
+        // ════════════════════════════════════════════════════════════════
+
         const priceDisplay = document.getElementById('priceDisplay');
         const changeDisplay = document.getElementById('changeDisplay');
+        const lastMoveDisplay = document.getElementById('lastMoveDisplay');
+        const buyCountEl = document.getElementById('buyCount');
+        const sellCountEl = document.getElementById('sellCount');
+        const rateDisplay = document.getElementById('rateDisplay');
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
         const playBtn = document.getElementById('playBtn');
         const logArea = document.getElementById('logArea');
+        const strings = document.querySelectorAll('.string');
 
-        // ══════════════════════════════════════════════════════════
-        //  LOG
-        // ══════════════════════════════════════════════════════════
-        function addLog(msg) {
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.textContent = msg;
-            logArea.appendChild(entry);
-            logArea.scrollTop = logArea.scrollHeight;
-            console.log(msg);
-        }
-
-        // ══════════════════════════════════════════════════════════
-        //  ÁUDIO (SIMPLES E GARANTIDO)
-        // ══════════════════════════════════════════════════════════
-        let audioCtx = null;
-        let gainNode = null;
         let isPlaying = false;
-        let currentOsc = null;
-        let melodyInterval = null;
-        let dataInterval = null;
-        let price = 150;
-        let change = 0;
-        let bpm = 90;
+        let audioCtx = null;
+        let masterGain = null;
+        let compressor = null;
+        let ws = null;
+
+        let currentPrice = 0;
+        let lastPrice = 0;
+        let change24h = 0;
+        let buyCount = 0;
+        let sellCount = 0;
+        let lastMove = ''; // 'buy' ou 'sell'
+
+        // Controle de notas
+        let noteQueue = [];
+        let isNotePlaying = false;
+
+        // ════════════════════════════════════════════════════════════════
+        //  3.  ÁUDIO — VIOLÃO
+        // ════════════════════════════════════════════════════════════════
 
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-                gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0.15;
-                gainNode.connect(audioCtx.destination);
-                addLog('🎧 AudioContext criado');
+                compressor = audioCtx.createDynamicsCompressor();
+                compressor.threshold.value = -20;
+                compressor.knee.value = 10;
+                compressor.ratio.value = 3;
+                compressor.attack.value = 0.005;
+                compressor.release.value = 0.2;
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.3;
+                masterGain.connect(compressor);
+                compressor.connect(audioCtx.destination);
+                addLog('🎸 Áudio inicializado');
             }
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
-                addLog('▶️ AudioContext retomado');
             }
             return audioCtx;
         }
 
-        // Som de teste (bip curto)
-        function playBeep(freq = 440, duration = 0.3) {
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(gainNode);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-                addLog(`🔊 Beep ${freq}Hz`);
-            } catch (e) {
-                addLog(`❌ Erro no beep: ${e.message}`);
-            }
-        }
-
-        // Toca uma nota musical
-        function playNote(pitch, velocity = 0.5, duration = 0.4) {
+        function playGuitarNote(midiNote, velocity = 0.6, duration = 0.4, isBuy = true) {
             if (!audioCtx || !isPlaying) return;
             try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = pitch;
-                const vol = 0.05 + velocity * 0.15;
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(gainNode);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch (e) {
-                // silencioso
-            }
-        }
+                const freq = 440 * Math.pow(2, (midiNote - 69) / 12);
+                const now = audioCtx.currentTime;
 
-        // Drone (nota sustentada)
-        function playDrone(pitch, intensity = 0.5) {
-            if (currentOsc) {
-                try { currentOsc.stop(); } catch (_) {}
-                currentOsc = null;
-            }
-            if (!audioCtx || !isPlaying) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = pitch;
-                const vol = 0.03 + intensity * 0.08;
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(gainNode);
-                osc.start();
-                currentOsc = osc;
-            } catch (e) { /* ignora */ }
-        }
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                const gain2 = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 2500 + (midiNote - 60) * 30;
+                filter.Q.value = 0.7;
 
-        function stopDrone() {
-            if (currentOsc) {
-                try { currentOsc.stop(); } catch (_) {}
-                currentOsc = null;
-            }
-        }
+                osc1.type = 'triangle';
+                osc1.frequency.value = freq;
+                osc2.type = 'sawtooth';
+                osc2.frequency.value = freq * 0.999;
 
-        // ══════════════════════════════════════════════════════════
-        //  MAPEAMENTO MUSICAL
-        // ══════════════════════════════════════════════════════════
-        function priceToNote(p) {
-            // Mapeia preço (50~250) para nota MIDI (48~84)
-            const min = 50,
-                max = 250;
-            const clamped = Math.max(min, Math.min(max, p));
-            const norm = (clamped - min) / (max - min);
-            return 48 + norm * 36;
-        }
+                const attack = 0.008;
+                const decay = 0.12;
+                const sustain = 0.15;
+                const release = 0.1;
+                const totalDur = Math.max(0.2, duration);
+                const vol = 0.06 + velocity * 0.14;
 
-        function changeToBpm(c) {
-            const clamped = Math.max(-15, Math.min(15, c));
-            const norm = (clamped + 15) / 30;
-            return 60 + norm * 80;
-        }
+                gain1.gain.setValueAtTime(0, now);
+                gain1.gain.linearRampToValueAtTime(vol * 0.8, now + attack);
+                gain1.gain.linearRampToValueAtTime(vol * sustain, now + attack + decay);
+                gain1.gain.setValueAtTime(vol * sustain, now + totalDur - release);
+                gain1.gain.linearRampToValueAtTime(0, now + totalDur);
 
-        // ══════════════════════════════════════════════════════════
-        //  API BINANCE (com fallback)
-        // ══════════════════════════════════════════════════════════
-        async function fetchPrice() {
-            try {
-                const resp = await fetch(BINANCE_URL);
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const data = await resp.json();
-                const newPrice = parseFloat(data.lastPrice);
-                const newChange = parseFloat(data.priceChangePercent);
-                if (!isNaN(newPrice) && newPrice > 0) {
-                    price = newPrice;
-                    change = newChange;
-                    addLog(`📡 Dados reais: $${price.toFixed(2)} (${change.toFixed(2)}%)`);
-                    return { price, change };
+                gain2.gain.setValueAtTime(0, now);
+                gain2.gain.linearRampToValueAtTime(vol * 0.4, now + attack);
+                gain2.gain.linearRampToValueAtTime(vol * 0.1, now + attack + decay);
+                gain2.gain.setValueAtTime(vol * 0.1, now + totalDur - release);
+                gain2.gain.linearRampToValueAtTime(0, now + totalDur);
+
+                osc1.connect(gain1);
+                gain1.connect(filter);
+                osc2.connect(gain2);
+                gain2.connect(filter);
+                filter.connect(masterGain);
+
+                osc1.start(now);
+                osc1.stop(now + totalDur);
+                osc2.start(now);
+                osc2.stop(now + totalDur);
+
+                // Visual: corda
+                const stringIndex = Math.floor(((midiNote - 48) % 12) / 2) % 6;
+                highlightString(stringIndex, isBuy);
+
+                // Pequeno ruído de ataque
+                const noise = audioCtx.createBufferSource();
+                const bufferSize = audioCtx.sampleRate * 0.01;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * 0.03;
                 }
-                throw new Error('Preço inválido');
-            } catch (err) {
-                // Fallback: variação aleatória realista
-                const variation = (Math.random() - 0.5) * 6;
-                price = Math.max(50, Math.min(250, price + variation));
-                change = (Math.random() - 0.5) * 10;
-                addLog(`🔄 Fallback: $${price.toFixed(2)} (${change.toFixed(2)}%)`);
-                return { price, change };
-            }
+                const noiseGain = audioCtx.createGain();
+                noiseGain.gain.setValueAtTime(0.03 * velocity, now);
+                noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                noise.buffer = buffer;
+                noise.connect(noiseGain);
+                noiseGain.connect(filter);
+                noise.start(now);
+                noise.stop(now + 0.03);
+
+            } catch (e) { /* silencioso */ }
         }
 
-        // ══════════════════════════════════════════════════════════
-        //  ATUALIZA UI
-        // ══════════════════════════════════════════════════════════
-        function updateUI() {
-            priceDisplay.textContent = `$${price.toFixed(2)}`;
-            const changeEl = changeDisplay;
-            if (change !== 0) {
-                changeEl.textContent = `${change > 0 ? '+' : ''}${change.toFixed(2)}%`;
-                changeEl.className = 'change ' + (change >= 0 ? 'positive' : 'negative');
+        function highlightString(index, isBuy) {
+            strings.forEach((el, i) => {
+                el.classList.remove('active-buy', 'active-sell');
+                if (i === index) {
+                    el.classList.add(isBuy ? 'active-buy' : 'active-sell');
+                }
+            });
+            // Remove destaque após 150ms
+            setTimeout(() => {
+                strings.forEach(el => el.classList.remove('active-buy', 'active-sell'));
+            }, 150);
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  4.  LÓGICA DE NOTAS POR MOVIMENTO
+        // ════════════════════════════════════════════════════════════════
+
+        // Nota base depende do preço atual (mapeia para escala)
+        function getBaseNote(price) {
+            // Mapeia preço (50~250) para índice da escala
+            const min = 50, max = 250;
+            const clamped = Math.max(min, Math.min(max, price));
+            const norm = (clamped - min) / (max - min);
+            const idx = Math.floor(norm * (MAJOR_SCALE.length - 1));
+            return idx;
+        }
+
+        function playMove(isBuy, priceNow) {
+            // Escolhe escala conforme direção
+            const scale = isBuy ? MAJOR_SCALE : MINOR_SCALE;
+            const baseIdx = getBaseNote(priceNow);
+            // Adiciona pequena variação para não soar sempre igual
+            const variation = Math.floor((priceNow * 100) % 5) - 2; // -2 a +2
+            let idx = (baseIdx + variation) % scale.length;
+            if (idx < 0) idx += scale.length;
+            const note = scale[idx];
+
+            // Velocidade baseada na variação de preço (quanto maior o movimento, mais forte)
+            const vel = 0.4 + Math.min(0.6, Math.abs(priceNow - lastPrice) / 0.5);
+            playGuitarNote(note, vel, 0.3, isBuy);
+
+            // Atualiza contadores
+            if (isBuy) {
+                buyCount++;
+                buyCountEl.textContent = buyCount;
+                lastMove = '▲ Compra';
+                lastMoveDisplay.textContent = '▲';
+                lastMoveDisplay.style.color = '#4ade80';
             } else {
-                changeEl.textContent = '—';
+                sellCount++;
+                sellCountEl.textContent = sellCount;
+                lastMove = '▼ Venda';
+                lastMoveDisplay.textContent = '▼';
+                lastMoveDisplay.style.color = '#f87171';
             }
-            bpm = changeToBpm(change);
-            // Atualiza BPM no status (opcional)
+
+            // Muda cor de fundo suavemente
+            document.body.className = isBuy ? 'bull' : 'bear';
+            setTimeout(() => { document.body.className = ''; }, 100);
+
+            // Atualiza taxa de notas
+            updateRate();
         }
 
-        // ══════════════════════════════════════════════════════════
-        //  MELODIA (notas baseadas no histórico simulado)
-        // ══════════════════════════════════════════════════════════
-        let melodyNotes = [];
-        let melodyIndex = 0;
-
-        function generateMelody() {
-            // Gera 8 notas baseadas no preço atual + variação
-            const base = priceToNote(price);
-            const notes = [];
-            for (let i = 0; i < 8; i++) {
-                const offset = (Math.random() - 0.5) * 8;
-                notes.push(Math.max(36, Math.min(84, base + offset)));
+        // Controle de fluxo: verifica se podemos tocar uma nova nota
+        function canPlayNote() {
+            const now = Date.now();
+            // Remove timestamps antigos (>1s)
+            noteTimestamps = noteTimestamps.filter(t => now - t < 1000);
+            if (noteTimestamps.length >= MAX_NOTES_PER_SEC) {
+                return false;
             }
-            return notes;
+            noteTimestamps.push(now);
+            return true;
         }
 
-        function playMelodyNote() {
-            if (!isPlaying) return;
-            if (melodyNotes.length === 0) {
-                melodyNotes = generateMelody();
-                melodyIndex = 0;
+        function updateRate() {
+            const now = Date.now();
+            const recent = noteTimestamps.filter(t => now - t < 1000);
+            rateDisplay.textContent = recent.length;
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  5.  WEBSOCKET BINANCE
+        // ════════════════════════════════════════════════════════════════
+
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+                ws = null;
             }
-            const note = melodyNotes[melodyIndex % melodyNotes.length];
-            const intensity = Math.min(1, Math.abs(change) / 10);
-            playNote(note, 0.3 + intensity * 0.5, 0.3);
-            melodyIndex++;
-            if (melodyIndex >= melodyNotes.length) {
-                melodyNotes = generateMelody();
-                melodyIndex = 0;
+            addLog('🔌 Conectando ao WebSocket da Binance...');
+            statusText.textContent = 'Conectando...';
+            statusDot.className = 'dot pulse';
+
+            ws = new WebSocket(WS_URL);
+
+            ws.onopen = () => {
+                addLog('✅ WebSocket conectado!');
+                statusText.textContent = 'Conectado (recebendo trades)';
+                statusDot.className = 'dot pulse';
+                // Reseta contadores
+                buyCount = 0;
+                sellCount = 0;
+                buyCountEl.textContent = '0';
+                sellCountEl.textContent = '0';
+                lastPrice = 0;
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    // data: { e: "trade", E: timestamp, s: "XMRUSDT", p: price, q: quantity, ... }
+                    if (data.e === 'trade') {
+                        const price = parseFloat(data.p);
+                        if (isNaN(price) || price <= 0) return;
+
+                        // Primeira atualização
+                        if (lastPrice === 0) {
+                            lastPrice = price;
+                            currentPrice = price;
+                            updateUI(price);
+                            return;
+                        }
+
+                        currentPrice = price;
+
+                        // Verifica movimento mínimo (centavo)
+                        const diff = price - lastPrice;
+                        if (Math.abs(diff) < TICK_SIZE) {
+                            // Não toca nota, mas atualiza preço
+                            updateUI(price);
+                            return;
+                        }
+
+                        // Toca nota se houver permissão
+                        if (canPlayNote()) {
+                            const isBuy = diff > 0;
+                            playMove(isBuy, price);
+                            // Atualiza preço anterior
+                            lastPrice = price;
+                            updateUI(price);
+                        } else {
+                            // Se limite excedido, apenas atualiza preço sem som
+                            lastPrice = price;
+                            updateUI(price);
+                        }
+                    }
+                } catch (err) {
+                    addLog('⚠️ Erro ao processar mensagem: ' + err.message);
+                }
+            };
+
+            ws.onerror = (error) => {
+                addLog('❌ Erro no WebSocket: ' + error.message);
+                statusText.textContent = 'Erro';
+                statusDot.className = 'dot off';
+            };
+
+            ws.onclose = () => {
+                addLog('🔌 WebSocket fechado');
+                statusText.textContent = 'Desconectado';
+                statusDot.className = 'dot off';
+                // Tenta reconectar após 3s se ainda estiver tocando
+                if (isPlaying) {
+                    setTimeout(() => {
+                        addLog('🔄 Tentando reconectar...');
+                        connectWebSocket();
+                    }, 3000);
+                }
+            };
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  6.  UI
+        // ════════════════════════════════════════════════════════════════
+
+        function updateUI(price) {
+            priceDisplay.textContent = price ? `$${price.toFixed(2)}` : '—';
+            // A variação 24h não vem do trade, mas podemos buscar de outra API
+            // Vamos deixar fixo ou ignorar por enquanto (ou buscar de ticker 24h separadamente)
+            // Para simplificar, vamos deixar como está
+        }
+
+        // Busca variação 24h via REST a cada 60s (opcional)
+        async function fetch24hChange() {
+            try {
+                const resp = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=XMRUSDT');
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const data = await resp.json();
+                change24h = parseFloat(data.priceChangePercent) || 0;
+                const changeEl = changeDisplay;
+                if (change24h !== 0) {
+                    changeEl.textContent = `${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%`;
+                    changeEl.className = 'value change ' + (change24h >= 0 ? 'positive' : 'negative');
+                } else {
+                    changeEl.textContent = '—';
+                }
+            } catch (err) {
+                // ignora
             }
         }
 
-        // ══════════════════════════════════════════════════════════
-        //  PLAY / STOP
-        // ══════════════════════════════════════════════════════════
+        // ════════════════════════════════════════════════════════════════
+        //  7.  LOG
+        // ════════════════════════════════════════════════════════════════
+
+        function addLog(msg) {
+            const entry = document.createElement('div');
+            entry.textContent = msg;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+            if (logArea.children.length > 20) logArea.removeChild(logArea.firstChild);
+            console.log(msg);
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  8.  PLAY / STOP
+        // ════════════════════════════════════════════════════════════════
+
         async function start() {
             if (isPlaying) return;
-            addLog('▶️ INICIANDO...');
-
-            // 1. Ativa áudio (agora!)
-            const ctx = initAudio();
-            if (ctx.state === 'suspended') {
-                await ctx.resume();
+            addLog('▶️ Iniciando...');
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                await audioCtx.resume();
             }
 
-            // 2. Toca beep de confirmação
-            playBeep(523, 0.3); // Dó
+            // Toca nota de teste
+            playGuitarNote(60, 0.5, 0.6, true);
 
-            // 3. Muda estado
             isPlaying = true;
             playBtn.textContent = '⏹ Parar';
             playBtn.classList.add('playing');
             statusDot.className = 'dot pulse';
-            statusText.textContent = 'Tocando...';
-            document.body.classList.add('playing');
+            statusText.textContent = 'Conectando...';
 
-            // 4. Busca dados iniciais
-            await fetchPrice();
-            updateUI();
+            // Conecta WebSocket
+            connectWebSocket();
 
-            // 5. Drone inicial
-            const initialPitch = priceToNote(price);
-            const intensity = Math.min(1, Math.abs(change) / 10);
-            playDrone(initialPitch, intensity);
+            // Busca variação 24h a cada 60s
+            await fetch24hChange();
+            setInterval(fetch24hChange, 60000);
 
-            // 6. Gera melodia
-            melodyNotes = generateMelody();
-            melodyIndex = 0;
-
-            // 7. Intervalo da melodia (a cada 500ms)
-            if (melodyInterval) clearInterval(melodyInterval);
-            melodyInterval = setInterval(() => {
-                playMelodyNote();
-            }, 500);
-
-            // 8. Intervalo de dados (a cada 5s)
-            if (dataInterval) clearInterval(dataInterval);
-            dataInterval = setInterval(async () => {
-                await fetchPrice();
-                updateUI();
-                // Atualiza drone
-                const pitch = priceToNote(price);
-                const inten = Math.min(1, Math.abs(change) / 10);
-                playDrone(pitch, inten);
-                // Regenera melodia a cada 2 ciclos
-                if (Math.random() < 0.3) {
-                    melodyNotes = generateMelody();
-                    melodyIndex = 0;
-                }
-            }, 5000);
-
-            addLog('✅ Sistema em execução!');
+            addLog('✅ Sistema em execução. Aguardando trades...');
         }
 
         function stop() {
             if (!isPlaying) return;
-            addLog('⏹ PARANDO...');
+            addLog('⏹ Parando...');
             isPlaying = false;
-            playBtn.textContent = '▶ Iniciar';
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            playBtn.textContent = '▶ Conectar e Iniciar';
             playBtn.classList.remove('playing');
             statusDot.className = 'dot off';
-            statusText.textContent = 'Pausado';
-            document.body.classList.remove('playing');
-            stopDrone();
-            if (melodyInterval) { clearInterval(melodyInterval);
-                melodyInterval = null; }
-            if (dataInterval) { clearInterval(dataInterval);
-                dataInterval = null; }
-            playBeep(330, 0.2); // beep de parada
+            statusText.textContent = 'Desconectado';
+            // Remove destaque das cordas
+            strings.forEach(el => el.classList.remove('active-buy', 'active-sell'));
             addLog('⏸ Sistema pausado');
         }
 
-        // ══════════════════════════════════════════════════════════
-        //  EVENTO DO BOTÃO
-        // ══════════════════════════════════════════════════════════
         playBtn.addEventListener('click', () => {
             if (isPlaying) stop();
             else start();
         });
 
-        // ══════════════════════════════════════════════════════════
-        //  INICIALIZAÇÃO
-        // ══════════════════════════════════════════════════════════
-        addLog('✅ Aplicação carregada. Clique em "Iniciar".');
-        statusDot.className = 'dot';
+        // ════════════════════════════════════════════════════════════════
+        //  9.  INICIALIZAÇÃO
+        // ════════════════════════════════════════════════════════════════
+
+        addLog('🎵 Sound of Monero — Market Tick');
+        addLog('📡 Clique em "Conectar e Iniciar" para ouvir o mercado em tempo real');
+        statusDot.className = 'dot off';
         statusText.textContent = 'Pronto';
         priceDisplay.textContent = '—';
         changeDisplay.textContent = '—';
+        lastMoveDisplay.textContent = '—';
+        rateDisplay.textContent = '0';
     </script>
 </body>
 </html>
