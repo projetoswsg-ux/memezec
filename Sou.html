@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sound of Market — Bitcoin sonificado</title>
+    <style>
+        /* ─── RESET E BASE ─── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0b0e14;
+            color: #e0e4ed;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            user-select: none;
+        }
+
+        /* ─── CANVAS 3D (fundo) ─── */
+        #canvas3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            display: block;
+        }
+
+        /* ─── OVERLAY UI ─── */
+        .ui-overlay {
+            position: fixed;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .ui-overlay * {
+            pointer-events: auto;
+        }
+
+        /* Topo — título e status */
+        .header {
+            top: 24px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 32px;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            background: rgba(11, 14, 20, 0.65);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .header h1 span {
+            color: #f7931a;
+        }
+        .header .status {
+            font-size: 13px;
+            opacity: 0.6;
+            background: rgba(11, 14, 20, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .header .status .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background: #4ade80;
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(0.7);
+            }
+        }
+
+        /* Painel central — info do mercado */
+        .market-panel {
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 48px;
+            background: rgba(11, 14, 20, 0.6);
+            backdrop-filter: blur(16px);
+            padding: 20px 44px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        .market-item {
+            text-align: center;
+        }
+        .market-item .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            opacity: 0.4;
+            margin-bottom: 4px;
+        }
+        .market-item .value {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+        .market-item .value.btc {
+            color: #f7931a;
+        }
+        .market-item .value.volume {
+            color: #60a5fa;
+        }
+        .market-item .value.change {
+            font-size: 18px;
+        }
+        .market-item .value.change.positive {
+            color: #4ade80;
+        }
+        .market-item .value.change.negative {
+            color: #f87171;
+        }
+        .market-item .value.bpm {
+            color: #c084fc;
+        }
+
+        /* Botão Play */
+        .play-btn {
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(247, 147, 26, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(247, 147, 26, 0.3);
+            color: #f7931a;
+            padding: 14px 48px;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+        .play-btn:hover {
+            background: rgba(247, 147, 26, 0.25);
+            border-color: #f7931a;
+            transform: translateX(-50%) scale(1.03);
+            box-shadow: 0 0 40px rgba(247, 147, 26, 0.15);
+        }
+        .play-btn.playing {
+            border-color: #4ade80;
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.12);
+        }
+
+        /* Rodapé — crédito */
+        .footer {
+            bottom: 100px;
+            right: 32px;
+            font-size: 11px;
+            opacity: 0.25;
+            text-align: right;
+            line-height: 1.6;
+            pointer-events: none;
+        }
+
+        /* ─── RESPONSIVO ─── */
+        @media (max-width: 720px) {
+            .header {
+                padding: 0 16px;
+                top: 16px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .header h1 {
+                font-size: 16px;
+                padding: 6px 14px;
+            }
+            .market-panel {
+                bottom: 100px;
+                padding: 14px 20px;
+                gap: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+                border-radius: 32px;
+                width: calc(100% - 32px);
+            }
+            .market-item .value {
+                font-size: 17px;
+            }
+            .play-btn {
+                padding: 12px 32px;
+                font-size: 14px;
+                bottom: 28px;
+            }
+            .footer {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CANVAS 3D -->
+    <canvas id="canvas3d"></canvas>
+
+    <!-- UI OVERLAY -->
+    <div class="ui-overlay header">
+        <h1>✦ <span>Sound</span> of Market</h1>
+        <div class="status">
+            <span class="dot"></span>
+            <span id="statusText">conectando...</span>
+        </div>
+    </div>
+
+    <div class="ui-overlay market-panel">
+        <div class="market-item">
+            <div class="label">BTC / USD</div>
+            <div class="value btc" id="priceDisplay">—</div>
+        </div>
+        <div class="market-item">
+            <div class="label">Volume 24h</div>
+            <div class="value volume" id="volumeDisplay">—</div>
+        </div>
+        <div class="market-item">
+            <div class="label">Variação 24h</div>
+            <div class="value change" id="changeDisplay">—</div>
+        </div>
+        <div class="market-item">
+            <div class="label">BPM</div>
+            <div class="value bpm" id="bpmDisplay">—</div>
+        </div>
+    </div>
+
+    <button class="ui-overlay play-btn" id="playBtn">▶ Iniciar</button>
+
+    <div class="ui-overlay footer">
+        Dados: CoinGecko API · Inspirado em Proof of Sound
+    </div>
+
+    <!-- ─── SCRIPT ─── -->
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        //  1.  CONFIGURAÇÕES
+        // ═══════════════════════════════════════════════════════════
+
+        const COINGECKO_BASE = 'https://api.coingecko.com/api/v3';
+        const COIN_ID = 'bitcoin';
+        const VS_CURRENCY = 'usd';
+
+        // Mapeamento musical
+        const NOTE_BASE = 48; // C3
+        const NOTE_RANGE = 36; // 3 oitavas
+        const PRICE_MIN = 20000;
+        const PRICE_MAX = 120000;
+
+        // Estado
+        let isPlaying = false;
+        let audioCtx = null;
+        let gainNode = null;
+        let currentNote = null;
+        let currentOsc = null;
+        let bpm = 80;
+        let price = 0;
+        let volume = 0;
+        let change24h = 0;
+        let historicalPrices = [];
+        let melodyIndex = 0;
+        let melodyTimer = null;
+        let dataTimer = null;
+        let animationId = null;
+
+        // DOM
+        const priceDisplay = document.getElementById('priceDisplay');
+        const volumeDisplay = document.getElementById('volumeDisplay');
+        const changeDisplay = document.getElementById('changeDisplay');
+        const bpmDisplay = document.getElementById('bpmDisplay');
+        const statusText = document.getElementById('statusText');
+        const playBtn = document.getElementById('playBtn');
+
+        // ═══════════════════════════════════════════════════════════
+        //  2.  CANVAS 3D — TERRA + PARTÍCULAS
+        // ═══════════════════════════════════════════════════════════
+
+        const canvas = document.getElementById('canvas3d');
+        const ctx = canvas.getContext('2d');
+
+        let W, H;
+
+        function resize() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Pontos da "Terra" (esfera wireframe)
+        const EARTH_POINTS = 600;
+        const earthPoints = [];
+        for (let i = 0; i < EARTH_POINTS; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const r = 180 + Math.random() * 30;
+            earthPoints.push({
+                x: r * Math.sin(phi) * Math.cos(theta),
+                y: r * Math.cos(phi),
+                z: r * Math.sin(phi) * Math.sin(theta),
+                baseR: r,
+            });
+        }
+
+        // Partículas (estrelas / rede)
+        const NUM_PARTICLES = 400;
+        const particles = [];
+        for (let i = 0; i < NUM_PARTICLES; i++) {
+            particles.push({
+                x: (Math.random() - 0.5) * 1200,
+                y: (Math.random() - 0.5) * 800,
+                z: (Math.random() - 0.5) * 800,
+                size: 1 + Math.random() * 2.5,
+                speed: 0.2 + Math.random() * 0.4,
+                phase: Math.random() * Math.PI * 2,
+            });
+        }
+
+        let rotX = 0.3;
+        let rotY = 0;
+        let targetRotY = 0;
+
+        function project(x, y, z) {
+            const cx = W / 2;
+            const cy = H / 2;
+            const fov = 500;
+            const scale = fov / (fov + z);
+            return {
+                x: cx + x * scale,
+                y: cy + y * scale,
+                s: scale,
+            };
+        }
+
+        function drawEarth(time, intensity) {
+            ctx.clearRect(0, 0, W, H);
+
+            // Fundo gradiente
+            const grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 600);
+            grad.addColorStop(0, '#141a24');
+            grad.addColorStop(1, '#07090e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Rotação suave
+            rotY += 0.002 + intensity * 0.001;
+            const cosY = Math.cos(rotY);
+            const sinY = Math.sin(rotY);
+            const cosX = Math.cos(rotX);
+            const sinX = Math.sin(rotX);
+
+            // ── Pontos da Terra ──
+            const projected = [];
+            for (const p of earthPoints) {
+                let x = p.x;
+                let y = p.y;
+                let z = p.z;
+
+                // Rotação Y
+                let x1 = x * cosY - z * sinY;
+                let z1 = x * sinY + z * cosY;
+                let y1 = y;
+
+                // Rotação X
+                let y2 = y1 * cosX - z1 * sinX;
+                let z2 = y1 * sinX + z1 * cosX;
+                let x2 = x1;
+
+                const proj = project(x2, y2, z2);
+                if (proj.s > 0) {
+                    projected.push({
+                        x: proj.x,
+                        y: proj.y,
+                        s: proj.s,
+                        z: z2,
+                    });
+                }
+            }
+
+            // Ordenar por profundidade (Z)
+            projected.sort((a, b) => a.z - b.z);
+
+            // Desenhar conexões (rede)
+            ctx.strokeStyle = `rgba(247, 147, 26, ${0.04 + intensity * 0.06})`;
+            ctx.lineWidth = 0.6;
+            for (let i = 0; i < projected.length; i++) {
+                for (let j = i + 1; j < projected.length; j++) {
+                    const dx = projected[i].x - projected[j].x;
+                    const dy = projected[i].y - projected[j].y;
+                    if (dx * dx + dy * dy < 2500) {
+                        ctx.beginPath();
+                        ctx.moveTo(projected[i].x, projected[i].y);
+                        ctx.lineTo(projected[j].x, projected[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Desenhar pontos
+            for (const p of projected) {
+                const size = (1.2 + intensity * 1.5) * p.s;
+                const alpha = 0.5 + intensity * 0.4;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(247, 147, 26, ${alpha})`;
+                ctx.fill();
+            }
+
+            // ── Partículas (estrelas) ──
+            const time2 = Date.now() * 0.0003;
+            for (const p of particles) {
+                const x = p.x + Math.sin(time2 * p.speed + p.phase) * 30;
+                const y = p.y + Math.cos(time2 * p.speed * 0.7 + p.phase) * 20;
+                const z = p.z + Math.sin(time2 * p.speed * 0.5 + p.phase * 2) * 40;
+                const proj = project(x, y, z);
+                if (proj.s > 0) {
+                    const alpha = 0.2 + 0.4 * (0.5 + 0.5 * Math.sin(time2 * 0.5 + p.phase));
+                    ctx.beginPath();
+                    ctx.arc(proj.x, proj.y, p.size * proj.s * 0.6, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(200, 215, 255, ${alpha * (0.6 + intensity * 0.4)})`;
+                    ctx.fill();
+                }
+            }
+
+            // ── "Sol" no horizonte ──
+            const sunX = W / 2 + 300;
+            const sunY = H / 2 - 100;
+            const sunRadius = 50 + intensity * 20;
+            const gradSun = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius);
+            const sunAlpha = 0.6 + intensity * 0.3;
+            gradSun.addColorStop(0, `rgba(255, 220, 100, ${sunAlpha})`);
+            gradSun.addColorStop(0.4, `rgba(255, 180, 50, ${sunAlpha * 0.6})`);
+            gradSun.addColorStop(1, `rgba(255, 150, 30, 0)`);
+            ctx.fillStyle = gradSun;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Brilho do sol
+            const glow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius * 2.5);
+            glow.addColorStop(0, `rgba(255, 200, 80, ${0.08 + intensity * 0.08})`);
+            glow.addColorStop(1, `rgba(255, 200, 80, 0)`);
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, sunRadius * 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  3.  ÁUDIO — Web Audio API
+        // ═══════════════════════════════════════════════════════════
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                gainNode = audioCtx.createGain();
+                gainNode.gain.value = 0.25;
+                gainNode.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playNote(pitch, velocity, duration) {
+            if (!audioCtx || !isPlaying) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            // Tipo de onda: seno suave
+            osc.type = 'sine';
+            osc.frequency.value = pitch;
+
+            // Volume (velocity 0-1)
+            const vol = 0.08 + velocity * 0.25;
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+            osc.connect(gain);
+            gain.connect(gainNode);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playDrone(pitch, intensity) {
+            // Nota sustentada (drone) que acompanha o preço
+            if (currentOsc) {
+                try {
+                    currentOsc.stop();
+                } catch (_) { /* ignore */ }
+            }
+            if (!audioCtx || !isPlaying) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.value = pitch;
+
+            const vol = 0.04 + intensity * 0.12;
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+
+            osc.connect(gain);
+            gain.connect(gainNode);
+
+            osc.start();
+            currentOsc = osc;
+        }
+
+        function stopDrone() {
+            if (currentOsc) {
+                try {
+                    currentOsc.stop();
+                } catch (_) { /* ignore */ }
+                currentOsc = null;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  4.  COLETA DE DADOS — CoinGecko
+        // ═══════════════════════════════════════════════════════════
+
+        async function fetchMarketData() {
+            try {
+                const url =
+                    `${COINGECKO_BASE}/coins/markets?vs_currency=${VS_CURRENCY}&ids=${COIN_ID}&order=market_cap_desc&per_page=1&page=1&sparkline=false&price_change_percentage=24h`;
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                if (!data || data.length === 0) throw new Error('Sem dados');
+
+                const item = data[0];
+                price = item.current_price || 0;
+                volume = item.total_volume || 0;
+                change24h = item.price_change_percentage_24h || 0;
+
+                // Atualiza UI
+                priceDisplay.textContent = price ? `$${price.toLocaleString()}` : '—';
+                volumeDisplay.textContent = volume ? `$${(volume / 1e9).toFixed(2)}B` : '—';
+
+                const changeEl = changeDisplay;
+                if (change24h !== 0) {
+                    changeEl.textContent = `${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%`;
+                    changeEl.className = 'value change ' + (change24h >= 0 ? 'positive' : 'negative');
+                } else {
+                    changeEl.textContent = '—';
+                }
+
+                statusText.textContent = 'ao vivo';
+                return { price, volume, change24h };
+            } catch (err) {
+                console.warn('Erro na API:', err);
+                statusText.textContent = '⚠️ erro';
+                return null;
+            }
+        }
+
+        async function fetchHistoricalPrices(days = 7) {
+            try {
+                const url =
+                    `${COINGECKO_BASE}/coins/${COIN_ID}/market_chart?vs_currency=${VS_CURRENCY}&days=${days}&interval=daily`;
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                if (data && data.prices) {
+                    historicalPrices = data.prices.map(p => p[1]);
+                }
+            } catch (err) {
+                console.warn('Erro ao buscar histórico:', err);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  5.  LÓGICA MUSICAL
+        // ═══════════════════════════════════════════════════════════
+
+        function mapPriceToNote(priceVal) {
+            const clamped = Math.max(PRICE_MIN, Math.min(PRICE_MAX, priceVal));
+            const normalized = (clamped - PRICE_MIN) / (PRICE_MAX - PRICE_MIN);
+            return NOTE_BASE + normalized * NOTE_RANGE;
+        }
+
+        function mapChangeToBpm(change) {
+            // Variação de -10% a +10% → BPM 60 a 140
+            const clamped = Math.max(-15, Math.min(15, change));
+            const normalized = (clamped + 15) / 30; // 0..1
+            return 60 + normalized * 80;
+        }
+
+        function mapVolumeToIntensity(vol) {
+            // Volume em USD, normaliza entre 0 e 1 (assumindo max ~50B)
+            const maxVol = 50e9;
+            return Math.min(1, vol / maxVol);
+        }
+
+        function generateMelody() {
+            if (historicalPrices.length < 7) return;
+            // Pega os últimos 7 dias e interpola
+            const recent = historicalPrices.slice(-7);
+            const step = recent.length > 1 ? (recent.length - 1) / 16 : 1;
+            const notes = [];
+            for (let i = 0; i < 16; i++) {
+                const idx = Math.floor(i * step);
+                const val = recent[Math.min(idx, recent.length - 1)];
+                if (val) {
+                    const note = mapPriceToNote(val);
+                    notes.push(note);
+                }
+            }
+            return notes;
+        }
+
+        let melodyNotes = [];
+
+        function playMelodyNote() {
+            if (!isPlaying || !audioCtx) return;
+            if (melodyNotes.length === 0) {
+                melodyNotes = generateMelody() || [];
+                if (melodyNotes.length === 0) return;
+                melodyIndex = 0;
+            }
+
+            const note = melodyNotes[melodyIndex % melodyNotes.length];
+            const intensity = mapVolumeToIntensity(volume);
+            const vel = 0.3 + intensity * 0.5;
+            playNote(note, vel, 0.4);
+
+            melodyIndex++;
+            if (melodyIndex >= melodyNotes.length) {
+                // Regera a melodia a cada ciclo
+                melodyNotes = generateMelody() || melodyNotes;
+                melodyIndex = 0;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  6.  LOOP PRINCIPAL
+        // ═══════════════════════════════════════════════════════════
+
+        let lastDataUpdate = 0;
+        let lastMelodyTime = 0;
+
+        function mainLoop(timestamp) {
+            // Atualiza dados a cada 5 segundos
+            if (timestamp - lastDataUpdate > 5000) {
+                fetchMarketData().then(() => {
+                    // Atualiza BPM
+                    bpm = mapChangeToBpm(change24h);
+                    bpmDisplay.textContent = Math.round(bpm);
+
+                    // Atualiza drone (nota sustentada)
+                    if (isPlaying && price > 0) {
+                        const pitch = mapPriceToNote(price);
+                        const intensity = mapVolumeToIntensity(volume);
+                        playDrone(pitch, intensity);
+                    }
+
+                    // Regenera melodia com novos dados históricos
+                    fetchHistoricalPrices(7).then(() => {
+                        melodyNotes = generateMelody() || [];
+                        melodyIndex = 0;
+                    });
+                });
+                lastDataUpdate = timestamp;
+            }
+
+            // Toca nota da melodia a cada ~500ms (ajustado pelo BPM)
+            const interval = 60000 / bpm / 2; // semicolcheia
+            if (isPlaying && timestamp - lastMelodyTime > interval) {
+                playMelodyNote();
+                lastMelodyTime = timestamp;
+            }
+
+            // Renderiza a paisagem
+            const intensity = mapVolumeToIntensity(volume);
+            drawEarth(timestamp, intensity);
+
+            animationId = requestAnimationFrame(mainLoop);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  7.  PLAY / STOP
+        // ═══════════════════════════════════════════════════════════
+
+        async function start() {
+            if (isPlaying) return;
+
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
+
+            isPlaying = true;
+            playBtn.textContent = '⏹ Parar';
+            playBtn.classList.add('playing');
+            statusText.textContent = 'conectando...';
+
+            // Busca dados iniciais
+            await fetchMarketData();
+            await fetchHistoricalPrices(7);
+            melodyNotes = generateMelody() || [];
+            melodyIndex = 0;
+
+            if (price > 0) {
+                const pitch = mapPriceToNote(price);
+                const intensity = mapVolumeToIntensity(volume);
+                playDrone(pitch, intensity);
+                bpm = mapChangeToBpm(change24h);
+                bpmDisplay.textContent = Math.round(bpm);
+            }
+
+            lastDataUpdate = performance.now();
+            lastMelodyTime = performance.now();
+
+            if (!animationId) {
+                mainLoop(performance.now());
+            }
+        }
+
+        function stop() {
+            isPlaying = false;
+            playBtn.textContent = '▶ Iniciar';
+            playBtn.classList.remove('playing');
+            stopDrone();
+            // Não para o loop de renderização, mas para de tocar
+            if (currentOsc) {
+                try { currentOsc.stop(); } catch (_) {}
+                currentOsc = null;
+            }
+            statusText.textContent = 'pausado';
+        }
+
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                stop();
+            } else {
+                start();
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        //  8.  INICIALIZAÇÃO
+        // ═══════════════════════════════════════════════════════════
+
+        // Já começa a renderizar (sem som)
+        function initRender() {
+            drawEarth(0, 0);
+            animationId = requestAnimationFrame(initRender);
+        }
+        // Para não conflitar com o mainLoop, usamos um loop separado para o idle
+        let idleAnimId = null;
+
+        function idleRender(timestamp) {
+            drawEarth(timestamp, 0.2);
+            idleAnimId = requestAnimationFrame(idleRender);
+        }
+        idleRender(0);
+
+        // Sobrescreve o start/stop para gerenciar os loops
+        const origStart = start;
+        start = async function() {
+            if (idleAnimId) {
+                cancelAnimationFrame(idleAnimId);
+                idleAnimId = null;
+            }
+            await origStart();
+        };
+
+        const origStop = stop;
+        stop = function() {
+            origStop();
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            // Volta ao idle
+            if (!idleAnimId) {
+                idleRender(0);
+            }
+        };
+
+        // Atualiza status inicial
+        statusText.textContent = 'pronto';
+
+        console.log('🎵 Sound of Market carregado!');
+        console.log('📊 Dados: CoinGecko API · Pressione "Iniciar" para começar a sonificar o mercado.');
+    </script>
+</body>
+</html>
