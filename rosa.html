@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🌍 Planeta Alienígena Rosa</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #ff99cc;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #instrucoes {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffe6f0;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 2px 2px 8px rgba(120, 0, 60, 0.8);
+            background: rgba(180, 60, 120, 0.7);
+            backdrop-filter: blur(6px);
+            padding: 24px 30px;
+            border-radius: 30px;
+            border: 2px solid #ffb3d1;
+            transition: opacity 0.6s ease-out;
+            z-index: 10;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 0 40px rgba(255, 80, 180, 0.5);
+        }
+        .dica {
+            font-size: 17px;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        .titulo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffd9e6;
+            text-shadow: 0 0 20px #ff66aa;
+            margin-bottom: 10px;
+        }
+
+        #aviso-portal {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            background: rgba(255, 80, 200, 0.8);
+            backdrop-filter: blur(6px);
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #ffb3d1;
+            box-shadow: 0 0 30px #ff66aa;
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        }
+        #aviso-portal.visivel {
+            opacity: 1;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js">
+    </script>
+</head>
+<body>
+
+    <div id="instrucoes">
+        <div class="titulo">🌸 Planeta Rosa</div>
+        <div class="dica">👈 <b>Lado Esquerdo:</b> Arraste para Andar</div>
+        <div class="dica">👉 <b>Lado Direito:</b> Arraste para Olhar</div>
+        <div style="margin-top: 18px; font-size: 14px; color: #ffcce0;">Atravesse as portas para viajar!</div>
+    </div>
+
+    <div id="aviso-portal">🚪 Atravessando a porta... 🚪</div>
+
+    <div id="canvas-container"></div>
+
+    <script>
+        // ──────────────────────────────────────────────
+        // 1. VARIÁVEIS GLOBAIS
+        // ──────────────────────────────────────────────
+        let scene, camera, renderer;
+        let clock = new THREE.Clock();
+
+        const touchEsquerdo = { ativo: false, id: null, inicioX: 0, inicioY: 0, deltaX: 0, deltaY: 0 };
+        const touchDireito = { ativo: false, id: null, ultimoX: 0, ultimoY: 0 };
+
+        const velMovimento = 8.0;
+        const velVisao = 0.005;
+        const alturaOlhos = 1.6;
+        let cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+        const corCeu = 0xff99cc;
+        const corFog = 0xff99cc;
+        const corChao = 0xcc66aa;
+        const corGrid = 0xffb3d1;
+
+        let textMoneroKon = null;
+        let textMonerotopia = null;
+        let portaMoneroKon = null; // grupo da porta
+        let portaMonerotopia = null;
+
+        // Áreas de detecção (bounding boxes)
+        const areaPortaKon = { minX: -6.6, maxX: -5.4, minZ: -4.6, maxZ: -3.4 };
+        const areaPortaTopia = { minX: 5.4, maxX: 6.6, minZ: 3.4, maxZ: 4.6 };
+
+        const DESTINO = 'https://moneroverse.com';
+        let jaRedirecionouKon = false;
+        let jaRedirecionouTopia = false;
+
+        const aviso = document.getElementById('aviso-portal');
+
+        // ──────────────────────────────────────────────
+        // 2. INICIALIZAÇÃO
+        // ──────────────────────────────────────────────
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(corCeu);
+            scene.fog = new THREE.Fog(corFog, 15, 50);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, alturaOlhos, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Luzes
+            const luzAmbiente = new THREE.AmbientLight(0xffccdd, 0.6);
+            scene.add(luzAmbiente);
+
+            const luzDirecional = new THREE.DirectionalLight(0xffddff, 0.9);
+            luzDirecional.position.set(10, 20, 10);
+            luzDirecional.castShadow = true;
+            luzDirecional.shadow.camera.top = 20;
+            luzDirecional.shadow.camera.bottom = -20;
+            luzDirecional.shadow.camera.left = -20;
+            luzDirecional.shadow.camera.right = 20;
+            scene.add(luzDirecional);
+
+            const luzFill = new THREE.PointLight(0xff88aa, 0.5, 30);
+            luzFill.position.set(-5, 5, 5);
+            scene.add(luzFill);
+
+            criarChao();
+            carregarTextosEPortas();
+
+            window.addEventListener('resize', onWindowResize, false);
+            const areaTouch = document.body;
+            areaTouch.addEventListener('touchstart', onTouchStart, { passive: false });
+            areaTouch.addEventListener('touchmove', onTouchMove, { passive: false });
+            areaTouch.addEventListener('touchend', onTouchEnd, { passive: false });
+            areaTouch.addEventListener('touchcancel', onTouchEnd, { passive: false });
+
+            animate();
+        }
+
+        // ──────────────────────────────────────────────
+        // 3. CHÃO
+        // ──────────────────────────────────────────────
+        function criarChao() {
+            const geometriaChao = new THREE.PlaneGeometry(100, 100);
+            const materialChao = new THREE.MeshStandardMaterial({
+                color: corChao,
+                roughness: 0.9,
+                metalness: 0.1,
+                emissive: new THREE.Color(0x882244),
+                emissiveIntensity: 0.1
+            });
+            const malhaChao = new THREE.Mesh(geometriaChao, materialChao);
+            malhaChao.rotation.x = -Math.PI / 2;
+            malhaChao.receiveShadow = true;
+            scene.add(malhaChao);
+
+            const grid = new THREE.GridHelper(100, 100, corGrid, 0x883366);
+            grid.position.y = 0.02;
+            grid.material.opacity = 0.3;
+            grid.material.transparent = true;
+            scene.add(grid);
+        }
+
+        // ──────────────────────────────────────────────
+        // 4. TEXTOS 3D E PORTAS REAIS
+        // ──────────────────────────────────────────────
+        function carregarTextosEPortas() {
+            const loader = new THREE.FontLoader();
+            const urlFonte = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/helvetiker_regular.typeface.json';
+
+            loader.load(urlFonte, function(font) {
+                // ---- MoneroKon ----
+                const geo1 = new THREE.TextGeometry('MoneroKon', {
+                    font: font,
+                    size: 0.8,
+                    height: 0.2,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.02,
+                    bevelSize: 0.02,
+                    bevelSegments: 5
+                });
+                const mat1 = new THREE.MeshStandardMaterial({
+                    color: 0xff66aa,
+                    emissive: 0x661144,
+                    emissiveIntensity: 0.4,
+                    roughness: 0.3,
+                    metalness: 0.2
+                });
+                textMoneroKon = new THREE.Mesh(geo1, mat1);
+                textMoneroKon.position.set(-6, 2.8, -4);
+                textMoneroKon.castShadow = true;
+                scene.add(textMoneroKon);
+
+                // Porta real MoneroKon
+                portaMoneroKon = criarPorta(0xcc88ff, 0xaa44dd);
+                portaMoneroKon.position.set(-6, 0, -4);
+                scene.add(portaMoneroKon);
+
+                // ---- Monerotopia ----
+                const geo2 = new THREE.TextGeometry('Monerotopia', {
+                    font: font,
+                    size: 0.8,
+                    height: 0.2,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.02,
+                    bevelSize: 0.02,
+                    bevelSegments: 5
+                });
+                const mat2 = new THREE.MeshStandardMaterial({
+                    color: 0xffaa66,
+                    emissive: 0x664411,
+                    emissiveIntensity: 0.4,
+                    roughness: 0.3,
+                    metalness: 0.2
+                });
+                textMonerotopia = new THREE.Mesh(geo2, mat2);
+                textMonerotopia.position.set(6, 2.8, 4);
+                textMonerotopia.castShadow = true;
+                scene.add(textMonerotopia);
+
+                // Porta real Monerotopia
+                portaMonerotopia = criarPorta(0xffaa66, 0xcc7733);
+                portaMonerotopia.position.set(6, 0, 4);
+                scene.add(portaMonerotopia);
+
+                setTimeout(ocultarInstrucoes, 3000);
+            },
+            undefined,
+            function(error) {
+                console.error('Erro ao carregar fonte:', error);
+            });
+        }
+
+        // Função para criar uma porta real (estrutura retangular)
+        function criarPorta(corPainel, corMoldura) {
+            const grupo = new THREE.Group();
+
+            // Dimensões da porta (largura, altura, profundidade)
+            const largura = 1.2;
+            const altura = 2.2;
+            const espessura = 0.08;
+
+            // 1. Moldura (três partes: laterais e topo)
+            const materialMoldura = new THREE.MeshStandardMaterial({
+                color: corMoldura,
+                roughness: 0.5,
+                metalness: 0.3,
+                emissive: corMoldura,
+                emissiveIntensity: 0.1
+            });
+
+            // Lado esquerdo
+            const geoMarco = new THREE.BoxGeometry(0.1, altura, 0.1);
+            const marcoEsq = new THREE.Mesh(geoMarco, materialMoldura);
+            marcoEsq.position.set(-largura / 2 - 0.05, altura / 2, 0);
+            grupo.add(marcoEsq);
+
+            // Lado direito
+            const marcoDir = new THREE.Mesh(geoMarco, materialMoldura);
+            marcoDir.position.set(largura / 2 + 0.05, altura / 2, 0);
+            grupo.add(marcoDir);
+
+            // Topo
+            const geoTopo = new THREE.BoxGeometry(largura + 0.2, 0.1, 0.1);
+            const topo = new THREE.Mesh(geoTopo, materialMoldura);
+            topo.position.set(0, altura + 0.05, 0);
+            grupo.add(topo);
+
+            // 2. Painel da porta (com textura ou cor sólida)
+            const materialPainel = new THREE.MeshStandardMaterial({
+                color: corPainel,
+                roughness: 0.7,
+                metalness: 0.1,
+                emissive: corPainel,
+                emissiveIntensity: 0.05
+            });
+            const geoPainel = new THREE.BoxGeometry(largura - 0.1, altura - 0.1, espessura);
+            const painel = new THREE.Mesh(geoPainel, materialPainel);
+            painel.position.set(0, altura / 2, 0.01);
+            grupo.add(painel);
+
+            // 3. Maçaneta
+            const materialMaca = new THREE.MeshStandardMaterial({
+                color: 0xffd700,
+                roughness: 0.3,
+                metalness: 0.9,
+                emissive: 0xffaa00,
+                emissiveIntensity: 0.2
+            });
+            const geoMaca = new THREE.SphereGeometry(0.08, 8, 8);
+            const maca = new THREE.Mesh(geoMaca, materialMaca);
+            maca.position.set(0.4, 0.9, 0.12); // lado direito, altura média
+            grupo.add(maca);
+
+            // 4. Brilho ao redor da porta (efeito de portal)
+            const luzPorta = new THREE.PointLight(corPainel, 0.5, 2);
+            luzPorta.position.set(0, altura / 2, 0.2);
+            grupo.add(luzPorta);
+
+            // Guardar referência para animação
+            grupo.userData = {
+                painel: painel,
+                maca: maca,
+                luz: luzPorta,
+                materialPainel: materialPainel,
+                materialMaca: materialMaca
+            };
+
+            return grupo;
+        }
+
+        // ──────────────────────────────────────────────
+        // 5. EVENTOS DE TOQUE
+        // ──────────────────────────────────────────────
+        function ocultarInstrucoes() {
+            const painel = document.getElementById('instrucoes');
+            if (painel && painel.style.opacity !== '0') {
+                painel.style.opacity = '0';
+                setTimeout(() => { painel.style.display = 'none'; }, 600);
+            }
+        }
+
+        function onTouchStart(e) {
+            e.preventDefault();
+            ocultarInstrucoes();
+            const meioTela = window.innerWidth / 2;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const toque = e.changedTouches[i];
+                if (toque.clientX < meioTela && !touchEsquerdo.ativo) {
+                    touchEsquerdo.ativo = true;
+                    touchEsquerdo.id = toque.identifier;
+                    touchEsquerdo.inicioX = toque.clientX;
+                    touchEsquerdo.inicioY = toque.clientY;
+                    touchEsquerdo.deltaX = 0;
+                    touchEsquerdo.deltaY = 0;
+                } else if (toque.clientX >= meioTela && !touchDireito.ativo) {
+                    touchDireito.ativo = true;
+                    touchDireito.id = toque.identifier;
+                    touchDireito.ultimoX = toque.clientX;
+                    touchDireito.ultimoY = toque.clientY;
+                }
+            }
+        }
+
+        function onTouchMove(e) {
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const toque = e.changedTouches[i];
+                if (touchEsquerdo.ativo && toque.identifier === touchEsquerdo.id) {
+                    touchEsquerdo.deltaX = toque.clientX - touchEsquerdo.inicioX;
+                    touchEsquerdo.deltaY = toque.clientY - touchEsquerdo.inicioY;
+                } else if (touchDireito.ativo && toque.identifier === touchDireito.id) {
+                    const difX = toque.clientX - touchDireito.ultimoX;
+                    const difY = toque.clientY - touchDireito.ultimoY;
+                    cameraEuler.setFromQuaternion(camera.quaternion);
+                    cameraEuler.y -= difX * velVisao;
+                    cameraEuler.x -= difY * velVisao;
+                    cameraEuler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraEuler.x));
+                    camera.quaternion.setFromEuler(cameraEuler);
+                    touchDireito.ultimoX = toque.clientX;
+                    touchDireito.ultimoY = toque.clientY;
+                }
+            }
+        }
+
+        function onTouchEnd(e) {
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const toque = e.changedTouches[i];
+                if (touchEsquerdo.ativo && toque.identifier === touchEsquerdo.id) {
+                    touchEsquerdo.ativo = false;
+                    touchEsquerdo.id = null;
+                    touchEsquerdo.deltaX = 0;
+                    touchEsquerdo.deltaY = 0;
+                } else if (touchDireito.ativo && toque.identifier === touchDireito.id) {
+                    touchDireito.ativo = false;
+                    touchDireito.id = null;
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // ──────────────────────────────────────────────
+        // 6. MOVIMENTO
+        // ──────────────────────────────────────────────
+        function atualizarMovimento(dt) {
+            if (!touchEsquerdo.ativo) return;
+
+            const limiteJoystick = 50;
+            let moveX = touchEsquerdo.deltaX / limiteJoystick;
+            let moveY = touchEsquerdo.deltaY / limiteJoystick;
+
+            moveX = Math.max(-1, Math.min(1, moveX));
+            moveY = Math.max(-1, Math.min(1, moveY));
+
+            if (moveX !== 0 || moveY !== 0) {
+                let direcao = new THREE.Vector3(moveX, 0, moveY);
+                cameraEuler.setFromQuaternion(camera.quaternion);
+                direcao.applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraEuler.y);
+                if (direcao.length() > 1) direcao.normalize();
+
+                const intensidade = Math.sqrt(moveX * moveX + moveY * moveY);
+                const velocidadeFinal = Math.min(1, intensidade) * velMovimento * dt;
+
+                camera.position.addScaledVector(direcao, velocidadeFinal);
+                camera.position.y = alturaOlhos;
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // 7. DETECÇÃO DE PASSAGEM PELA PORTA
+        // ──────────────────────────────────────────────
+        function verificarPortas() {
+            const pos = camera.position;
+
+            // Verifica se o jogador está dentro da área da porta MoneroKon
+            if (pos.x >= areaPortaKon.minX && pos.x <= areaPortaKon.maxX &&
+                pos.z >= areaPortaKon.minZ && pos.z <= areaPortaKon.maxZ &&
+                !jaRedirecionouKon) {
+                jaRedirecionouKon = true;
+                mostrarAviso('🚪 Atravessando MoneroKon → MoneroVerse 🚪');
+                setTimeout(() => {
+                    window.open(DESTINO, '_blank');
+                }, 400);
+            }
+
+            // Verifica se o jogador está dentro da área da porta Monerotopia
+            if (pos.x >= areaPortaTopia.minX && pos.x <= areaPortaTopia.maxX &&
+                pos.z >= areaPortaTopia.minZ && pos.z <= areaPortaTopia.maxZ &&
+                !jaRedirecionouTopia) {
+                jaRedirecionouTopia = true;
+                mostrarAviso('🚪 Atravessando Monerotopia → MoneroVerse 🚪');
+                setTimeout(() => {
+                    window.open(DESTINO, '_blank');
+                }, 400);
+            }
+
+            // Resetar bloqueio se sair da área (para permitir nova tentativa)
+            if (!(pos.x >= areaPortaKon.minX && pos.x <= areaPortaKon.maxX &&
+                    pos.z >= areaPortaKon.minZ && pos.z <= areaPortaKon.maxZ)) {
+                jaRedirecionouKon = false;
+            }
+            if (!(pos.x >= areaPortaTopia.minX && pos.x <= areaPortaTopia.maxX &&
+                    pos.z >= areaPortaTopia.minZ && pos.z <= areaPortaTopia.maxZ)) {
+                jaRedirecionouTopia = false;
+            }
+        }
+
+        function mostrarAviso(texto) {
+            aviso.textContent = texto;
+            aviso.classList.add('visivel');
+            setTimeout(() => {
+                aviso.classList.remove('visivel');
+            }, 1500);
+        }
+
+        // ──────────────────────────────────────────────
+        // 8. ANIMAÇÃO DAS PORTAS (brilho)
+        // ──────────────────────────────────────────────
+        function animarPortas(time) {
+            // Brilho pulsante nas portas
+            [portaMoneroKon, portaMonerotopia].forEach((porta, idx) => {
+                if (!porta) return;
+                const dados = porta.userData;
+                const intensidade = 0.3 + 0.2 * Math.sin(time * 1.5 + idx * 2);
+                dados.luz.intensity = intensidade;
+                dados.materialPainel.emissiveIntensity = 0.05 + 0.1 * Math.sin(time * 1.2 + idx);
+                // Maçaneta brilha
+                dados.materialMaca.emissiveIntensity = 0.2 + 0.3 * Math.sin(time * 2 + idx);
+            });
+        }
+
+        // ──────────────────────────────────────────────
+        // 9. LOOP PRINCIPAL
+        // ──────────────────────────────────────────────
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = Math.min(clock.getDelta(), 0.05);
+            const elapsed = clock.elapsedTime;
+
+            atualizarMovimento(dt);
+            animarPortas(elapsed);
+            verificarPortas();
+
+            renderer.render(scene, camera);
+        }
+
+        // ──────────────────────────────────────────────
+        // 10. INICIAR
+        // ──────────────────────────────────────────────
+        window.onload = init;
+    </script>
+</body>
+</html>
