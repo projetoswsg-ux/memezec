@@ -130,11 +130,14 @@
         let portaMonerotopia = null;
 
         // Áreas de detecção (ajustadas para a face frontal do cubo)
-        const OFFSET = 0.05; // pequeno deslocamento para frente
+        const OFFSET = 0.05;
         const areaPortaKon = { minX: -6.6, maxX: -5.4, minZ: -4.45, maxZ: -3.45 };
         const areaPortaTopia = { minX: 5.4, maxX: 6.6, minZ: 3.35, maxZ: 4.55 };
 
-        const DESTINO = 'https://moneroverse.com';
+        // Destinos específicos
+        const DESTINO_KON = 'https://www.monerokon.org';
+        const DESTINO_TOPIA = 'https://monerotopia.com';
+
         let jaRedirecionouKon = false;
         let jaRedirecionouTopia = false;
 
@@ -534,8 +537,8 @@
             borda.rotation.copy(mesh.rotation);
             scene.add(borda);
 
-            // AABB para colisão com recuo menor (área de colisão mais próxima do visual)
-            const recuo = 0.2; // antes era 0.3
+            // AABB para colisão com recuo menor
+            const recuo = 0.2;
             const halfW = largura / 2 - recuo;
             const halfD = profundidade / 2 - recuo;
             const cx = mesh.position.x;
@@ -852,28 +855,24 @@
         }
 
         // ──────────────────────────────────────────────
-        // 7. MOVIMENTO COM COLISÃO (MELHORADA)
+        // 7. MOVIMENTO COM COLISÃO
         // ──────────────────────────────────────────────
         function aplicarColisoes(pos) {
-            const raio = 0.45; // aumentado de 0.4 para 0.45
-            // Repetir para resolver penetrações residuais
+            const raio = 0.45;
             for (let iter = 0; iter < 3; iter++) {
                 for (const cubo of listaCubos) {
-                    // Ponto mais próximo do centro do jogador na AABB
                     let closestX = Math.max(cubo.minX, Math.min(pos.x, cubo.maxX));
                     let closestZ = Math.max(cubo.minZ, Math.min(pos.z, cubo.maxZ));
                     let dx = pos.x - closestX;
                     let dz = pos.z - closestZ;
                     let dist = Math.sqrt(dx * dx + dz * dz);
                     if (dist < raio && dist > 0.001) {
-                        // Empurrar para fora
                         let overlap = raio - dist;
                         let normX = dx / dist;
                         let normZ = dz / dist;
                         pos.x += normX * overlap;
                         pos.z += normZ * overlap;
                     } else if (dist < 0.001) {
-                        // Centro dentro do cubo: empurrar para a borda mais próxima
                         let distToMinX = pos.x - cubo.minX;
                         let distToMaxX = cubo.maxX - pos.x;
                         let distToMinZ = pos.z - cubo.minZ;
@@ -909,11 +908,8 @@
                 const velocidadeFinal = Math.min(1, intensidade) * velMovimento * dt;
 
                 let novaPos = camera.position.clone().addScaledVector(direcao, velocidadeFinal);
-
-                // Aplica colisão com os cubos
                 novaPos = aplicarColisoes(novaPos);
 
-                // Limite do mundo (círculo)
                 const limite = 19.5;
                 const dist = Math.sqrt(novaPos.x * novaPos.x + novaPos.z * novaPos.z);
                 if (dist < limite) {
@@ -928,31 +924,34 @@
         }
 
         // ──────────────────────────────────────────────
-        // 8. DETECÇÃO DAS PORTAS
+        // 8. DETECÇÃO DAS PORTAS (COM DESTINOS PERSONALIZADOS)
         // ──────────────────────────────────────────────
         function verificarPortas() {
             const pos = camera.position;
 
+            // Portal MoneroKon
             if (pos.x >= areaPortaKon.minX && pos.x <= areaPortaKon.maxX &&
                 pos.z >= areaPortaKon.minZ && pos.z <= areaPortaKon.maxZ &&
                 !jaRedirecionouKon) {
                 jaRedirecionouKon = true;
-                mostrarAviso('Browsing...');
+                mostrarAviso('🌐 Entrando no MoneroKon...');
                 setTimeout(() => {
-                    window.open(DESTINO, '_blank');
+                    window.open(DESTINO_KON, '_blank');
                 }, 400);
             }
 
+            // Portal Monerotopia
             if (pos.x >= areaPortaTopia.minX && pos.x <= areaPortaTopia.maxX &&
                 pos.z >= areaPortaTopia.minZ && pos.z <= areaPortaTopia.maxZ &&
                 !jaRedirecionouTopia) {
                 jaRedirecionouTopia = true;
-                mostrarAviso('Browsing...');
+                mostrarAviso('🌐 Entrando na Monerotopia...');
                 setTimeout(() => {
-                    window.open(DESTINO, '_blank');
+                    window.open(DESTINO_TOPIA, '_blank');
                 }, 400);
             }
 
+            // Reset dos flags quando sair das áreas
             if (!(pos.x >= areaPortaKon.minX && pos.x <= areaPortaKon.maxX &&
                     pos.z >= areaPortaKon.minZ && pos.z <= areaPortaKon.maxZ)) {
                 jaRedirecionouKon = false;
