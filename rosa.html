@@ -92,13 +92,13 @@
 <body>
 
     <div id="instrucoes">
-        <div class="titulo"></div>
+        <div class="titulo">✨ Moneroverse</div>
         <div class="dica"> <b> Left side:</b> Drag to Walk </div>
         <div class="dica"> <b> Right Side:</b> Drag to Look </div>
-        <div style="margin-top: 18px; font-size: 14px; color: #ffcce0;">Go through the doors</div>
+        <div style="margin-top: 18px; font-size: 14px; color: #ffcce0;">Atravesse o portal para voltar</div>
     </div>
 
-    <div id="aviso-portal">Browsing... </div>
+    <div id="aviso-portal">🌌 Viajando...</div>
 
     <div id="canvas-container"></div>
 
@@ -137,13 +137,16 @@
         // Destinos específicos
         const DESTINO_KON = 'https://www.monerokon.org';
         const DESTINO_TOPIA = 'https://monerotopia.com';
+        const DESTINO_MONEROVERSE = 'https://moneroverse.com';
 
         let jaRedirecionouKon = false;
         let jaRedirecionouTopia = false;
+        let jaRedirecionouMoneroverse = false;
 
         const aviso = document.getElementById('aviso-portal');
         let muroMagico = null;
         let nuvensNevoa = null;
+        let portalPretoEstrelas = null; // referência ao novo portal
 
         // Lista de cubos para colisão (AABBs)
         const listaCubos = [];
@@ -157,7 +160,8 @@
             scene.fog = new THREE.Fog(corNevoa, distNevoa, distNevoaMax);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, alturaOlhos, 0);
+            // Posição inicial: em frente ao portal preto (nasce no portal)
+            camera.position.set(0, alturaOlhos, 19.0);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -184,6 +188,7 @@
             criarChao();
             criarMuroMagico();
             criarNevoa();
+            criarPortalPretoEstrelas(); // <-- NOVO PORTAL
             carregarTextosEPortas();
 
             window.addEventListener('resize', onWindowResize, false);
@@ -502,6 +507,120 @@
             texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(2, 1);
             return texture;
+        }
+
+        // ──────────────────────────────────────────────
+        // 3d. PORTAL PRETO COM ESTRELAS (NOVO)
+        // ──────────────────────────────────────────────
+        function criarPortalPretoEstrelas() {
+            const grupo = new THREE.Group();
+
+            // Posição no muro (Z positivo)
+            const posX = 0;
+            const posY = 2.25; // centro do muro em altura
+            const posZ = 20.5; // raio do muro
+            grupo.position.set(posX, posY, posZ);
+
+            // Orientação: olhar para o centro (0, posY, 0)
+            grupo.lookAt(0, posY, 0);
+
+            // Disco preto com brilho sutil
+            const raioPortal = 1.8;
+            const geoDisco = new THREE.CircleGeometry(raioPortal, 48);
+            const matDisco = new THREE.MeshStandardMaterial({
+                color: 0x000000,
+                emissive: 0x111122,
+                emissiveIntensity: 0.3,
+                roughness: 0.4,
+                metalness: 0.1,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.92
+            });
+            const disco = new THREE.Mesh(geoDisco, matDisco);
+            disco.position.z = 0.01; // ligeiramente à frente
+            grupo.add(disco);
+
+            // Estrelas (partículas brilhantes)
+            const numEstrelas = 400;
+            const posEstrelas = new Float32Array(numEstrelas * 3);
+            const tamanhos = new Float32Array(numEstrelas);
+            const cores = new Float32Array(numEstrelas * 3);
+            for (let i = 0; i < numEstrelas; i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const r = Math.sqrt(Math.random()) * raioPortal * 0.95;
+                const x = Math.cos(ang) * r;
+                const y = Math.sin(ang) * r;
+                posEstrelas[i * 3] = x;
+                posEstrelas[i * 3 + 1] = y;
+                posEstrelas[i * 3 + 2] = (Math.random() - 0.5) * 0.15;
+
+                tamanhos[i] = 0.02 + Math.random() * 0.08;
+
+                const brilho = 0.6 + Math.random() * 0.4;
+                cores[i * 3] = brilho;
+                cores[i * 3 + 1] = brilho * (0.8 + Math.random() * 0.2);
+                cores[i * 3 + 2] = 1.0;
+            }
+            const geoEstrelas = new THREE.BufferGeometry();
+            geoEstrelas.setAttribute('position', new THREE.BufferAttribute(posEstrelas, 3));
+            geoEstrelas.setAttribute('size', new THREE.BufferAttribute(tamanhos, 1));
+            geoEstrelas.setAttribute('color', new THREE.BufferAttribute(cores, 3));
+
+            const matEstrelas = new THREE.PointsMaterial({
+                size: 0.08,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                sizeAttenuation: true
+            });
+            const estrelas = new THREE.Points(geoEstrelas, matEstrelas);
+            estrelas.position.z = 0.02;
+            grupo.add(estrelas);
+
+            // Anel brilhante
+            const geoAnel = new THREE.TorusGeometry(raioPortal * 0.98, 0.06, 16, 64);
+            const matAnel = new THREE.MeshStandardMaterial({
+                color: 0x8888ff,
+                emissive: 0x4444aa,
+                emissiveIntensity: 1.0,
+                transparent: true,
+                opacity: 0.7
+            });
+            const anel = new THREE.Mesh(geoAnel, matAnel);
+            anel.position.z = 0.03;
+            anel.rotation.x = Math.PI / 2;
+            grupo.add(anel);
+
+            // Luz suave
+            const luz = new THREE.PointLight(0x4466ff, 0.6, 6);
+            luz.position.set(0, 0, 0.4);
+            grupo.add(luz);
+
+            // Guardar referências para animação
+            grupo.userData = {
+                estrelas: estrelas,
+                anel: anel,
+                matAnel: matAnel,
+                matDisco: matDisco,
+                luz: luz,
+                offset: 0
+            };
+
+            scene.add(grupo);
+            portalPretoEstrelas = grupo;
+
+            // Área de detecção (ajustada para a posição do portal)
+            // O portal está em (0, 2.25, 20.5), com raio ~1.8
+            // Vamos definir uma área retangular ao redor
+            window.areaPortalMoneroverse = {
+                minX: -1.5,
+                maxX: 1.5,
+                minZ: 19.0,
+                maxZ: 22.0
+            };
         }
 
         // ──────────────────────────────────────────────
@@ -951,6 +1070,25 @@
                 }, 400);
             }
 
+            // NOVO: Portal Preto (Moneroverse)
+            const area = window.areaPortalMoneroverse;
+            if (area) {
+                if (pos.x >= area.minX && pos.x <= area.maxX &&
+                    pos.z >= area.minZ && pos.z <= area.maxZ &&
+                    !jaRedirecionouMoneroverse) {
+                    jaRedirecionouMoneroverse = true;
+                    mostrarAviso('🌌 Voltando para o Moneroverse...');
+                    setTimeout(() => {
+                        window.open(DESTINO_MONEROVERSE, '_blank');
+                    }, 400);
+                }
+                // Reset do flag quando sair
+                if (!(pos.x >= area.minX && pos.x <= area.maxX &&
+                        pos.z >= area.minZ && pos.z <= area.maxZ)) {
+                    jaRedirecionouMoneroverse = false;
+                }
+            }
+
             // Reset dos flags quando sair das áreas
             if (!(pos.x >= areaPortaKon.minX && pos.x <= areaPortaKon.maxX &&
                     pos.z >= areaPortaKon.minZ && pos.z <= areaPortaKon.maxZ)) {
@@ -992,6 +1130,30 @@
                 dados.luz.intensity = intensidade;
                 dados.materialPortal.emissiveIntensity = 0.7 + 0.3 * Math.sin(time * 1.3 + idx);
             });
+
+            // Animar portal preto
+            if (portalPretoEstrelas) {
+                const dados = portalPretoEstrelas.userData;
+                // Estrelas piscam
+                const estrelas = dados.estrelas;
+                const sizeAttr = estrelas.geometry.attributes.size;
+                if (sizeAttr) {
+                    const sizes = sizeAttr.array;
+                    for (let i = 0; i < sizes.length; i++) {
+                        const base = 0.02 + (i % 10) * 0.006;
+                        sizes[i] = base * (0.7 + 0.3 * Math.sin(time * 2.0 + i * 1.7));
+                    }
+                    sizeAttr.needsUpdate = true;
+                }
+                // Anel gira
+                dados.anel.rotation.z = time * 0.4;
+                // Brilho do anel
+                dados.matAnel.emissiveIntensity = 0.8 + 0.4 * Math.sin(time * 0.9);
+                // Luz pisca
+                dados.luz.intensity = 0.5 + 0.3 * Math.sin(time * 1.2);
+                // Disco com leve pulsação
+                dados.matDisco.emissiveIntensity = 0.2 + 0.15 * Math.sin(time * 0.7);
+            }
         }
 
         function animarMuro(time) {
