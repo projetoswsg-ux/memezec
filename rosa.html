@@ -93,8 +93,8 @@
 
     <div id="instrucoes">
         <div class="titulo"></div>
-        <div class="dica">👈 <b> Left side:</b> Drag to Walk </div>
-        <div class="dica">👉 <b> Right Side:</b> Drag to Look </div>
+        <div class="dica"> <b> Left side:</b> Drag to Walk </div>
+        <div class="dica"> <b> Right Side:</b> Drag to Look </div>
         <div style="margin-top: 18px; font-size: 14px; color: #ffcce0;">Go through the doors</div>
     </div>
 
@@ -843,7 +843,7 @@
                 pos.z >= areaPortaKon.minZ && pos.z <= areaPortaKon.maxZ &&
                 !jaRedirecionouKon) {
                 jaRedirecionouKon = true;
-                mostrarAviso('🚪 Atravessando MoneroKon → MoneroVerse 🚪');
+                mostrarAviso('Browsing...');
                 setTimeout(() => {
                     window.open(DESTINO, '_blank');
                 }, 400);
@@ -853,7 +853,7 @@
                 pos.z >= areaPortaTopia.minZ && pos.z <= areaPortaTopia.maxZ &&
                 !jaRedirecionouTopia) {
                 jaRedirecionouTopia = true;
-                mostrarAviso('🚪 Atravessando Monerotopia → MoneroVerse 🚪');
+                mostrarAviso('Browsing...');
                 setTimeout(() => {
                     window.open(DESTINO, '_blank');
                 }, 400);
