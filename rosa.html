@@ -118,9 +118,8 @@
         let cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
         const corCeu = 0xff99cc;
-        // ── NÉVOA CINZA ──
-        const corNevoa = 0x8899aa; // cinza com leve tom azulado
-        const distNevoa = 8; // mais densa perto
+        const corNevoa = 0x8899aa;
+        const distNevoa = 8;
         const distNevoaMax = 35;
 
         const corGrid = 0xffaacc;
@@ -130,8 +129,10 @@
         let portaMoneroKon = null;
         let portaMonerotopia = null;
 
-        const areaPortaKon = { minX: -6.6, maxX: -5.4, minZ: -4.6, maxZ: -3.4 };
-        const areaPortaTopia = { minX: 5.4, maxX: 6.6, minZ: 3.4, maxZ: 4.6 };
+        // Áreas de detecção (ajustadas para a face frontal do cubo)
+        const OFFSET = 0.05; // pequeno deslocamento para frente
+        const areaPortaKon = { minX: -6.6, maxX: -5.4, minZ: -4.45, maxZ: -3.45 };
+        const areaPortaTopia = { minX: 5.4, maxX: 6.6, minZ: 3.35, maxZ: 4.55 };
 
         const DESTINO = 'https://moneroverse.com';
         let jaRedirecionouKon = false;
@@ -139,8 +140,6 @@
 
         const aviso = document.getElementById('aviso-portal');
         let muroMagico = null;
-
-        // ── Partículas de névoa ──
         let nuvensNevoa = null;
 
         // ──────────────────────────────────────────────
@@ -149,7 +148,6 @@
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(corCeu);
-            // ── NÉVOA CINZA ──
             scene.fog = new THREE.Fog(corNevoa, distNevoa, distNevoaMax);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -179,7 +177,7 @@
 
             criarChao();
             criarMuroMagico();
-            criarNevoa(); // partículas de neblina
+            criarNevoa();
             carregarTextosEPortas();
 
             window.addEventListener('resize', onWindowResize, false);
@@ -263,7 +261,7 @@
         }
 
         // ──────────────────────────────────────────────
-        // 3b. NÉVOA EM PARTÍCULAS (camada adicional)
+        // 3b. NÉVOA EM PARTÍCULAS
         // ──────────────────────────────────────────────
         function criarNevoa() {
             const count = 800;
@@ -295,7 +293,6 @@
             nuvensNevoa = new THREE.Points(geo, mat);
             scene.add(nuvensNevoa);
 
-            // Guardar para animação (movimento lento)
             nuvensNevoa.userData = {
                 velocidades: Array.from({ length: count }, () => ({
                     ang: (Math.random() - 0.5) * 0.002,
@@ -502,13 +499,60 @@
         }
 
         // ──────────────────────────────────────────────
-        // 4. TEXTOS E PORTAS
+        // 4. FACHADAS EM CUBO (blocos 3D)
+        // ──────────────────────────────────────────────
+        function criarFachadaCubo(x, z, rotacaoY, cor) {
+            const largura = 8.6;    // cobre portal e letreiro
+            const altura = 4.6;
+            const profundidade = 4.6; // espessura do bloco
+
+            const geo = new THREE.BoxGeometry(largura, altura, profundidade);
+            const mat = new THREE.MeshStandardMaterial({
+                color: cor,
+                roughness: 0.5,
+                metalness: 0.2,
+                emissive: cor,
+                emissiveIntensity: 0.1,
+                side: THREE.DoubleSide
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            // Posiciona o centro do cubo de modo que a face frontal fique em 'z' (ou x) exato
+            // Para o lado MoneroKon (x negativo, z=-4), a face frontal está voltada para +Z? 
+            // Na verdade, o portal está voltado para o jogador, que está em Z=0. 
+            // Para o lado esquerdo, a face frontal está em Z=-4+profundidade/2? 
+            // Vamos posicionar de forma que a face frontal coincida com a posição Z do portal.
+            // O portal está em z=-4+OFFSET. Queremos que a face frontal do cubo fique em z=-4 (sem offset)
+            // Assim, o cubo fica um pouco atrás.
+            const posZ = z - (profundidade / 2); // face frontal em z
+            mesh.position.set(x, 2.3, posZ); // y=2.3 para centralizar verticalmente (altura 4.6)
+            mesh.rotation.y = rotacaoY;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+
+            // Arestas decorativas (opcional)
+            const bordaMat = new THREE.LineBasicMaterial({ color: 0xffdd99, transparent: true, opacity: 0.2 });
+            const bordaGeo = new THREE.EdgesGeometry(geo);
+            const borda = new THREE.LineSegments(bordaGeo, bordaMat);
+            borda.position.copy(mesh.position);
+            borda.rotation.copy(mesh.rotation);
+            scene.add(borda);
+
+            return mesh;
+        }
+
+        // ──────────────────────────────────────────────
+        // 5. TEXTOS E PORTAS (com ajuste de posição)
         // ──────────────────────────────────────────────
         function carregarTextosEPortas() {
             const loader = new THREE.FontLoader();
             const urlFonte = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/helvetiker_regular.typeface.json';
 
             loader.load(urlFonte, function(font) {
+                // ---- Fachadas em cubo (atrás dos portais) ----
+                criarFachadaCubo(-6, -4, 0, 0x225522); // MoneroKon - verde escuro
+                criarFachadaCubo(6, 4, Math.PI, 0x884422); // Monerotopia - laranja escuro
+
                 // ---- MoneroKon (VERDE FLORESCENTE) ----
                 const geo1 = new THREE.TextGeometry('MoneroKon', {
                     font: font,
@@ -528,12 +572,12 @@
                     metalness: 0.2
                 });
                 textMoneroKon = new THREE.Mesh(geo1, mat1);
-                textMoneroKon.position.set(-6, 2.8, -4);
+                textMoneroKon.position.set(-6, 2.8, -4 + OFFSET);
                 textMoneroKon.castShadow = true;
                 scene.add(textMoneroKon);
 
                 portaMoneroKon = criarPortalMagico(0x66ff00, 0x00cc44);
-                portaMoneroKon.position.set(-6, 0, -4);
+                portaMoneroKon.position.set(-6, 0, -4 + OFFSET);
                 scene.add(portaMoneroKon);
 
                 // ---- Monerotopia (laranja/rosa) ----
@@ -555,12 +599,12 @@
                     metalness: 0.2
                 });
                 textMonerotopia = new THREE.Mesh(geo2, mat2);
-                textMonerotopia.position.set(6, 2.8, 4);
+                textMonerotopia.position.set(6, 2.8, 4 - OFFSET);
                 textMonerotopia.castShadow = true;
                 scene.add(textMonerotopia);
 
                 portaMonerotopia = criarPortalMagico(0xffaa66, 0xcc7733);
-                portaMonerotopia.position.set(6, 0, 4);
+                portaMonerotopia.position.set(6, 0, 4 - OFFSET);
                 scene.add(portaMonerotopia);
 
                 setTimeout(ocultarInstrucoes, 3000);
@@ -722,7 +766,7 @@
         }
 
         // ──────────────────────────────────────────────
-        // 5. EVENTOS DE TOQUE
+        // 6. EVENTOS DE TOQUE
         // ──────────────────────────────────────────────
         function ocultarInstrucoes() {
             const painel = document.getElementById('instrucoes');
@@ -798,7 +842,7 @@
         }
 
         // ──────────────────────────────────────────────
-        // 6. MOVIMENTO
+        // 7. MOVIMENTO
         // ──────────────────────────────────────────────
         function atualizarMovimento(dt) {
             if (!touchEsquerdo.ativo) return;
@@ -834,7 +878,7 @@
         }
 
         // ──────────────────────────────────────────────
-        // 7. DETECÇÃO DAS PORTAS
+        // 8. DETECÇÃO DAS PORTAS
         // ──────────────────────────────────────────────
         function verificarPortas() {
             const pos = camera.position;
@@ -878,7 +922,7 @@
         }
 
         // ──────────────────────────────────────────────
-        // 8. ANIMAÇÃO
+        // 9. ANIMAÇÃO
         // ──────────────────────────────────────────────
         function animarPortas(time) {
             [portaMoneroKon, portaMonerotopia].forEach((porta, idx) => {
@@ -930,14 +974,12 @@
             dados.particulas.geometry.attributes.position.needsUpdate = true;
         }
 
-        // ── Animar névoa ──
         function animarNevoa(time) {
             if (!nuvensNevoa) return;
             const pos = nuvensNevoa.geometry.attributes.position.array;
             const dados = nuvensNevoa.userData;
             const count = pos.length / 3;
             for (let i = 0; i < count; i++) {
-                // Movimento lento e ondulatório
                 const idx3 = i * 3;
                 const ang = Math.atan2(pos[idx3 + 2], pos[idx3]) + dados.velocidades[i].ang;
                 const r = Math.sqrt(pos[idx3] * pos[idx3] + pos[idx3 + 2] * pos[idx3 + 2]);
@@ -951,7 +993,7 @@
         }
 
         // ──────────────────────────────────────────────
-        // 9. LOOP PRINCIPAL
+        // 10. LOOP PRINCIPAL
         // ──────────────────────────────────────────────
         function animate() {
             requestAnimationFrame(animate);
@@ -969,9 +1011,9 @@
         }
 
         // ──────────────────────────────────────────────
-        // 10. INICIAR
+        // 11. INICIAR
         // ──────────────────────────────────────────────
         window.onload = init;
     </script>
 </body>
-</html>
+</html> 
