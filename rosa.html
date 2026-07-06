@@ -142,6 +142,9 @@
         let muroMagico = null;
         let nuvensNevoa = null;
 
+        // Lista de cubos para colisão (AABBs)
+        const listaCubos = [];
+
         // ──────────────────────────────────────────────
         // 2. INICIALIZAÇÃO
         // ──────────────────────────────────────────────
@@ -499,12 +502,12 @@
         }
 
         // ──────────────────────────────────────────────
-        // 4. FACHADAS EM CUBO (blocos 3D)
+        // 4. FACHADAS EM CUBO (blocos 3D) COM COLISÃO
         // ──────────────────────────────────────────────
         function criarFachadaCubo(x, z, rotacaoY, cor) {
-            const largura = 10.0;    // cobre portal e letreiro
+            const largura = 10.0;
             const altura = 4.6;
-            const profundidade = 4.6; // espessura do bloco
+            const profundidade = 4.6;
 
             const geo = new THREE.BoxGeometry(largura, altura, profundidade);
             const mat = new THREE.MeshStandardMaterial({
@@ -516,27 +519,34 @@
                 side: THREE.DoubleSide
             });
             const mesh = new THREE.Mesh(geo, mat);
-            // Posiciona o centro do cubo de modo que a face frontal fique em 'z' (ou x) exato
-            // Para o lado MoneroKon (x negativo, z=-4), a face frontal está voltada para +Z? 
-            // Na verdade, o portal está voltado para o jogador, que está em Z=0. 
-            // Para o lado esquerdo, a face frontal está em Z=-4+profundidade/2? 
-            // Vamos posicionar de forma que a face frontal coincida com a posição Z do portal.
-            // O portal está em z=-4+OFFSET. Queremos que a face frontal do cubo fique em z=-4 (sem offset)
-            // Assim, o cubo fica um pouco atrás.
-            const posZ = z - (profundidade / 2); // face frontal em z
-            mesh.position.set(x, 2.3, posZ); // y=2.3 para centralizar verticalmente (altura 4.6)
+            // Posiciona de modo que a face frontal fique em z (ou x) exato
+            const posZ = z - (profundidade / 2);
+            mesh.position.set(x, 2.3, posZ);
             mesh.rotation.y = rotacaoY;
             mesh.castShadow = true;
             mesh.receiveShadow = true;
             scene.add(mesh);
 
-            // Arestas decorativas (opcional)
+            // Arestas decorativas
             const bordaMat = new THREE.LineBasicMaterial({ color: 0xffdd99, transparent: true, opacity: 0.2 });
             const bordaGeo = new THREE.EdgesGeometry(geo);
             const borda = new THREE.LineSegments(bordaGeo, bordaMat);
             borda.position.copy(mesh.position);
             borda.rotation.copy(mesh.rotation);
             scene.add(borda);
+
+            // Armazena AABB para colisão (no espaço mundial, pois a rotação é 0 ou PI, e a caixa é simétrica)
+            const halfW = largura / 2;
+            const halfD = profundidade / 2;
+            const cx = mesh.position.x;
+            const cz = mesh.position.z;
+            const cubo = {
+                minX: cx - halfW,
+                maxX: cx + halfW,
+                minZ: cz - halfD,
+                maxZ: cz + halfD
+            };
+            listaCubos.push(cubo);
 
             return mesh;
         }
@@ -604,7 +614,7 @@
                 scene.add(textMonerotopia);
 
                 portaMonerotopia = criarPortalMagico(0xffaa66, 0xcc7733);
-                portaMonerotopia.position.set( 6, 0, 4.1 - OFFSET);
+                portaMonerotopia.position.set(6, 0, 4.1 - OFFSET);
                 scene.add(portaMonerotopia);
 
                 setTimeout(ocultarInstrucoes, 3000);
@@ -842,8 +852,45 @@
         }
 
         // ──────────────────────────────────────────────
-        // 7. MOVIMENTO
+        // 7. MOVIMENTO COM COLISÃO
         // ──────────────────────────────────────────────
+        function aplicarColisoes(pos) {
+            const raio = 0.3;
+            for (const cubo of listaCubos) {
+                // Verifica se o jogador (com raio) colide com o cubo
+                const colidiuX = pos.x + raio > cubo.minX && pos.x - raio < cubo.maxX;
+                const colidiuZ = pos.z + raio > cubo.minZ && pos.z - raio < cubo.maxZ;
+                if (colidiuX && colidiuZ) {
+                    // Calcula a distância para cada borda
+                    const distMinX = pos.x - raio - cubo.minX;
+                    const distMaxX = cubo.maxX - (pos.x + raio);
+                    const distMinZ = pos.z - raio - cubo.minZ;
+                    const distMaxZ = cubo.maxZ - (pos.z + raio);
+
+                    // Escolhe o eixo com menor sobreposição para ajustar
+                    const overX = Math.min(Math.abs(distMinX), Math.abs(distMaxX));
+                    const overZ = Math.min(Math.abs(distMinZ), Math.abs(distMaxZ));
+
+                    if (overX < overZ) {
+                        // Ajusta em X
+                        if (Math.abs(distMinX) < Math.abs(distMaxX)) {
+                            pos.x = cubo.minX + raio;
+                        } else {
+                            pos.x = cubo.maxX - raio;
+                        }
+                    } else {
+                        // Ajusta em Z
+                        if (Math.abs(distMinZ) < Math.abs(distMaxZ)) {
+                            pos.z = cubo.minZ + raio;
+                        } else {
+                            pos.z = cubo.maxZ - raio;
+                        }
+                    }
+                }
+            }
+            return pos;
+        }
+
         function atualizarMovimento(dt) {
             if (!touchEsquerdo.ativo) return;
 
@@ -863,7 +910,12 @@
                 const intensidade = Math.sqrt(moveX * moveX + moveY * moveY);
                 const velocidadeFinal = Math.min(1, intensidade) * velMovimento * dt;
 
-                const novaPos = camera.position.clone().addScaledVector(direcao, velocidadeFinal);
+                let novaPos = camera.position.clone().addScaledVector(direcao, velocidadeFinal);
+
+                // Aplica colisão com os cubos
+                novaPos = aplicarColisoes(novaPos);
+
+                // Limite do mundo (círculo)
                 const limite = 19.5;
                 const dist = Math.sqrt(novaPos.x * novaPos.x + novaPos.z * novaPos.z);
                 if (dist < limite) {
@@ -1016,4 +1068,4 @@
         window.onload = init;
     </script>
 </body>
-</html> 
+</html>
