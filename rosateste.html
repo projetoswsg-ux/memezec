@@ -573,11 +573,11 @@
         function criarPortalPretoEstrelas() {
             const grupo = new THREE.Group();
 
-            const posX = 0;
+            const posX = 0.5;
             const posY = 2.25;
-            const posZ = 20.5;
+            const posZ = 0.5;
             grupo.position.set(posX, posY, posZ);
-            grupo.lookAt(5, posY, 5);
+            grupo.lookAt(0, posY, 0);
 
             const raioPortal = 5.0;
             const geoDisco = new THREE.CircleGeometry(raioPortal, 48);
