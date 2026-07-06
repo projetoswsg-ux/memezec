@@ -519,7 +519,6 @@
                 side: THREE.DoubleSide
             });
             const mesh = new THREE.Mesh(geo, mat);
-            // Posiciona de modo que a face frontal fique em z (ou x) exato
             const posZ = z - (profundidade / 2);
             mesh.position.set(x, 2.3, posZ);
             mesh.rotation.y = rotacaoY;
@@ -535,9 +534,10 @@
             borda.rotation.copy(mesh.rotation);
             scene.add(borda);
 
-            // Armazena AABB para colisão (no espaço mundial, pois a rotação é 0 ou PI, e a caixa é simétrica)
-            const halfW = largura / 2;
-            const halfD = profundidade / 2;
+            // AABB para colisão com recuo menor (área de colisão mais próxima do visual)
+            const recuo = 0.2; // antes era 0.3
+            const halfW = largura / 2 - recuo;
+            const halfD = profundidade / 2 - recuo;
             const cx = mesh.position.x;
             const cz = mesh.position.z;
             const cubo = {
@@ -852,39 +852,37 @@
         }
 
         // ──────────────────────────────────────────────
-        // 7. MOVIMENTO COM COLISÃO
+        // 7. MOVIMENTO COM COLISÃO (MELHORADA)
         // ──────────────────────────────────────────────
         function aplicarColisoes(pos) {
-            const raio = 0.3;
-            for (const cubo of listaCubos) {
-                // Verifica se o jogador (com raio) colide com o cubo
-                const colidiuX = pos.x + raio > cubo.minX && pos.x - raio < cubo.maxX;
-                const colidiuZ = pos.z + raio > cubo.minZ && pos.z - raio < cubo.maxZ;
-                if (colidiuX && colidiuZ) {
-                    // Calcula a distância para cada borda
-                    const distMinX = pos.x - raio - cubo.minX;
-                    const distMaxX = cubo.maxX - (pos.x + raio);
-                    const distMinZ = pos.z - raio - cubo.minZ;
-                    const distMaxZ = cubo.maxZ - (pos.z + raio);
-
-                    // Escolhe o eixo com menor sobreposição para ajustar
-                    const overX = Math.min(Math.abs(distMinX), Math.abs(distMaxX));
-                    const overZ = Math.min(Math.abs(distMinZ), Math.abs(distMaxZ));
-
-                    if (overX < overZ) {
-                        // Ajusta em X
-                        if (Math.abs(distMinX) < Math.abs(distMaxX)) {
-                            pos.x = cubo.minX + raio;
-                        } else {
-                            pos.x = cubo.maxX - raio;
-                        }
-                    } else {
-                        // Ajusta em Z
-                        if (Math.abs(distMinZ) < Math.abs(distMaxZ)) {
-                            pos.z = cubo.minZ + raio;
-                        } else {
-                            pos.z = cubo.maxZ - raio;
-                        }
+            const raio = 0.45; // aumentado de 0.4 para 0.45
+            // Repetir para resolver penetrações residuais
+            for (let iter = 0; iter < 3; iter++) {
+                for (const cubo of listaCubos) {
+                    // Ponto mais próximo do centro do jogador na AABB
+                    let closestX = Math.max(cubo.minX, Math.min(pos.x, cubo.maxX));
+                    let closestZ = Math.max(cubo.minZ, Math.min(pos.z, cubo.maxZ));
+                    let dx = pos.x - closestX;
+                    let dz = pos.z - closestZ;
+                    let dist = Math.sqrt(dx * dx + dz * dz);
+                    if (dist < raio && dist > 0.001) {
+                        // Empurrar para fora
+                        let overlap = raio - dist;
+                        let normX = dx / dist;
+                        let normZ = dz / dist;
+                        pos.x += normX * overlap;
+                        pos.z += normZ * overlap;
+                    } else if (dist < 0.001) {
+                        // Centro dentro do cubo: empurrar para a borda mais próxima
+                        let distToMinX = pos.x - cubo.minX;
+                        let distToMaxX = cubo.maxX - pos.x;
+                        let distToMinZ = pos.z - cubo.minZ;
+                        let distToMaxZ = cubo.maxZ - pos.z;
+                        let minDist = Math.min(distToMinX, distToMaxX, distToMinZ, distToMaxZ);
+                        if (minDist === distToMinX) pos.x = cubo.minX - raio;
+                        else if (minDist === distToMaxX) pos.x = cubo.maxX + raio;
+                        else if (minDist === distToMinZ) pos.z = cubo.minZ - raio;
+                        else if (minDist === distToMaxZ) pos.z = cubo.maxZ + raio;
                     }
                 }
             }
