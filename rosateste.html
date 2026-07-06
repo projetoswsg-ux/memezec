@@ -127,10 +127,10 @@
         <div class="titulo">✨ Moneroverse</div>
         <div class="dica"> <b>Left side:</b> Drag to Walk | <b>WASD</b> to Walk</div>
         <div class="dica"> <b>Right Side:</b> Drag to Look | <b>Mouse</b> to Look</div>
-        <div style="margin-top: 18px; font-size: 14px; color: #ffcce0;">Atravesse o portal para voltar</div>
+        <div style="margin-top: 18px; font-size: 14px; color: #ffcce0;">Go through the portal to get back</div>
     </div>
 
-    <div id="aviso-portal">🌌 Viajando...</div>
+    <div id="aviso-portal">Browser...</div>
    
 
     <div id="canvas-container"></div>
@@ -183,7 +183,7 @@
         // Destinos específicos
         const DESTINO_KON = 'https://www.monerokon.org';
         const DESTINO_TOPIA = 'https://monerotopia.com';
-        const DESTINO_MONEROVERSE = 'https://moneroverse.com';
+        const DESTINO_MONEROVERSE = 'https://moneroverse.com/universe.html';
 
         let jaRedirecionouKon = false;
         let jaRedirecionouTopia = false;
@@ -207,7 +207,7 @@
             scene.fog = new THREE.Fog(corNevoa, distNevoa, distNevoaMax);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, alturaOlhos, 19.0);
+            camera.position.set(0, alturaOlhos, 17.0);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1176,7 +1176,7 @@
                 pos.z >= areaPortaKon.minZ && pos.z <= areaPortaKon.maxZ &&
                 !jaRedirecionouKon) {
                 jaRedirecionouKon = true;
-                mostrarAviso('🌐 Entrando no MoneroKon...');
+                mostrarAviso('MoneroKon...');
                 setTimeout(() => {
                     window.open(DESTINO_KON, '_blank');
                 }, 400);
@@ -1186,7 +1186,7 @@
                 pos.z >= areaPortaTopia.minZ && pos.z <= areaPortaTopia.maxZ &&
                 !jaRedirecionouTopia) {
                 jaRedirecionouTopia = true;
-                mostrarAviso('🌐 Entrando na Monerotopia...');
+                mostrarAviso('Monerotopia...');
                 setTimeout(() => {
                     window.open(DESTINO_TOPIA, '_blank');
                 }, 400);
@@ -1198,7 +1198,7 @@
                     pos.z >= area.minZ && pos.z <= area.maxZ &&
                     !jaRedirecionouMoneroverse) {
                     jaRedirecionouMoneroverse = true;
-                    mostrarAviso('🌌 Voltando para o Moneroverse...');
+                    mostrarAviso('Browser...');
                     setTimeout(() => {
                         window.open(DESTINO_MONEROVERSE, '_blank');
                     }, 400);
