@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Monero - Velas Gigantes 3D</title>
+    <title>Monero - Atmosfera Dinâmica</title>
     <style>
         body, html {
             margin: 0; padding: 0;
@@ -48,12 +48,12 @@
             transition: opacity 0.6s ease-out;
             z-index: 10;
             font-size: 14px;
-            max-width: 280px;
+            max-width: 260px;
             box-shadow: 0 0 30px rgba(0,0,0,0.6);
         }
         .dica { margin: 4px 0; line-height: 1.4; }
         .titulo { font-size: 20px; font-weight: bold; color: #f90; text-shadow: 0 0 20px #f60; margin-bottom: 6px; }
-        #status-ws {
+        #status-api {
             position: absolute;
             bottom: 30px;
             right: 30px;
@@ -66,8 +66,11 @@
             z-index: 20;
             pointer-events: none;
         }
-        #status-ws.conectado { color: #4caf50; border-color: #4caf50; }
-        #status-ws.desconectado { color: #f44336; border-color: #f44336; }
+        #status-api .variacao {
+            font-weight: bold;
+        }
+        .alta { color: #4caf50; }
+        .baixa { color: #f44336; }
         #aviso-portal {
             position: absolute;
             bottom: 30px;
@@ -89,34 +92,21 @@
             text-shadow: 0 0 10px rgba(0,0,0,0.8);
         }
         #aviso-portal.visivel { opacity: 1; }
-        #info-velas {
-            position: absolute;
-            bottom: 80px;
-            left: 30px;
-            color: #aaa;
-            font-size: 13px;
-            background: rgba(0,0,0,0.5);
-            padding: 6px 12px;
-            border-radius: 12px;
-            pointer-events: none;
-            z-index: 15;
-        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
     <div id="instrucoes">
-        <div class="titulo">⬡ MONERO - VELAS GIGANTES</div>
+        <div class="titulo">⬡ MONERO ATMOSPHERE</div>
         <div class="dica">🖱️ <b>Left drag</b> / <b>WASD</b> → Walk</div>
         <div class="dica">🖱️ <b>Right drag</b> / <b>Mouse</b> → Look</div>
-        <div class="dica" style="margin-top:8px; color:#4caf50;">🟢 Verde = Alta (sobe do chão)</div>
-        <div class="dica" style="color:#f44336;">🔴 Vermelho = Baixa (cai do céu)</div>
-        <div class="dica" style="margin-top:8px; color:#888;">⌨️ Pressione <b>T</b> para testar vela</div>
+        <div class="dica" style="margin-top:8px;">🌍 Atmosfera muda com o mercado:</div>
+        <div class="dica" style="color:#4caf50;">🟢 Alta = Verde</div>
+        <div class="dica" style="color:#f44336;">🔴 Baixa = Vermelho</div>
     </div>
-    <div id="status-ws" class="desconectado">⏳ Conectando...</div>
+    <div id="status-api">⏳ Carregando dados...</div>
     <div id="aviso-portal">Portal...</div>
     <div id="crosshair">+</div>
-    <div id="info-velas">Velas ativas: 0</div>
     <div id="canvas-container"></div>
 
     <script>
@@ -129,293 +119,44 @@
         // Controles
         const touchEsquerdo = { ativo: false, id: null, inicioX: 0, inicioY: 0, deltaX: 0, deltaY: 0 };
         const touchDireito = { ativo: false, id: null, ultimoX: 0, ultimoY: 0 };
-        const teclas = { w: false, a: false, s: false, d: false, t: false };
+        const teclas = { w: false, a: false, s: false, d: false };
         let mousePreso = false;
         const velMovimento = 8.0;
         const velVisao = 0.005;
         const alturaOlhos = 1.6;
         let cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
-        const corCeu = 0x0a0a14;
+        // Estado da atmosfera
+        let atmosferaAtual = 'neutro'; // 'neutro', 'alta', 'baixa'
+        let variacaoPercentual = 0;
+        let precoAtual = 0;
 
-        // Elementos
+        // Elementos da cena que serão alterados
+        let skyColor = new THREE.Color(0x0a0a14);
+        let fogColor = new THREE.Color(0x1a1a2a);
+        let ambientLight, directionalLight, fillLight;
+        let fog;
+
+        const statusApi = document.getElementById('status-api');
+
+        // Portal
         let portalPretoEstrelas = null;
         const areaPortal = { minX: -1.5, maxX: 1.5, minZ: 19.0, maxZ: 22.0 };
         const DESTINO_MONEROVERSE = 'https://moneroverse.com/universe.html';
         let jaRedirecionouPortal = false;
         const aviso = document.getElementById('aviso-portal');
         const crosshair = document.getElementById('crosshair');
-        const statusWs = document.getElementById('status-ws');
-        const infoVelas = document.getElementById('info-velas');
-
-        // Limite do muro
-        const RAIO_MURO = 19.5;
 
         // ============================================================
-        //  2. SISTEMA DE VELAS GIGANTES
-        // ============================================================
-        const velas = [];
-        const VIDA_TOTAL = 10.0;
-        const DURACAO_CRESCIMENTO = 2.0;
-        const DURACAO_DECOLAGEM = 2.0;
-        const ALTURA_MIN = 8.0;
-        const ALTURA_MAX = 18.0;
-        const DISTANCIA_MIN_JOGADOR = 5.0; // distância mínima do centro do jogador
-
-        function gerarPosicaoValida() {
-            // Posição aleatória dentro do raio do muro, mas longe do jogador
-            const maxAttempts = 50;
-            for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                const ang = Math.random() * Math.PI * 2;
-                const raio = Math.random() * (RAIO_MURO - 1.0);
-                const x = Math.cos(ang) * raio;
-                const z = Math.sin(ang) * raio;
-                // Verifica distância ao jogador
-                const dx = x - camera.position.x;
-                const dz = z - camera.position.z;
-                const dist = Math.sqrt(dx*dx + dz*dz);
-                if (dist > DISTANCIA_MIN_JOGADOR) {
-                    return { x, z };
-                }
-            }
-            // Fallback: posição à frente do jogador
-            const forward = new THREE.Vector3(0, 0, -1);
-            forward.applyQuaternion(camera.quaternion);
-            forward.y = 0;
-            forward.normalize();
-            const dist = DISTANCIA_MIN_JOGADOR + 2;
-            const pos = camera.position.clone().add(forward.clone().multiplyScalar(dist));
-            // Garantir que fique dentro do raio
-            const distCentro = Math.sqrt(pos.x*pos.x + pos.z*pos.z);
-            if (distCentro > RAIO_MURO - 1) {
-                const ang = Math.atan2(pos.z, pos.x);
-                pos.x = Math.cos(ang) * (RAIO_MURO - 1);
-                pos.z = Math.sin(ang) * (RAIO_MURO - 1);
-            }
-            return { x: pos.x, z: pos.z };
-        }
-
-        function criarVela(open, close, high, low, tipo) {
-            const diff = Math.abs(close - open);
-            const variacaoPercentual = diff / open;
-            let altura = Math.min(variacaoPercentual * 30, ALTURA_MAX);
-            if (altura < ALTURA_MIN) altura = ALTURA_MIN;
-
-            const raioCorpo = 0.8 + (altura / ALTURA_MAX) * 0.6;
-            const raioPavio = 0.12;
-
-            const grupo = new THREE.Group();
-
-            // Corpo
-            const corpoGeo = new THREE.CylinderGeometry(raioCorpo, raioCorpo, altura, 12);
-            const cor = tipo === 'green' ? 0x4caf50 : 0xf44336;
-            const material = new THREE.MeshStandardMaterial({
-                color: cor,
-                emissive: cor,
-                emissiveIntensity: 0.5,
-                roughness: 0.3,
-                metalness: 0.1
-            });
-            const corpo = new THREE.Mesh(corpoGeo, material);
-            corpo.position.y = altura / 2;
-            corpo.castShadow = true;
-            corpo.receiveShadow = true;
-            grupo.add(corpo);
-
-            // Pavio
-            const pavioAlt = Math.max((high - low) / open * 30, 0.5);
-            const pavioGeo = new THREE.CylinderGeometry(raioPavio, raioPavio, pavioAlt, 6);
-            const pavioMat = new THREE.MeshStandardMaterial({
-                color: 0xcccccc,
-                emissive: 0x555555,
-                emissiveIntensity: 0.2
-            });
-            const pavio = new THREE.Mesh(pavioGeo, pavioMat);
-            pavio.position.y = altura / 2;
-            grupo.add(pavio);
-
-            // Posição válida
-            const pos = gerarPosicaoValida();
-            grupo.position.set(pos.x, 0, pos.z);
-
-            // Rotação aleatória
-            grupo.rotation.y = Math.random() * Math.PI * 2;
-
-            // Configuração inicial
-            if (tipo === 'green') {
-                grupo.scale.y = 0;
-                grupo.position.y = 0;
-                grupo.userData.alturaFinal = altura;
-                grupo.userData.fase = 'crescendo';
-                grupo.userData.tempoFase = 0;
-            } else {
-                const alturaCeu = 25 + Math.random() * 15;
-                grupo.position.y = alturaCeu;
-                grupo.scale.y = 1;
-                grupo.userData.alturaFinal = 0;
-                grupo.userData.fase = 'caindo';
-                grupo.userData.tempoFase = 0;
-                grupo.userData.alturaInicial = alturaCeu;
-            }
-
-            scene.add(grupo);
-
-            const vela = {
-                grupo: grupo,
-                tipo: tipo,
-                tempoCriacao: clock.elapsedTime,
-                ativo: true,
-                altura: altura,
-                pavioAlt: pavioAlt
-            };
-            velas.push(vela);
-            atualizarInfoVelas();
-            return vela;
-        }
-
-        function atualizarVelas(deltaTime) {
-            const agora = clock.elapsedTime;
-            for (let i = velas.length - 1; i >= 0; i--) {
-                const v = velas[i];
-                const idade = agora - v.tempoCriacao;
-                if (idade > VIDA_TOTAL) {
-                    scene.remove(v.grupo);
-                    v.grupo.children.forEach(child => {
-                        if (child.geometry) child.geometry.dispose();
-                        if (child.material) child.material.dispose();
-                    });
-                    velas.splice(i, 1);
-                    continue;
-                }
-
-                const grupo = v.grupo;
-                const user = grupo.userData;
-                const fase = user.fase;
-                user.tempoFase += deltaTime;
-
-                if (v.tipo === 'green') {
-                    if (fase === 'crescendo') {
-                        const progresso = Math.min(user.tempoFase / DURACAO_CRESCIMENTO, 1);
-                        const eased = progresso * progresso * (3 - 2 * progresso);
-                        grupo.scale.y = eased;
-                        grupo.position.y = (user.alturaFinal / 2) * eased;
-                        if (progresso >= 1) {
-                            user.fase = 'decolando';
-                            user.tempoFase = 0;
-                        }
-                    } else if (fase === 'decolando') {
-                        const progresso = Math.min(user.tempoFase / DURACAO_DECOLAGEM, 1);
-                        const alturaExtra = progresso * 3.0;
-                        grupo.position.y = (user.alturaFinal / 2) + alturaExtra;
-                        grupo.rotation.x = -progresso * 0.05;
-                        if (progresso >= 1) {
-                            user.fase = 'pronto';
-                        }
-                    }
-                } else {
-                    if (fase === 'caindo') {
-                        const progresso = Math.min(user.tempoFase / DURACAO_CRESCIMENTO, 1);
-                        const eased = progresso * progresso * (3 - 2 * progresso);
-                        const yAtual = user.alturaInicial * (1 - eased);
-                        grupo.position.y = yAtual;
-                        grupo.rotation.z = progresso * 0.1;
-                        if (progresso >= 1) {
-                            user.fase = 'pronto';
-                            grupo.position.y = 0;
-                            grupo.rotation.z = 0;
-                        }
-                    }
-                }
-            }
-            atualizarInfoVelas();
-        }
-
-        function atualizarInfoVelas() {
-            infoVelas.textContent = 'Velas ativas: ' + velas.length;
-        }
-
-        // ============================================================
-        //  3. WEBSOCKET BINANCE FUTURES
-        // ============================================================
-        let ws = null;
-        let reconectarTimer = null;
-
-        function conectarWebSocket() {
-            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
-            statusWs.textContent = '⏳ Conectando...';
-            statusWs.className = 'desconectado';
-
-            ws = new WebSocket('wss://fstream.binance.com/ws/xmrusdt@kline_1m');
-
-            ws.onopen = function() {
-                console.log('WebSocket conectado');
-                statusWs.textContent = '🟢 Conectado (XMRUSDT 1m)';
-                statusWs.className = 'conectado';
-            };
-
-            ws.onmessage = function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.e === 'kline') {
-                        const k = data.k;
-                        if (k.x === true) {
-                            const open = parseFloat(k.o);
-                            const close = parseFloat(k.c);
-                            const high = parseFloat(k.h);
-                            const low = parseFloat(k.l);
-                            const tipo = close > open ? 'green' : 'red';
-                            criarVela(open, close, high, low, tipo);
-                            // Limite de velas
-                            if (velas.length > 40) {
-                                const remover = velas.splice(0, velas.length - 40);
-                                remover.forEach(v => {
-                                    scene.remove(v.grupo);
-                                    v.grupo.children.forEach(child => {
-                                        if (child.geometry) child.geometry.dispose();
-                                        if (child.material) child.material.dispose();
-                                    });
-                                });
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.warn('Erro ao processar mensagem WS:', e);
-                }
-            };
-
-            ws.onerror = function(err) {
-                console.warn('WebSocket erro:', err);
-                statusWs.textContent = '⚠️ Erro na conexão';
-                statusWs.className = 'desconectado';
-            };
-
-            ws.onclose = function() {
-                console.log('WebSocket fechado, reconectando em 5s...');
-                statusWs.textContent = '🔄 Reconectando...';
-                statusWs.className = 'desconectado';
-                if (reconectarTimer) clearTimeout(reconectarTimer);
-                reconectarTimer = setTimeout(conectarWebSocket, 5000);
-            };
-        }
-
-        // ============================================================
-        //  4. FUNÇÃO DE TESTE (TECLA T)
-        // ============================================================
-        function gerarVelaTeste() {
-            const open = 200 + Math.random() * 50;
-            const close = open + (Math.random() - 0.5) * 30;
-            const high = Math.max(open, close) + Math.random() * 10;
-            const low = Math.min(open, close) - Math.random() * 10;
-            const tipo = close > open ? 'green' : 'red';
-            criarVela(open, close, high, low, tipo);
-        }
-
-        // ============================================================
-        //  5. CENA 3D
+        //  2. INICIALIZAÇÃO DA CENA
         // ============================================================
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(corCeu);
+            scene.background = skyColor;
+
+            // Névoa (fog) - será atualizada dinamicamente
+            fog = new THREE.Fog(fogColor, 5, 30);
+            scene.fog = fog;
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(0, alturaOlhos, 12.0);
@@ -428,20 +169,22 @@
             renderer.toneMappingExposure = 0.8;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Luzes
-            const luzAmbiente = new THREE.AmbientLight(0x334466, 0.5);
-            scene.add(luzAmbiente);
-            const luzDirecional = new THREE.DirectionalLight(0xffaa66, 0.7);
-            luzDirecional.position.set(5, 20, 10);
-            luzDirecional.castShadow = true;
-            luzDirecional.shadow.camera.top = 30;
-            luzDirecional.shadow.camera.bottom = -5;
-            luzDirecional.shadow.camera.left = -25;
-            luzDirecional.shadow.camera.right = 25;
-            scene.add(luzDirecional);
-            const luzFill = new THREE.PointLight(0x446688, 0.3, 25);
-            luzFill.position.set(-8, 4, -5);
-            scene.add(luzFill);
+            // Luzes (referências para alterar cor)
+            ambientLight = new THREE.AmbientLight(0x334466, 0.5);
+            scene.add(ambientLight);
+
+            directionalLight = new THREE.DirectionalLight(0xffaa66, 0.7);
+            directionalLight.position.set(5, 15, 8);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.camera.top = 30;
+            directionalLight.shadow.camera.bottom = -5;
+            directionalLight.shadow.camera.left = -20;
+            directionalLight.shadow.camera.right = 20;
+            scene.add(directionalLight);
+
+            fillLight = new THREE.PointLight(0x446688, 0.3, 25);
+            fillLight.position.set(-8, 4, -5);
+            scene.add(fillLight);
 
             // Chão
             criarChao();
@@ -450,8 +193,10 @@
             // Portal
             criarPortalPretoEstrelas();
 
-            // Conectar WebSocket
-            conectarWebSocket();
+            // Buscar dados da CoinGecko pela primeira vez
+            buscarDadosMonero();
+            // Atualizar a cada 30 segundos
+            setInterval(buscarDadosMonero, 30000);
 
             // Eventos
             window.addEventListener('resize', onWindowResize, false);
@@ -470,7 +215,7 @@
         }
 
         // ============================================================
-        //  6. CHÃO E MURO
+        //  3. CRIAÇÃO DO CENÁRIO
         // ============================================================
         function criarTexturaPedraEscura() {
             const canvas = document.createElement('canvas');
@@ -511,7 +256,7 @@
         }
 
         function criarMuroPedra() {
-            const raio = RAIO_MURO, altura = 4.5, seg = 80;
+            const raio = 20.5, altura = 4.5, seg = 80;
             const textura = (() => {
                 const c = document.createElement('canvas');
                 c.width = 1024; c.height = 512;
@@ -571,7 +316,7 @@
         }
 
         // ============================================================
-        //  7. PORTAL PRETO
+        //  4. PORTAL PRETO (Moneroverse)
         // ============================================================
         function criarPortalPretoEstrelas() {
             const grupo = new THREE.Group();
@@ -629,7 +374,124 @@
         }
 
         // ============================================================
-        //  8. EVENTOS DE INTERAÇÃO
+        //  5. BUSCA DE DADOS NA COINGECKO
+        // ============================================================
+        function buscarDadosMonero() {
+            statusApi.innerHTML = '⏳ Carregando...';
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd&include_24hr_change=true')
+                .then(res => {
+                    if (!res.ok) throw new Error('Erro na API');
+                    return res.json();
+                })
+                .then(data => {
+                    const monero = data.monero;
+                    if (!monero) throw new Error('Dados não encontrados');
+                    const preco = monero.usd || 0;
+                    const variacao = monero.usd_24h_change || 0;
+                    precoAtual = preco;
+                    variacaoPercentual = variacao;
+
+                    // Atualiza o status na tela
+                    const sinal = variacao >= 0 ? '+' : '';
+                    const classe = variacao >= 0 ? 'alta' : 'baixa';
+                    statusApi.innerHTML = `
+                        XMR: $${preco.toFixed(2)} 
+                        <span class="variacao ${classe}">${sinal}${variacao.toFixed(2)}%</span>
+                    `;
+
+                    // Atualiza a atmosfera
+                    if (variacao > 0.1) {
+                        atmosferaAtual = 'alta';
+                        aplicarAtmosfera('alta');
+                    } else if (variacao < -0.1) {
+                        atmosferaAtual = 'baixa';
+                        aplicarAtmosfera('baixa');
+                    } else {
+                        atmosferaAtual = 'neutro';
+                        aplicarAtmosfera('neutro');
+                    }
+                })
+                .catch(err => {
+                    console.warn('Erro ao buscar dados:', err);
+                    statusApi.innerHTML = '⚠️ Erro ao carregar dados';
+                    // Mantém a atmosfera atual
+                });
+        }
+
+        // ============================================================
+        //  6. APLICAÇÃO DA ATMOSFERA
+        // ============================================================
+        function aplicarAtmosfera(tipo) {
+            let corCeu, corFog, corAmbiente, corDirecional, corFill;
+            let intensidadeEmissiva = 0.1;
+
+            switch (tipo) {
+                case 'alta':
+                    corCeu = new THREE.Color(0x0a1a0a);
+                    corFog = new THREE.Color(0x1a2a1a);
+                    corAmbiente = new THREE.Color(0x224422);
+                    corDirecional = new THREE.Color(0x88ff88);
+                    corFill = new THREE.Color(0x448844);
+                    intensidadeEmissiva = 0.2;
+                    break;
+                case 'baixa':
+                    corCeu = new THREE.Color(0x1a0a0a);
+                    corFog = new THREE.Color(0x2a1a1a);
+                    corAmbiente = new THREE.Color(0x442222);
+                    corDirecional = new THREE.Color(0xff8888);
+                    corFill = new THREE.Color(0x884444);
+                    intensidadeEmissiva = 0.2;
+                    break;
+                default: // neutro
+                    corCeu = new THREE.Color(0x0a0a14);
+                    corFog = new THREE.Color(0x1a1a2a);
+                    corAmbiente = new THREE.Color(0x334466);
+                    corDirecional = new THREE.Color(0xffaa66);
+                    corFill = new THREE.Color(0x446688);
+                    intensidadeEmissiva = 0.05;
+                    break;
+            }
+
+            // Atualiza o céu (com suavidade)
+            scene.background.copy(corCeu);
+
+            // Atualiza a névoa
+            fog.color.copy(corFog);
+
+            // Atualiza as luzes
+            ambientLight.color.copy(corAmbiente);
+            directionalLight.color.copy(corDirecional);
+            fillLight.color.copy(corFill);
+
+            // Ajusta a intensidade da emissividade do chão e muro (efeito sutil)
+            scene.children.forEach(child => {
+                if (child.isMesh && child.material) {
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach(mat => {
+                            if (mat.emissive) {
+                                // Se for chão ou muro, ajusta a cor emissiva para combinar
+                                if (mat.color && mat.color.getHex() === 0x2a2a30 || mat.color && mat.color
+                                    .getHex() === 0x3a3a44) {
+                                    mat.emissive.copy(corAmbiente);
+                                    mat.emissive.multiplyScalar(0.3);
+                                }
+                            }
+                        });
+                    } else {
+                        if (child.material.emissive) {
+                            if (child.material.color && (child.material.color.getHex() === 0x2a2a30 || child
+                                    .material.color.getHex() === 0x3a3a44)) {
+                                child.material.emissive.copy(corAmbiente);
+                                child.material.emissive.multiplyScalar(0.3);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        //  7. EVENTOS DE INTERAÇÃO
         // ============================================================
         function ocultarInstrucoes() {
             const p = document.getElementById('instrucoes');
@@ -696,10 +558,6 @@
         function onKeyDown(e) {
             const k = e.key.toLowerCase();
             if (['w','a','s','d'].includes(k)) { teclas[k] = true; e.preventDefault(); ocultarInstrucoes(); }
-            if (k === 't') {
-                gerarVelaTeste();
-                e.preventDefault();
-            }
             if (k === 'escape' && document.pointerLockElement) document.exitPointerLock();
         }
         function onKeyUp(e) {
@@ -732,7 +590,7 @@
         }
 
         // ============================================================
-        //  9. MOVIMENTO E PORTAL
+        //  8. MOVIMENTO E PORTAL
         // ============================================================
         function atualizarMovimento(dt) {
             let mx = 0, my = 0;
@@ -753,13 +611,14 @@
                 if (dir.length() > 1) dir.normalize();
                 const vel = Math.min(1, Math.sqrt(mx*mx + my*my)) * velMovimento * dt;
                 let novaPos = camera.position.clone().addScaledVector(dir, vel);
+                const limite = 19.5;
                 const dist = Math.sqrt(novaPos.x*novaPos.x + novaPos.z*novaPos.z);
-                if (dist < RAIO_MURO) {
+                if (dist < limite) {
                     camera.position.copy(novaPos);
                 } else {
                     const ang = Math.atan2(novaPos.z, novaPos.x);
-                    camera.position.x = Math.cos(ang) * (RAIO_MURO - 0.1);
-                    camera.position.z = Math.sin(ang) * (RAIO_MURO - 0.1);
+                    camera.position.x = Math.cos(ang) * limite;
+                    camera.position.z = Math.sin(ang) * limite;
                 }
                 camera.position.y = alturaOlhos;
             }
@@ -784,7 +643,7 @@
         }
 
         // ============================================================
-        //  10. LOOP PRINCIPAL
+        //  9. LOOP PRINCIPAL
         // ============================================================
         function animarPortalPreto(time) {
             if (!portalPretoEstrelas) return;
@@ -799,7 +658,6 @@
             const elapsed = clock.elapsedTime;
 
             atualizarMovimento(dt);
-            atualizarVelas(dt);
             animarPortalPreto(elapsed);
             verificarPortal();
 
@@ -807,7 +665,7 @@
         }
 
         // ============================================================
-        //  11. INICIAR
+        //  10. INICIAR
         // ============================================================
         window.onload = init;
     </script>
