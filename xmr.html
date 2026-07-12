@@ -16,7 +16,6 @@
             font-family: 'Rajdhani', sans-serif;
             background: #0a0a1a;
             touch-action: none;
-            /* previne scroll/pinch padrão */;
         }
         #container {
             width: 100vw;
@@ -25,7 +24,6 @@
             touch-action: none;
         }
 
-        /* ===== HUD ===== */
         #hud {
             position: absolute;
             top: 12px;
@@ -238,7 +236,6 @@
             min-height: 18px;
         }
 
-        /* ===== RESPONSIVO ===== */
         @media (max-width: 700px) {
             #hud {
                 top: 10px;
@@ -414,7 +411,6 @@
             }
         }
 
-        /* ===== TOUCH HINT (desaparece após interação) ===== */
         #touchHint {
             position: absolute;
             bottom: 20px;
@@ -459,10 +455,8 @@
 
     <div id="container"></div>
 
-    <!-- Áudio da batalha (loop) -->
     <audio id="battleMusic" src="https://memezec.vercel.app/Thunderous%20March.mp3" loop preload="auto"></audio>
 
-    <!-- HUD -->
     <div id="hud">
         <div class="hud-title">
             <span class="icon">⚔️</span>
@@ -488,10 +482,8 @@
         <div class="hud-variation" id="variationText">Aguardando ticker...</div>
     </div>
 
-    <!-- Toque / arraste hint -->
     <div id="touchHint">👆 Arraste para mover · 🔍 Pinça para zoom</div>
 
-    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
     </script>
 
@@ -503,14 +495,13 @@
         const isSmallScreen = window.innerWidth < 600;
 
         // ================================================================
-        // 1. CENA, CÂMERA (2.5D - lateral isométrica)
+        // 1. CENA, CÂMERA
         // ================================================================
         const container = document.getElementById('container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a2e);
-        scene.fog = new THREE.FogExp2(0x1a1a2e, 0.004);
+        scene.background = new THREE.Color(0x1a3a6a); // fundo azul dramático
+        scene.fog = new THREE.FogExp2(0x1a3a6a, 0.0025);
 
-        // Ajusta câmera para mobile
         let camDistance = isSmallScreen ? 28 : 40;
         let camHeight = isSmallScreen ? 16 : 22;
         let camFov = isSmallScreen ? 45 : 35;
@@ -529,7 +520,7 @@
         container.appendChild(renderer.domElement);
 
         // ================================================================
-        // 2. CONTROLES - MOUSE + TOUCH
+        // 2. CONTROLES
         // ================================================================
         let isDragging = false;
         let previousPointer = { x: 0, y: 0 };
@@ -537,28 +528,24 @@
         let zoomLevel = 0;
         let lastPinchDist = 0;
 
-        // --- Atualiza câmera ---
         function updateCamera() {
             const baseDist = isSmallScreen ? 28 : 40;
             const baseHeight = isSmallScreen ? 16 : 22;
-            const z = Math.max(12, Math.min(75, baseDist + zoomLevel));
-            const y = Math.max(8, Math.min(35, baseHeight + cameraOffset.y * 0.3));
+            let z = Math.max(12, Math.min(55, baseDist + zoomLevel)); // LIMITE MÁXIMO 55
+            let y = Math.max(8, Math.min(35, baseHeight + cameraOffset.y * 0.3));
             camera.position.x = cameraOffset.x;
             camera.position.y = y;
             camera.position.z = z;
             camera.lookAt(cameraOffset.x * 0.25, 0.8, 0);
         }
 
-        // --- Pointer down ---
         function onPointerDown(x, y) {
             isDragging = true;
             previousPointer.x = x;
             previousPointer.y = y;
-            // esconde hint
             document.getElementById('touchHint').classList.add('hidden');
         }
 
-        // --- Pointer move ---
         function onPointerMove(x, y) {
             if (!isDragging) return;
             const deltaX = x - previousPointer.x;
@@ -574,12 +561,10 @@
             updateCamera();
         }
 
-        // --- Pointer up ---
         function onPointerUp() {
             isDragging = false;
         }
 
-        // --- Mouse ---
         renderer.domElement.addEventListener('mousedown', (e) => {
             onPointerDown(e.clientX, e.clientY);
         });
@@ -588,7 +573,6 @@
         });
         window.addEventListener('mouseup', onPointerUp);
 
-        // --- Touch ---
         let touchIdentifiers = [];
 
         function getTouchPoint(touch) {
@@ -603,7 +587,6 @@
                 onPointerDown(t.clientX, t.clientY);
                 touchIdentifiers = [t.identifier];
             } else if (touches.length === 2) {
-                // Pinch
                 const dx = touches[0].clientX - touches[1].clientX;
                 const dy = touches[0].clientY - touches[1].clientY;
                 lastPinchDist = Math.sqrt(dx * dx + dy * dy);
@@ -619,14 +602,13 @@
                 const t = touches[0];
                 onPointerMove(t.clientX, t.clientY);
             } else if (touches.length === 2) {
-                // Pinch zoom
                 const dx = touches[0].clientX - touches[1].clientX;
                 const dy = touches[0].clientY - touches[1].clientY;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (lastPinchDist > 0) {
                     const delta = (dist - lastPinchDist) * 0.15;
                     zoomLevel -= delta;
-                    zoomLevel = Math.max(-15, Math.min(30, zoomLevel));
+                    zoomLevel = Math.max(-15, Math.min(15, zoomLevel)); // LIMITE
                     updateCamera();
                 }
                 lastPinchDist = dist;
@@ -652,19 +634,18 @@
             lastPinchDist = 0;
         }, { passive: false });
 
-        // --- Wheel ---
         renderer.domElement.addEventListener('wheel', (e) => {
             e.preventDefault();
             const delta = e.deltaY * 0.025;
             zoomLevel -= delta;
-            zoomLevel = Math.max(-15, Math.min(30, zoomLevel));
+            zoomLevel = Math.max(-15, Math.min(15, zoomLevel)); // LIMITE
             updateCamera();
         }, { passive: false });
 
         // ================================================================
         // 3. LUZES
         // ================================================================
-        const ambientLight = new THREE.AmbientLight(0x404060, 0.4);
+        const ambientLight = new THREE.AmbientLight(0x6088bb, 0.5);
         scene.add(ambientLight);
 
         const sunLight = new THREE.DirectionalLight(0xffeedd, 1.8);
@@ -680,11 +661,11 @@
         sunLight.shadow.camera.bottom = -50;
         scene.add(sunLight);
 
-        const fillLight = new THREE.DirectionalLight(0x8888ff, 0.3);
+        const fillLight = new THREE.DirectionalLight(0x88aaff, 0.4);
         fillLight.position.set(-20, 15, -15);
         scene.add(fillLight);
 
-        const rimLight = new THREE.DirectionalLight(0xffaa66, 0.4);
+        const rimLight = new THREE.DirectionalLight(0xffaa66, 0.3);
         rimLight.position.set(-10, 10, -25);
         scene.add(rimLight);
 
@@ -693,16 +674,16 @@
         scene.add(crystalLight);
 
         // ================================================================
-        // 4. CÉU DINÂMICO
+        // 4. CÉU AZUL DRAMÁTICO COM NUVENS
         // ================================================================
         const skyGeo = new THREE.SphereGeometry(120, 32, 32);
         const skyMat = new THREE.ShaderMaterial({
             side: THREE.BackSide,
             uniforms: {
-                topColor: { value: new THREE.Color(0x0a0a2a) },
-                bottomColor: { value: new THREE.Color(0x2a1a0a) },
+                topColor: { value: new THREE.Color(0x0a2a5a) },
+                bottomColor: { value: new THREE.Color(0x7ab8e6) },
                 offset: { value: 30 },
-                exponent: { value: 0.3 }
+                exponent: { value: 0.4 }
             },
             vertexShader: `
                         varying vec3 vWorldPosition;
@@ -734,7 +715,7 @@
             canvas.height = 128;
             const ctx = canvas.getContext('2d');
             const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-            gradient.addColorStop(0, 'rgba(255,255,255,0.8)');
+            gradient.addColorStop(0, 'rgba(255,255,255,0.9)');
             gradient.addColorStop(0.4, 'rgba(255,255,255,0.5)');
             gradient.addColorStop(1, 'rgba(255,255,255,0)');
             ctx.fillStyle = gradient;
@@ -743,29 +724,34 @@
         }
         const cloudTex = createCloudTexture();
         const clouds = [];
-        const cloudCount = isMobile ? 18 : 30;
+        const cloudCount = isMobile ? 15 : 25;
         for (let i = 0; i < cloudCount; i++) {
             const mat = new THREE.SpriteMaterial({
                 map: cloudTex,
                 transparent: true,
-                opacity: 0.2 + Math.random() * 0.4,
-                color: new THREE.Color(0xffddbb),
+                opacity: 0.4 + Math.random() * 0.4,
+                color: new THREE.Color(0xffffff),
                 depthWrite: false
             });
             const cloud = new THREE.Sprite(mat);
-            const scale = 15 + Math.random() * 30;
+            const scale = 20 + Math.random() * 40;
             cloud.scale.set(scale, scale * 0.4, 1);
             cloud.position.set(
-                (Math.random() - 0.5) * 120,
-                18 + Math.random() * 20,
-                (Math.random() - 0.5) * 80 - 20
+                (Math.random() - 0.5) * 150,
+                25 + Math.random() * 20,
+                (Math.random() - 0.5) * 100 - 30
             );
             scene.add(cloud);
-            clouds.push(cloud);
+            clouds.push({
+                sprite: cloud,
+                speed: 0.02 + Math.random() * 0.04,
+                dir: Math.random() > 0.5 ? 1 : -1,
+                range: 50 + Math.random() * 50
+            });
         }
 
         // ================================================================
-        // 5. VALE 2.5D
+        // 5. VALE
         // ================================================================
         const VALLEYSIZE = 60;
         const SEG = isMobile ? 80 : 120;
@@ -835,7 +821,119 @@
         scene.add(terrain);
 
         // ================================================================
-        // 6. RIO DE LAVA
+        // 6. MONTANHAS NO FUNDO (lado oposto da câmera)
+        // ================================================================
+        function createMountain(x, z, scale, color) {
+            const group = new THREE.Group();
+            const mat = new THREE.MeshStandardMaterial({
+                color: color || 0x5a6a4a,
+                roughness: 0.8,
+                flatShading: true,
+                emissive: 0x1a2a1a,
+                emissiveIntensity: 0.05
+            });
+            // Cone com vértices deformados para parecer montanha
+            const segments = 8;
+            const geo = new THREE.ConeGeometry(scale * 1.5, scale * 2.5, segments);
+            // Deformar vértices para irregularidade
+            const pos = geo.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                const xv = pos.getX(i);
+                const yv = pos.getY(i);
+                const zv = pos.getZ(i);
+                const noise = 1 + 0.2 * (Math.sin(xv * 2 + zv * 3) + Math.cos(xv * 1.5 - zv * 2));
+                if (yv > 0) {
+                    pos.setXYZ(i, xv * noise, yv, zv * noise);
+                }
+            }
+            geo.computeVertexNormals();
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.position.set(0, scale * 0.5, 0);
+            group.add(mesh);
+
+            // Neve no topo
+            const snowMat = new THREE.MeshStandardMaterial({
+                color: 0xeeeeff,
+                roughness: 0.9,
+                emissive: 0x446688,
+                emissiveIntensity: 0.05
+            });
+            const snow = new THREE.Mesh(new THREE.ConeGeometry(scale * 0.5, scale * 0.6, 6), snowMat);
+            snow.position.set(0, scale * 2.2, 0);
+            snow.castShadow = true;
+            group.add(snow);
+
+            group.position.set(x, getTerrainHeight(x, z) - 0.5, z);
+            group.rotation.y = Math.random() * Math.PI * 2;
+            scene.add(group);
+            return group;
+        }
+
+        // Montanhas no fundo (z negativo)
+        const mountainPositions = [
+            { x: -22, z: -28, scale: 4.5, color: 0x6a7a5a },
+            { x: -10, z: -32, scale: 6.0, color: 0x5a6a4a },
+            { x: 5, z: -30, scale: 5.0, color: 0x7a8a6a },
+            { x: 18, z: -27, scale: 4.0, color: 0x5a6a4a },
+            { x: 25, z: -33, scale: 5.5, color: 0x6a7a5a },
+            { x: -18, z: -25, scale: 3.0, color: 0x4a5a3a },
+            { x: 0, z: -35, scale: 7.0, color: 0x5a7a4a },
+            { x: -30, z: -30, scale: 3.5, color: 0x6a7a5a },
+        ];
+        for (const mp of mountainPositions) {
+            createMountain(mp.x, mp.z, mp.scale, mp.color);
+        }
+
+        // ================================================================
+        // 7. ÁRVORES NAS MONTANHAS
+        // ================================================================
+        function createPineTree(x, z, scale) {
+            const group = new THREE.Group();
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.9 });
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08 * scale, 0.15 * scale, 0.4 * scale), trunkMat);
+            trunk.position.y = 0.2 * scale;
+            trunk.castShadow = true;
+            trunk.receiveShadow = true;
+            group.add(trunk);
+
+            const leafMat = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(0.2 + Math.random() * 0.15, 0.4 + Math.random() * 0.2, 0.1 + Math.random() * 0.1),
+                roughness: 0.8
+            });
+            for (let i = 0; i < 3; i++) {
+                const r = (0.5 - i * 0.1) * scale;
+                const h = (0.4 + i * 0.25) * scale;
+                const cone = new THREE.Mesh(new THREE.ConeGeometry(r, h, 6), leafMat);
+                cone.position.y = (0.2 + i * 0.25) * scale + 0.2 * scale;
+                cone.castShadow = true;
+                cone.receiveShadow = true;
+                group.add(cone);
+            }
+            const yBase = getTerrainHeight(x, z);
+            group.position.set(x, yBase, z);
+            group.rotation.y = Math.random() * Math.PI * 2;
+            scene.add(group);
+        }
+
+        // Plantar árvores nas montanhas (nas encostas)
+        const treePositions = [];
+        for (let i = 0; i < 80; i++) {
+            const x = (Math.random() - 0.5) * 60;
+            const z = -25 - Math.random() * 15;
+            // Verificar se está perto de uma montanha (usando a altura do terreno)
+            const h = getTerrainHeight(x, z);
+            if (h > 1.0 && h < 3.5) {
+                treePositions.push({ x, z, scale: 0.5 + Math.random() * 0.8 });
+            }
+        }
+        for (const tp of treePositions) {
+            createPineTree(tp.x, tp.z, tp.scale);
+        }
+
+        // ================================================================
+        // 8. RIO DE LAVA
         // ================================================================
         function createGlowTexture() {
             const canvas = document.createElement('canvas');
@@ -905,7 +1003,7 @@
         const lavaRiver = createLavaRiver();
 
         // ================================================================
-        // 7. FORTALEZAS
+        // 9. FORTALEZAS
         // ================================================================
         function createFortress(x, z, color, flagColor) {
             const group = new THREE.Group();
@@ -991,7 +1089,7 @@
         scene.add(fortressRed);
 
         // ================================================================
-        // 8. CRISTAL MONERO
+        // 10. CRISTAL MONERO
         // ================================================================
         function createMoneroCrystal() {
             const group = new THREE.Group();
@@ -1077,7 +1175,7 @@
         scene.add(crystal);
 
         // ================================================================
-        // 9. ROCHAS E ÁRVORES (menos em mobile)
+        // 11. ROCHAS E ÁRVORES (cenário)
         // ================================================================
         function createRock(x, z, scale) {
             const geo = new THREE.DodecahedronGeometry(scale);
@@ -1091,11 +1189,12 @@
             rock.receiveShadow = true;
             scene.add(rock);
         }
-        const rockCount = isMobile ? 25 : 50;
+        const rockCount = isMobile ? 20 : 40;
         for (let i = 0; i < rockCount; i++) {
             const x = (Math.random() - 0.5) * 55,
                 z = (Math.random() - 0.5) * 55;
             if (Math.abs(x) < 18 && Math.abs(z) < 7) continue;
+            if (z < -20) continue; // evitar montanhas
             createRock(x, z, 0.3 + Math.random() * 0.8);
         }
 
@@ -1119,16 +1218,17 @@
             group.rotation.y = Math.random() * 2 * Math.PI;
             scene.add(group);
         }
-        const treeCount = isMobile ? 30 : 60;
+        const treeCount = isMobile ? 25 : 50;
         for (let i = 0; i < treeCount; i++) {
             const x = (Math.random() - 0.5) * 55,
                 z = (Math.random() - 0.5) * 55;
             if (Math.abs(x) < 18 && Math.abs(z) < 7) continue;
+            if (z < -20) continue;
             createDeadTree(x, z);
         }
 
         // ================================================================
-        // 10. ZONAS DE COMBATE
+        // 12. ZONAS DE COMBATE
         // ================================================================
         const GREEN_COMBAT_ZONE = { xMin: -4.5, xMax: -2.5, zMin: -6, zMax: 6 };
         const RED_COMBAT_ZONE = { xMin: 2.5, xMax: 4.5, zMin: -6, zMax: 6 };
@@ -1141,7 +1241,7 @@
         }
 
         // ================================================================
-        // 11. SOLDADOS
+        // 13. SOLDADOS
         // ================================================================
         const INITIAL_SOLDIERS = isMobile ? 16 : 25;
         const MIN_SOLDIERS = 4;
@@ -1149,7 +1249,6 @@
 
         let currentVariation = 0;
 
-        // --- Áudio ---
         let audioCtx = null;
         let audioEnabled = true;
 
@@ -1199,7 +1298,7 @@
         }
 
         // ================================================================
-        // 11.1 CLASSE SOLDIER (versão otimizada)
+        // 13.1 CLASSE SOLDIER
         // ================================================================
         class Soldier {
             constructor(side, spawnPosition) {
@@ -1725,7 +1824,7 @@
         }
 
         // ================================================================
-        // 12. PROJÉTEIS
+        // 14. PROJÉTEIS
         // ================================================================
         let projectiles = [];
 
@@ -1862,7 +1961,7 @@
         }
 
         // ================================================================
-        // 13. GERENCIAMENTO DE SOLDADOS
+        // 15. GERENCIAMENTO DE SOLDADOS
         // ================================================================
         let greenSoldiers = [];
         let redSoldiers = [];
@@ -1902,7 +2001,7 @@
         }
 
         // ================================================================
-        // 14. COLISÕES
+        // 16. COLISÕES
         // ================================================================
         function resolveSoldierCollisions() {
             const allSoldiers = [...greenSoldiers, ...redSoldiers];
@@ -1933,7 +2032,7 @@
         }
 
         // ================================================================
-        // 15. AMBIENTE DINÂMICO
+        // 17. AMBIENTE DINÂMICO
         // ================================================================
         function adjustByVariation(variation) {
             currentVariation = variation;
@@ -1998,8 +2097,9 @@
             updateCountsAndHUD();
 
             const strength = clamped / 10;
-            const topColor = new THREE.Color(0x0a0a2a).lerp(new THREE.Color(0x4a2a0a), Math.max(0, strength));
-            const bottomColor = new THREE.Color(0x2a1a0a).lerp(new THREE.Color(0xff8844), Math.max(0, strength));
+            // Ajustes visuais do céu (mantém o azul)
+            const topColor = new THREE.Color(0x0a2a5a).lerp(new THREE.Color(0x4a2a0a), Math.max(0, strength));
+            const bottomColor = new THREE.Color(0x7ab8e6).lerp(new THREE.Color(0xff8844), Math.max(0, strength));
             if (strength < 0) {
                 topColor.lerp(new THREE.Color(0x1a0a0a), -strength);
                 bottomColor.lerp(new THREE.Color(0x0a0a1a), -strength);
@@ -2026,86 +2126,11 @@
             lavaRiver.lavaMesh.material.color.setHSL(0.07, 1, 0.3 + lavaBright * 0.3);
             lavaRiver.glow.material.opacity = 0.3 + strength * 0.4;
 
-            const cloudOpacity = 0.2 + (1 - Math.abs(strength)) * 0.3;
-            const cloudColor = new THREE.Color(0xffddbb).lerp(new THREE.Color(0x444466), Math.max(0, -strength));
-            clouds.forEach(c => {
-                c.material.opacity = cloudOpacity * (0.5 + Math.random() * 0.5);
-                c.material.color.copy(cloudColor);
-            });
-
-            scene.children.forEach(child => {
-                if (child.userData && child.userData.isLightBeam) {
-                    scene.remove(child);
-                }
-            });
-            if (strength > 0.3) {
-                const numBeams = Math.floor(strength * 8);
-                for (let i = 0; i < numBeams; i++) {
-                    const beamMat = new THREE.SpriteMaterial({
-                        map: createGlowTexture(),
-                        blending: THREE.AdditiveBlending,
-                        depthWrite: false,
-                        color: 0xffdd44,
-                        transparent: true,
-                        opacity: 0.06 + strength * 0.06
-                    });
-                    const beam = new THREE.Sprite(beamMat);
-                    const x = (Math.random() - 0.5) * 35;
-                    const z = (Math.random() - 0.5) * 40;
-                    beam.position.set(x, 5 + Math.random() * 15, z);
-                    beam.scale.set(3 + Math.random() * 6, 15 + Math.random() * 20, 1);
-                    beam.userData.isLightBeam = true;
-                    scene.add(beam);
-                }
-            }
-
-            if (strength < -0.3 && Math.random() < 0.008) {
-                createLightning();
-            }
-        }
-
-        function createLightning() {
-            const points = [];
-            const startX = (Math.random() - 0.5) * 40;
-            const startZ = (Math.random() - 0.5) * 40;
-            let x = startX,
-                z = startZ,
-                y = 20;
-            points.push(new THREE.Vector3(x, y, z));
-            for (let i = 0; i < 6; i++) {
-                x += (Math.random() - 0.5) * 5;
-                z += (Math.random() - 0.5) * 5;
-                y -= 2 + Math.random() * 3;
-                points.push(new THREE.Vector3(x, y, z));
-            }
-            const geo = new THREE.BufferGeometry().setFromPoints(points);
-            const mat = new THREE.LineBasicMaterial({
-                color: 0x88ccff,
-                transparent: true,
-                opacity: 0.8,
-                linewidth: 2
-            });
-            const lightning = new THREE.Line(geo, mat);
-            scene.add(lightning);
-            const flashMat = new THREE.SpriteMaterial({
-                map: createGlowTexture(),
-                blending: THREE.AdditiveBlending,
-                color: 0x88ccff,
-                transparent: true,
-                opacity: 0.3
-            });
-            const flash = new THREE.Sprite(flashMat);
-            flash.scale.set(30, 30, 1);
-            flash.position.set(0, 5, 0);
-            scene.add(flash);
-            setTimeout(() => {
-                scene.remove(lightning);
-                scene.remove(flash);
-            }, 200);
+            // Nuvens já são animadas separadamente
         }
 
         // ================================================================
-        // 16. HUD
+        // 18. HUD
         // ================================================================
         function updateHUD(price, variation, greenCount, redCount) {
             document.getElementById('priceDisplay').textContent = price.toFixed(2);
@@ -2141,7 +2166,7 @@
         }
 
         // ================================================================
-        // 17. WEBSOCKET BINANCE - XMR/USDT
+        // 19. WEBSOCKET BINANCE - XMR/USDT
         // ================================================================
         let currentPrice = 0;
         let price15min = 0;
@@ -2192,7 +2217,7 @@
         };
 
         // ================================================================
-        // 18. LOOP PRINCIPAL
+        // 20. LOOP PRINCIPAL
         // ================================================================
         const clock = new THREE.Clock();
 
@@ -2201,6 +2226,7 @@
             const delta = clock.getDelta();
             const now = performance.now() / 1000;
 
+            // Anima bandeiras
             const time = now * 1.5;
             if (fortressGreen.userData.flag) {
                 fortressGreen.userData.flag.rotation.z = Math.sin(time) * 0.15;
@@ -2211,12 +2237,22 @@
                 fortressRed.userData.flag.position.y = 3.0 + Math.sin(time * 1.3 + 0.8) * 0.05;
             }
 
+            // Cristal
             crystal.rotation.y += delta * 0.4;
             crystal.rotation.x = Math.sin(now * 0.2) * 0.1;
             crystal.position.y = getTerrainHeight(0, 0) + 0.8 + Math.sin(now * 0.5) * 0.1;
 
+            // Lava
             lavaRiver.particles.rotation.y += delta * 0.015;
 
+            // Nuvens em movimento
+            for (const c of clouds) {
+                c.sprite.position.x += c.speed * c.dir * delta * 0.8;
+                if (c.sprite.position.x > c.range) c.sprite.position.x = -c.range;
+                if (c.sprite.position.x < -c.range) c.sprite.position.x = c.range;
+            }
+
+            // Soldados
             for (const soldier of greenSoldiers) {
                 if (soldier.alive) soldier.update(delta, now);
             }
@@ -2238,20 +2274,19 @@
         }
 
         // ================================================================
-        // 19. INICIALIZAÇÃO
+        // 21. INICIALIZAÇÃO
         // ================================================================
         initSoldiers();
         animate();
 
         // ================================================================
-        // 20. ÁUDIO DA BATALHA (loop)
+        // 22. ÁUDIO DA BATALHA
         // ================================================================
         const battleMusic = document.getElementById('battleMusic');
         battleMusic.volume = 0.5;
 
         function tryPlayMusic() {
             battleMusic.play().catch(() => {
-                // Aguarda interação do usuário
                 document.addEventListener('click', function playOnClick() {
                     battleMusic.play().catch(e => console.log('Áudio ainda bloqueado:', e));
                     document.removeEventListener('click', playOnClick);
@@ -2265,41 +2300,21 @@
         tryPlayMusic();
 
         // ================================================================
-        // 21. RESIZE
+        // 23. RESIZE
         // ================================================================
         window.addEventListener('resize', () => {
             const w = window.innerWidth;
             const h = window.innerHeight;
-            const isNowSmall = w < 600;
             camera.aspect = w / h;
             camera.updateProjectionMatrix();
             renderer.setSize(w, h);
-            // Ajusta distância da câmera se mudar drasticamente
-            if (isNowSmall !== isSmallScreen) {
-                // Recarrega a página para ajustar parâmetros completos
-                // ou apenas ajusta a câmera dinamicamente
-                const targetDist = isNowSmall ? 28 : 40;
-                const targetHeight = isNowSmall ? 16 : 22;
-                // Transição suave
-                const currentZ = camera.position.z;
-                const currentY = camera.position.y;
-                const diffZ = targetDist - currentZ;
-                const diffY = targetHeight - currentY;
-                if (Math.abs(diffZ) > 0.5) {
-                    camera.position.z += diffZ * 0.1;
-                    camera.position.y += diffY * 0.1;
-                    camera.lookAt(cameraOffset.x * 0.25, 0.8, 0);
-                }
-            }
         });
 
-        console.log('⚔️ XMR BATTLE 2.5D iniciada! (Mobile Responsive)');
+        console.log('⚔️ XMR BATTLE 2.5D (Montanhas, Céu Azul, Nuvens)');
         console.log('📊 Conectado ao WebSocket XMR/USDT da Binance');
-        console.log('🟩 Verde (compradores) vs 🔴 Vermelho (vendedores)');
-        console.log('💎 Cristal Monero no centro do vale');
-        console.log('⚡ Variação do XMR define quantidade e força dos exércitos');
-        console.log('🖱️ Arraste para mover | Scroll/Pinça para zoom');
-        console.log('📱 Totalmente responsivo para dispositivos móveis!');
+        console.log('🏔️ Montanhas e árvores adicionadas no fundo');
+        console.log('☁️ Nuvens em movimento');
+        console.log('🔒 Zoom limitado para não ultrapassar o terreno');
     </script>
 </body>
 </html>
