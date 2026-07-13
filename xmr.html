@@ -2156,16 +2156,16 @@
 
             const statusEl = document.getElementById('statusText');
             if (variation > 0.5) {
-                statusEl.textContent = '🔥 Mercado em alta · GREEN domina!';
+                statusEl.textContent = 'GREEN · DOMINATES';
                 statusEl.style.color = 'rgba(76, 175, 80, 0.7)';
             } else if (variation < -0.5) {
-                statusEl.textContent = '❄️ Mercado em baixa · RED domina!';
+                statusEl.textContent = 'RED · DOMINATES';
                 statusEl.style.color = 'rgba(244, 67, 54, 0.7)';
             } else if (Math.abs(variation) > 0.1) {
-                statusEl.textContent = '⚖️ Mercado tendendo para ' + (variation > 0 ? 'GREEN' : 'RED');
+                statusEl.textContent = 'Trending ' + (variation > 0 ? 'GREEN' : 'RED');
                 statusEl.style.color = 'rgba(255, 170, 0, 0.6)';
             } else {
-                statusEl.textContent = '⚖️ Mercado estável · Batalha equilibrada';
+                statusEl.textContent = 'Evenly matched ·  batle';
                 statusEl.style.color = 'rgba(255, 170, 0, 0.5)';
             }
         }
@@ -2198,7 +2198,7 @@
                     adjustByVariation(variation);
                 }
             } catch (e) {
-                console.error('Erro ao processar mensagem:', e);
+                console.error('Error:', e);
             }
         };
 
