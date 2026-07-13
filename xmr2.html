@@ -2218,9 +2218,10 @@
             }
             
             // Mostrar notificação na HUD
-            const el = document.getElementById('whale');
-            el.className = kind === 'candle' ? 'candle show' : 'nuke show';
-            el.textContent = (kind === 'candle' ? '▲ GOD CANDLE  ' : '☢ NUKE  ') + '$' + notional.toFixed(0);
+          
+const el = document.getElementById('whale');
+el.className = kind === 'candle' ? 'candle show' : 'nuke show';
+el.textContent = kind === 'candle' ? '▲ GOD CANDLE' : '☢ NUKE';
             
             setTimeout(() => {
                 el.className = '';
@@ -2640,7 +2641,7 @@
 
         function tryPlayMusic() {
             battleMusic.play().catch(() => {
-                document.addEventListener('click', function playOnClick() {
+                document.addEventListener('click', function playOnClick() {F
                     battleMusic.play().catch(e => console.log('Áudio ainda bloqueado:', e));
                     document.removeEventListener('click', playOnClick);
                 }, { once: true });
