@@ -1956,54 +1956,142 @@
             projectiles.push(proj);
         }
 
+      // ================================================================
+        // 14. PROJÉTEIS
         // ================================================================
-        // 12. GERENCIAMENTO DE SOLDADOS
-        // ================================================================
-         let projectiles = [];
-        let greenSoldiers = [];
-        let redSoldiers = [];
-        let greenTargetCount = INITIAL_SOLDIERS;
-        let redTargetCount = INITIAL_SOLDIERS;
+        let projectiles = [];
 
-        // Posição de spawn no topo do castelo
-        function getCastleTopPosition(side) {
-            const x = side === 'green' ? -11 : 11;
-            const z = (Math.random() - 0.5) * 2.0;
-            const y = getTerrainHeight(x, z) + 2.2; // no topo da muralha
-            return new THREE.Vector3(x, y, z);
-        }
+        class Projectile {
+            constructor(startPos, targetSoldier, color, speed = 28, damage = 20) {
+                this.startPos = startPos.clone();
+                this.targetSoldier = targetSoldier;
+                this.color = color;
+                this.speed = speed;
+                this.damage = damage;
+                this.alive = true;
+                this.trail = [];
+                this.trailLength = isMobile ? 6 : 10;
 
-        function spawnSoldierAtCastleTop(side) {
-            const pos = getCastleTopPosition(side);
-            const soldier = new Soldier(side, pos);
-            if (side === 'green') greenSoldiers.push(soldier);
-            else redSoldiers.push(soldier);
-            // Atualiza HUD com contagem de soldados (mas não usamos mais)
-            // updateCountsAndHUD();
-        }
+                const geo = new THREE.SphereGeometry(0.07, 8, 8);
+                const mat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 2.0 });
+                this.mesh = new THREE.Mesh(geo, mat);
+                this.mesh.position.copy(startPos);
+                this.mesh.castShadow = false;
+                scene.add(this.mesh);
 
-        function updateCountsAndHUD() {
-            // Agora usamos contagem de ordens em vez de soldados
-            // Mas mantemos para compatibilidade
-            const greenAlive = greenSoldiers.filter(s => s.alive).length;
-            const redAlive = redSoldiers.filter(s => s.alive).length;
-            // Não atualizamos mais a contagem de soldados no HUD
-        }
+                const glowMat = new THREE.SpriteMaterial({
+                    map: createGlowTexture(),
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false,
+                });
+                this.glow = new THREE.Sprite(glowMat);
+                this.glow.scale.set(0.35, 0.35, 1);
+                this.mesh.add(this.glow);
 
-        function initSoldiers() {
-            for (let i = 0; i < INITIAL_SOLDIERS; i++) {
-                spawnSoldierAtCastleTop('green');
-                spawnSoldierAtCastleTop('red');
+                this.trailGeo = new THREE.BufferGeometry();
+                this.trailPositions = new Float32Array(this.trailLength * 3);
+                this.trailGeo.setAttribute('position', new THREE.BufferAttribute(this.trailPositions, 3));
+                const trailMat = new THREE.LineBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.7,
+                    blending: THREE.AdditiveBlending
+                });
+                this.trailLine = new THREE.Line(this.trailGeo, trailMat);
+                scene.add(this.trailLine);
+
+                const targetPos = targetSoldier.group.position.clone();
+                this.direction = new THREE.Vector3().subVectors(targetPos, startPos).normalize();
+                this.direction.x += (Math.random() - 0.5) * 0.05;
+                this.direction.z += (Math.random() - 0.5) * 0.05;
+                this.direction.normalize();
+                this.totalDist = startPos.distanceTo(targetPos);
+                this.traveled = 0;
             }
-            greenTargetCount = INITIAL_SOLDIERS;
-            redTargetCount = INITIAL_SOLDIERS;
-            // updateCountsAndHUD();
+
+            update(delta) {
+                if (!this.alive) return;
+                const move = this.direction.clone().multiplyScalar(this.speed * delta);
+                this.mesh.position.add(move);
+                this.traveled += move.length();
+
+                this.trail.push(this.mesh.position.clone());
+                if (this.trail.length > this.trailLength) this.trail.shift();
+                const positions = this.trailLine.geometry.attributes.position.array;
+                for (let i = 0; i < this.trailLength; i++) {
+                    const idx = i * 3;
+                    if (i < this.trail.length) {
+                        const p = this.trail[i];
+                        positions[idx] = p.x;
+                        positions[idx + 1] = p.y;
+                        positions[idx + 2] = p.z;
+                    } else {
+                        positions[idx] = this.mesh.position.x;
+                        positions[idx + 1] = this.mesh.position.y;
+                        positions[idx + 2] = this.mesh.position.z;
+                    }
+                }
+                this.trailLine.geometry.attributes.position.needsUpdate = true;
+                const progress = this.traveled / this.totalDist;
+                this.trailLine.material.opacity = Math.max(0, 0.7 * (1 - progress * 0.8));
+
+                const pos = this.mesh.position;
+                if (pos.y < 0.1) {
+                    this.alive = false;
+                    this.cleanup();
+                    return;
+                }
+
+                const target = this.targetSoldier;
+                if (target.alive && pos.distanceTo(target.group.position) < 0.7) {
+                    this.alive = false;
+                    this.cleanup();
+                    target.takeDamage(this.damage, this.startPos);
+                    flashImpact(pos.clone(), this.color);
+                    return;
+                }
+
+                if (this.traveled > this.totalDist * 1.5 || pos.x > 35 || pos.x < -35 || pos.z > 30 || pos.z < -30) {
+                    this.alive = false;
+                    this.cleanup();
+                }
+            }
+
+            cleanup() {
+                scene.remove(this.mesh);
+                scene.remove(this.trailLine);
+            }
         }
 
+        function flashImpact(position, color) {
+            const geo = new THREE.SphereGeometry(0.3, 8, 8);
+            const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1.0, blending: THREE
+                    .AdditiveBlending });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(position);
+            scene.add(mesh);
+            const start = performance.now();
 
+            function animFlash() {
+                const elapsed = (performance.now() - start) / 1000;
+                if (elapsed > 0.2) { scene.remove(mesh); return; }
+                const scale = 1 + elapsed * 4;
+                mesh.scale.set(scale, scale, scale);
+                mesh.material.opacity = 1 - elapsed / 0.2;
+                requestAnimationFrame(animFlash);
+            }
+            animFlash();
+        }
 
-        
-      
+        function shootProjectile(shooter, target) {
+            const startPos = shooter.group.position.clone();
+            startPos.y += 0.40 * 0.65;
+            const forward = new THREE.Vector3(shooter.side === 'green' ? 1 : -1, 0, 0);
+            startPos.add(forward.multiplyScalar(0.30 * 0.65));
+            const color = shooter.side === 'green' ? 0x66ff66 : 0xff4444;
+            const proj = new Projectile(startPos, target, color, 24 + Math.random() * 8, shooter.damage);
+            projectiles.push(proj);
+        }
 
         // ================================================================
         // 15. GERENCIAMENTO DE SOLDADOS
