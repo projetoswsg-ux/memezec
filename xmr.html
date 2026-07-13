@@ -1816,8 +1816,10 @@
             }
         }
 
-        // ================================================================
-        // 14. PROJÉTEIS
+
+
+      // ================================================================
+        // 11. PROJÉTEIS COM RASTRO (sem partículas, sem fumaça)
         // ================================================================
         let projectiles = [];
 
@@ -1830,7 +1832,7 @@
                 this.damage = damage;
                 this.alive = true;
                 this.trail = [];
-                this.trailLength = isMobile ? 6 : 10;
+                this.trailLength = 10;
 
                 const geo = new THREE.SphereGeometry(0.07, 8, 8);
                 const mat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 2.0 });
@@ -1906,6 +1908,7 @@
                 if (target.alive && pos.distanceTo(target.group.position) < 0.7) {
                     this.alive = false;
                     this.cleanup();
+                    // Passa a posição do atirador para knockback
                     target.takeDamage(this.damage, this.startPos);
                     flashImpact(pos.clone(), this.color);
                     return;
@@ -1952,6 +1955,55 @@
             const proj = new Projectile(startPos, target, color, 24 + Math.random() * 8, shooter.damage);
             projectiles.push(proj);
         }
+
+        // ================================================================
+        // 12. GERENCIAMENTO DE SOLDADOS
+        // ================================================================
+         let projectiles = [];
+        let greenSoldiers = [];
+        let redSoldiers = [];
+        let greenTargetCount = INITIAL_SOLDIERS;
+        let redTargetCount = INITIAL_SOLDIERS;
+
+        // Posição de spawn no topo do castelo
+        function getCastleTopPosition(side) {
+            const x = side === 'green' ? -11 : 11;
+            const z = (Math.random() - 0.5) * 2.0;
+            const y = getTerrainHeight(x, z) + 2.2; // no topo da muralha
+            return new THREE.Vector3(x, y, z);
+        }
+
+        function spawnSoldierAtCastleTop(side) {
+            const pos = getCastleTopPosition(side);
+            const soldier = new Soldier(side, pos);
+            if (side === 'green') greenSoldiers.push(soldier);
+            else redSoldiers.push(soldier);
+            // Atualiza HUD com contagem de soldados (mas não usamos mais)
+            // updateCountsAndHUD();
+        }
+
+        function updateCountsAndHUD() {
+            // Agora usamos contagem de ordens em vez de soldados
+            // Mas mantemos para compatibilidade
+            const greenAlive = greenSoldiers.filter(s => s.alive).length;
+            const redAlive = redSoldiers.filter(s => s.alive).length;
+            // Não atualizamos mais a contagem de soldados no HUD
+        }
+
+        function initSoldiers() {
+            for (let i = 0; i < INITIAL_SOLDIERS; i++) {
+                spawnSoldierAtCastleTop('green');
+                spawnSoldierAtCastleTop('red');
+            }
+            greenTargetCount = INITIAL_SOLDIERS;
+            redTargetCount = INITIAL_SOLDIERS;
+            // updateCountsAndHUD();
+        }
+
+
+
+        
+      
 
         // ================================================================
         // 15. GERENCIAMENTO DE SOLDADOS
