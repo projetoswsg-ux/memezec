@@ -1073,66 +1073,102 @@
         // 10. MOEDA MONERO EM PÉ
         // ================================================================
         function createMoneroCoin() {
-            const group = new THREE.Group();
-            const textureLoader = new THREE.TextureLoader();
-            const moneroTex = textureLoader.load('https://memezec.vercel.app/Picsart_26-06-24_17-16-03-867.png');
+    const group = new THREE.Group();
+    const textureLoader = new THREE.TextureLoader();
 
-            const coinRadius = 1.8;
-            const coinHeight = 0.35;
-            const coinGeo = new THREE.CylinderGeometry(coinRadius, coinRadius, coinHeight, 48);
-            const coinMat = new THREE.MeshStandardMaterial({
-                map: moneroTex,
-                roughness: 0.3,
-                metalness: 0.7,
-                emissive: 0xff6600,
-                emissiveIntensity: 0.15,
-                side: THREE.DoubleSide,
-            });
-            const coin = new THREE.Mesh(coinGeo, coinMat);
-            coin.castShadow = true;
-            coin.receiveShadow = true;
-            coin.rotation.x = -Math.PI / 2;
-            group.add(coin);
+    const moneroTex = textureLoader.load(
+        'https://memezec.vercel.app/Picsart_26-06-24_17-16-03-867.png'
+    );
 
-            const rimMat = new THREE.MeshStandardMaterial({
-                color: 0xffaa44,
-                emissive: 0xff6600,
-                emissiveIntensity: 0.3,
-                metalness: 0.9,
-                roughness: 0.2,
-            });
-            const rimGeo = new THREE.TorusGeometry(coinRadius, 0.06, 16, 48);
-            const rim = new THREE.Mesh(rimGeo, rimMat);
-            rim.rotation.z = Math.PI / 2;
-            rim.position.y = coinHeight / 2 + 0.01;
-            group.add(rim);
-            const rimBottom = rim.clone();
-            rimBottom.position.y = -coinHeight / 2 - 0.01;
-            group.add(rimBottom);
+    // Gira apenas a textura em 90°
+    moneroTex.center.set(0.5, 0.5);
+    moneroTex.rotation = Math.PI / 2;
+    moneroTex.needsUpdate = true;
 
-            const glowMat = new THREE.SpriteMaterial({
-                map: createGlowTexture(),
-                blending: THREE.AdditiveBlending,
-                depthWrite: false,
-                color: 0xff8800,
-                transparent: true,
-                opacity: 0.6,
-            });
-            const glow = new THREE.Sprite(glowMat);
-            glow.scale.set(5, 5, 1);
-            group.add(glow);
+    const coinRadius = 1.8;
+    const coinHeight = 0.35;
 
-            const light = new THREE.PointLight(0xff8800, 1.2, 18);
-            light.position.set(0, 0, 0);
-            group.add(light);
+    const coinGeo = new THREE.CylinderGeometry(
+        coinRadius,
+        coinRadius,
+        coinHeight,
+        48
+    );
 
-            const yBase = getTerrainHeight(0, 0);
-            group.position.set(0, yBase + 1.8, 0);
-            group.userData = { coin, glow, light, rim };
-            return group;
-        }
-        const moneroCoin = createMoneroCoin();
-        scene.add(moneroCoin);
+    const coinMat = new THREE.MeshStandardMaterial({
+        map: moneroTex,
+        roughness: 0.3,
+        metalness: 0.7,
+        emissive: 0xff6600,
+        emissiveIntensity: 0.15,
+        side: THREE.DoubleSide,
+    });
+
+    const coin = new THREE.Mesh(coinGeo, coinMat);
+    coin.castShadow = true;
+    coin.receiveShadow = true;
+
+    // Apenas deita a moeda
+    coin.rotation.x = -Math.PI / 2;
+
+    group.add(coin);
+
+    const rimMat = new THREE.MeshStandardMaterial({
+        color: 0xffaa44,
+        emissive: 0xff6600,
+        emissiveIntensity: 0.3,
+        metalness: 0.9,
+        roughness: 0.2,
+    });
+
+    const rimGeo = new THREE.TorusGeometry(
+        coinRadius,
+        0.06,
+        16,
+        48
+    );
+
+    const rim = new THREE.Mesh(rimGeo, rimMat);
+    rim.rotation.z = Math.PI / 2;
+    rim.position.y = coinHeight / 2 + 0.01;
+    group.add(rim);
+
+    const rimBottom = rim.clone();
+    rimBottom.position.y = -coinHeight / 2 - 0.01;
+    group.add(rimBottom);
+
+    const glowMat = new THREE.SpriteMaterial({
+        map: createGlowTexture(),
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        color: 0xff8800,
+        transparent: true,
+        opacity: 0.6,
+    });
+
+    const glow = new THREE.Sprite(glowMat);
+    glow.scale.set(5, 5, 1);
+    group.add(glow);
+
+    const light = new THREE.PointLight(0xff8800, 1.2, 18);
+    light.position.set(0, 0, 0);
+    group.add(light);
+
+    const yBase = getTerrainHeight(0, 0);
+    group.position.set(0, yBase + 1.8, 0);
+
+    group.userData = {
+        coin,
+        glow,
+        light,
+        rim
+    };
+
+    return group;
+}
+
+const moneroCoin = createMoneroCoin();
+scene.add(moneroCoin);
 
         // ================================================================
         // 11. ROCHAS E ÁRVORES MORTAS
