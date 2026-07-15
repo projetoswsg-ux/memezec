@@ -2349,7 +2349,7 @@
 
             const el = document.getElementById('whale');
             el.className = 'nuke show';
-            el.textContent = '☢  · ' + killed + ' dead';
+            el.textContent = '☢  · ' + killed + ' of damage ';
             setTimeout(() => { el.className = ''; }, 3000);
 
             console.log('💥 Nuke explodiu! ' + killed + ' unidades ' + (side === 'green' ? 'vermelhas' : 'verdes') +
