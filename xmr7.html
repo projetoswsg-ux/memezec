@@ -2349,7 +2349,7 @@
 
             const el = document.getElementById('whale');
             el.className = 'nuke show';
-            el.textContent = '☢ NUKE · ' + killed + ' destruídos';
+            el.textContent = '☢  · ' + killed + ' dead';
             setTimeout(() => { el.className = ''; }, 3000);
 
             console.log('💥 Nuke explodiu! ' + killed + ' unidades ' + (side === 'green' ? 'vermelhas' : 'verdes') +
@@ -2417,7 +2417,7 @@
 
             const el = document.getElementById('whale');
             el.className = 'nuke show';
-            el.textContent = '☢ TANQUE NUKE!';
+            el.textContent = '☢ CAUTION';
             setTimeout(() => { el.className = ''; }, 2500);
 
             console.log('🚀 Tanque ' + attackerSide + ' lançado contra ' + (victimTeam === 1 ? 'RED' : 'GREEN'));
