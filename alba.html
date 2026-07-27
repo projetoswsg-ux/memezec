@@ -807,16 +807,16 @@
         color: var(--azul-brasil);
       }
 
-      /* Hero - Ajustes da imagem para mobile: 80% do tamanho */
+      /* Hero - Ajustes da imagem para mobile: mostrar lado esquerdo */
       .hero {
         padding: 48px 0 64px;
         min-height: 400px;
-        /* Mostra 80% da imagem em mobile */
-        background-size: 80%;
-        background-position: center;
+        /* Mostra a parte esquerda da imagem em mobile */
+        background-size: cover;
+        background-position: 15% center;
+        /* Move a imagem para a esquerda (15% da largura) */
         background-attachment: scroll;
         background-repeat: no-repeat;
-        /* Fundo azul como fallback */
         background-color: var(--azul-brasil);
       }
 
@@ -825,11 +825,11 @@
         background: rgba(0, 51, 153, 0.2);
       }
 
-      /* Para telas muito pequenas */
+      /* Para telas muito pequenas - mais para esquerda */
       @media (max-width: 480px) {
         .hero {
-          background-size: 80%;
-          background-position: center;
+          background-position: 5% center;
+          /* Move ainda mais para esquerda em telas muito pequenas */
           min-height: 350px;
           padding: 40px 0 50px;
         }
@@ -841,8 +841,8 @@
       /* Para telas em paisagem em mobile */
       @media (max-height: 500px) and (orientation: landscape) {
         .hero {
-          background-size: 80%;
-          background-position: center;
+          background-position: 20% center;
+          /* Um pouco menos deslocado em paisagem */
           min-height: 300px;
           padding: 30px 0 40px;
         }
@@ -1044,8 +1044,8 @@
       }
       
       .hero {
-        background-size: 80%;
-        background-position: center;
+        background-position: 0% center;
+        /* Desloca totalmente para a esquerda */
         min-height: 300px;
       }
       .hero::before {
@@ -1058,8 +1058,7 @@
       .hero {
         padding: 32px 0 40px;
         min-height: 280px;
-        background-size: 80%;
-        background-position: center;
+        background-position: 20% center;
       }
       .hero h1 {
         font-size: 1.6rem;
