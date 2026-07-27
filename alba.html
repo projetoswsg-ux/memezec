@@ -170,8 +170,7 @@
       width: 100%;
       height: 100%;
       /* Overlay azul com transparência - a imagem aparece por baixo */
-      background: rgba(0, 51, 153, 0.2);
-      /* Ajuste a opacidade aqui: 0.3 = mais transparente, 0.8 = mais opaco */
+      background: rgba(0, 51, 153, 0.65);
       z-index: 1;
     }
 
@@ -808,25 +807,29 @@
         color: var(--azul-brasil);
       }
 
-      /* Hero - Ajustes da imagem de fundo com overlay para mobile */
+      /* Hero - Ajustes da imagem para mobile: 80% do tamanho */
       .hero {
         padding: 48px 0 64px;
         min-height: 400px;
-        background-size: cover;
-        background-position: center 30%;
+        /* Mostra 80% da imagem em mobile */
+        background-size: 80%;
+        background-position: center;
         background-attachment: scroll;
+        background-repeat: no-repeat;
+        /* Fundo azul como fallback */
+        background-color: var(--azul-brasil);
       }
 
-      /* Overlay em mobile - mantém a transparência */
+      /* Overlay azul com transparência 0.2 em mobile */
       .hero::before {
         background: rgba(0, 51, 153, 0.2);
-        /* Um pouco mais opaco em mobile para melhor contraste do texto */
       }
 
       /* Para telas muito pequenas */
       @media (max-width: 480px) {
         .hero {
-          background-position: center 25%;
+          background-size: 80%;
+          background-position: center;
           min-height: 350px;
           padding: 40px 0 50px;
         }
@@ -838,7 +841,8 @@
       /* Para telas em paisagem em mobile */
       @media (max-height: 500px) and (orientation: landscape) {
         .hero {
-          background-position: center 40%;
+          background-size: 80%;
+          background-position: center;
           min-height: 300px;
           padding: 30px 0 40px;
         }
@@ -1040,11 +1044,12 @@
       }
       
       .hero {
-        background-position: center 20%;
+        background-size: 80%;
+        background-position: center;
         min-height: 300px;
       }
       .hero::before {
-        background: rgba(0, 51, 153, 0.80);
+        background: rgba(0, 51, 153, 0.2);
       }
     }
 
@@ -1053,7 +1058,8 @@
       .hero {
         padding: 32px 0 40px;
         min-height: 280px;
-        background-position: center 40%;
+        background-size: 80%;
+        background-position: center;
       }
       .hero h1 {
         font-size: 1.6rem;
@@ -1072,7 +1078,7 @@
         padding-top: 56px;
       }
       .hero::before {
-        background: rgba(0, 51, 153, 0.60);
+        background: rgba(0, 51, 153, 0.2);
       }
     }
 
@@ -1080,8 +1086,6 @@
     @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
       .hero {
         background-image: url('https://i.postimg.cc/ZnS673MC/IMG-20260727-WA0051.jpg');
-        background-size: cover;
-        background-position: center;
       }
     }
 
