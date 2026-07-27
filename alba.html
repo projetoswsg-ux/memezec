@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ABALC – Associação Brasileira de Arremesso e Lançamento de Cartas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* ----- RESET E BASE ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #FFFFFF;
+      color: #1E293B;
+      line-height: 1.6;
+      padding-top: 76px;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ----- CORES ----- */
+    :root {
+      --azul-brasil: #003399;
+      --verde-brasil: #009739;
+      --amarelo-brasil: #FEDB00;
+      --branco: #FFFFFF;
+      --cinza-claro: #F4F6F9;
+      --cinza-borda: #E2E8F0;
+      --texto-escuro: #0B1E33;
+    }
+
+    /* ----- HEADER ----- */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: var(--branco);
+      color: var(--texto-escuro);
+      z-index: 1000;
+      box-shadow: 0 2px 16px rgba(0, 51, 153, 0.08);
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 3px solid var(--azul-brasil);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-icon {
+      background: var(--azul-brasil);
+      color: var(--amarelo-brasil);
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    .logo span {
+      color: var(--azul-brasil);
+    }
+    .logo span.verde {
+      color: var(--verde-brasil);
+    }
+    .logo span.amarelo {
+      color: var(--amarelo-brasil);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav a {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--texto-escuro);
+      transition: color 0.2s;
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    .nav a:hover {
+      color: var(--azul-brasil);
+    }
+
+    .nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: var(--amarelo-brasil);
+      transition: width 0.3s;
+    }
+
+    .nav a:hover::after {
+      width: 100%;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--azul-brasil);
+    }
+
+    /* ----- HERO – COM SUA IMAGEM E OVERLAY DE 10% ----- */
+    .hero {
+      background: var(--azul-brasil);
+      background-image: url('https://i.postimg.cc/ZnS673MC/IMG-20260727-WA0051.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+      padding: 80px 0 100px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 51, 153, 0.10);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero h1 {
+      font-size: 3.4rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 .amarelo {
+      color: var(--amarelo-brasil);
+    }
+    .hero h1 .verde {
+      color: var(--verde-brasil);
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      max-width: 700px;
+      margin: 0 auto 36px;
+      opacity: 0.95;
+    }
+
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      background: var(--amarelo-brasil);
+      color: var(--azul-brasil);
+      padding: 14px 40px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 14px rgba(254, 219, 0, 0.35);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(254, 219, 0, 0.5);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      box-shadow: none;
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--amarelo-brasil);
+      box-shadow: none;
+    }
+
+    /* ----- SEÇÕES ----- */
+    .section {
+      padding: 80px 0;
+    }
+    .section-title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--azul-brasil);
+      margin-bottom: 8px;
+    }
+    .section-sub {
+      font-size: 1.1rem;
+      color: #475569;
+      max-width: 700px;
+      margin-bottom: 48px;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .bg-cinza {
+      background: var(--cinza-claro);
+    }
+
+    /* ----- SOBRE – agora com fundo para o Joker percorrer toda a tela ----- */
+    .sobre-wrapper {
+      position: relative;
+      overflow: hidden; /* esconde o Joker quando sair da tela */
+    }
+
+    /* Joker animado – cruza a tela toda */
+    .joker-animado {
+      font-size: 6rem;
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%) translateX(-10vw);
+      animation: jokerMove 10s linear infinite;
+      z-index: 0; /* fica atrás do conteúdo, mas ainda visível */
+      opacity: 0.6; /* leve transparência para não atrapalhar a leitura */
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+      pointer-events: none; /* permite clicar no conteúdo por cima */
+    }
+
+    @keyframes jokerMove {
+      0% {
+        transform: translateY(-50%) translateX(-10vw) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-50%) translateX(110vw) rotate(720deg);
+      }
+      100% {
+        transform: translateY(-50%) translateX(-10vw) rotate(1440deg);
+      }
+    }
+
+    .sobre-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center;
+      position: relative;
+      z-index: 1; /* fica acima do Joker */
+    }
+
+    .sobre-text h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--azul-brasil);
+      margin-bottom: 16px;
+    }
+
+    .sobre-text p {
+      color: #334155;
+      margin-bottom: 16px;
+    }
+
+    .valores {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .valores-item {
+      background: var(--branco);
+      padding: 18px 22px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 51, 153, 0.06);
+      border-left: 6px solid var(--verde-brasil);
+      font-weight: 600;
+      color: var(--texto-escuro);
+    }
+
+    .valores-item .emoji {
+      margin-right: 8px;
+    }
+
+    /* .sobre-img – sem fundo, apenas com o texto */
+    .sobre-img {
+      background: transparent;
+      border-radius: 28px;
+      height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 4px solid var(--amarelo-brasil);
+      background-color: rgba(255,255,255,0.5); /* fundo levemente branco para contraste */
+      backdrop-filter: blur(2px); /* pequeno desfoque para destacar o texto */
+    }
+
+    .sobre-img .legenda {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--azul-brasil);
+      text-align: center;
+      z-index: 2;
+      text-shadow: 0 2px 8px rgba(255,255,255,0.8);
+    }
+
+    /* ----- NOTÍCIAS ----- */
+    .noticias-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+    }
+    .noticia-card {
+      background: var(--branco);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      transition: transform 0.25s, box-shadow 0.25s;
+      border-bottom: 5px solid var(--azul-brasil);
+    }
+    .noticia-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(0, 51, 153, 0.10);
+    }
+    .noticia-img {
+      height: 180px;
+      background: var(--azul-brasil);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.6rem;
+      color: var(--amarelo-brasil);
+    }
+    .noticia-card .content {
+      padding: 24px;
+    }
+    .noticia-card .tag {
+      display: inline-block;
+      background: var(--amarelo-brasil);
+      padding: 2px 14px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--azul-brasil);
+      letter-spacing: 0.3px;
+      margin-bottom: 10px;
+    }
+    .noticia-card h4 {
+      font-size: 1.15rem;
+      color: var(--texto-escuro);
+      margin-bottom: 8px;
+    }
+    .noticia-card p {
+      color: #64748B;
+      font-size: 0.95rem;
+    }
+    .noticia-card .data {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #94A3B8;
+    }
+
+    /* ----- REGULAMENTOS ----- */
+    .regulamentos-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .reg-item {
+      background: var(--branco);
+      border-radius: 16px;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--cinza-borda);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .reg-item:hover {
+      border-color: var(--azul-brasil);
+      box-shadow: 0 4px 16px rgba(0, 51, 153, 0.08);
+    }
+    .reg-item i {
+      font-size: 2.2rem;
+      color: var(--verde-brasil);
+    }
+    .reg-item .info h4 {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--texto-escuro);
+    }
+    .reg-item .info span {
+      font-size: 0.85rem;
+      color: #64748B;
+    }
+    .reg-item .download {
+      margin-left: auto;
+      background: var(--azul-brasil);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: background 0.2s, color 0.2s;
+    }
+    .reg-item .download:hover {
+      background: var(--amarelo-brasil);
+      color: var(--azul-brasil);
+    }
+
+    /* ----- FILIAÇÃO ----- */
+    .filia-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+    }
+    .filia-beneficios ul {
+      margin-top: 16px;
+    }
+    .filia-beneficios li {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--cinza-borda);
+    }
+    .filia-beneficios li i {
+      color: var(--verde-brasil);
+      font-size: 1.2rem;
+      width: 28px;
+    }
+    .filia-form {
+      background: var(--branco);
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 51, 153, 0.06);
+      border-top: 6px solid var(--amarelo-brasil);
+    }
+    .filia-form h3 {
+      color: var(--azul-brasil);
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      color: var(--texto-escuro);
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--cinza-borda);
+      font-family: 'Inter', sans-serif;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--azul-brasil);
+      box-shadow: 0 0 0 4px rgba(0, 51, 153, 0.08);
+    }
+    .btn-form {
+      background: var(--azul-brasil);
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      width: 100%;
+    }
+    .btn-form:hover {
+      background: var(--verde-brasil);
+      transform: scale(1.01);
+    }
+
+    /* ----- EVENTOS ----- */
+    .eventos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 30px;
+    }
+    .evento-card {
+      background: var(--branco);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      border-top: 6px solid var(--verde-brasil);
+      transition: transform 0.2s;
+    }
+    .evento-card:hover {
+      transform: scale(1.02);
+    }
+    .evento-card .data-evento {
+      font-weight: 700;
+      color: var(--azul-brasil);
+      font-size: 1.2rem;
+    }
+    .evento-card .local {
+      color: #64748B;
+      font-size: 0.9rem;
+      margin: 4px 0 14px;
+    }
+    .evento-card .btn-evento {
+      background: var(--azul-brasil);
+      color: #fff;
+      padding: 8px 24px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+      transition: background 0.2s;
+    }
+    .evento-card .btn-evento:hover {
+      background: var(--amarelo-brasil);
+      color: var(--azul-brasil);
+    }
+
+    /* ----- CONTATO ----- */
+    .contato-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+    }
+    .contato-info h3 {
+      font-size: 1.6rem;
+      color: var(--azul-brasil);
+      margin-bottom: 16px;
+    }
+    .contato-info p {
+      color: #475569;
+      margin-bottom: 28px;
+    }
+    .contato-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .contato-item i {
+      width: 48px;
+      height: 48px;
+      background: var(--azul-brasil);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .social-links {
+      display: flex;
+      gap: 16px;
+      margin-top: 28px;
+    }
+    .social-links a {
+      width: 48px;
+      height: 48px;
+      background: var(--cinza-claro);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--azul-brasil);
+      transition: background 0.2s, color 0.2s;
+    }
+    .social-links a:hover {
+      background: var(--azul-brasil);
+      color: #fff;
+    }
+    .contato-form {
+      background: var(--branco);
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 51, 153, 0.06);
+      border-top: 6px solid var(--verde-brasil);
+    }
+    .contato-form h3 {
+      color: var(--azul-brasil);
+      margin-bottom: 20px;
+    }
+    .contato-form .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--cinza-borda);
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      min-height: 130px;
+    }
+    .contato-form .form-group textarea:focus {
+      outline: none;
+      border-color: var(--azul-brasil);
+      box-shadow: 0 0 0 4px rgba(0, 51, 153, 0.08);
+    }
+
+    /* ----- RODAPÉ ----- */
+    .footer {
+      background: var(--azul-brasil);
+      color: #E2E8F0;
+      padding: 40px 0 28px;
+      margin-top: 40px;
+    }
+    .footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .footer .logo {
+      color: #fff;
+    }
+    .footer .logo span {
+      color: var(--amarelo-brasil);
+    }
+    .footer .logo span.verde {
+      color: var(--verde-brasil);
+    }
+    .footer .logo-icon {
+      background: var(--amarelo-brasil);
+      color: var(--azul-brasil);
+    }
+    .footer small {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    /* ----- RESPONSIVO ----- */
+    @media (max-width: 992px) {
+      .sobre-grid {
+        grid-template-columns: 1fr;
+      }
+      .sobre-img {
+        height: 200px;
+        order: -1;
+      }
+      .hero h1 {
+        font-size: 2.6rem;
+      }
+      .joker-animado {
+        font-size: 4rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-top: 68px;
+      }
+      .header {
+        height: 68px;
+        padding: 0 16px;
+      }
+      .nav {
+        position: fixed;
+        top: 68px;
+        left: 0;
+        width: 100%;
+        background: var(--branco);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s ease;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+        border-bottom: 3px solid var(--amarelo-brasil);
+      }
+      .nav.open {
+        max-height: 420px;
+      }
+      .nav a {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--cinza-borda);
+        font-size: 1rem;
+      }
+      .menu-toggle {
+        display: block;
+      }
+      .hero {
+        padding: 60px 0 80px;
+      }
+      .hero h1 {
+        font-size: 2rem;
+      }
+      .valores {
+        grid-template-columns: 1fr;
+      }
+      .filia-form,
+      .contato-form {
+        padding: 28px;
+      }
+      .section {
+        padding: 56px 0;
+      }
+      .section-title {
+        font-size: 2rem;
+      }
+      .footer .container {
+        flex-direction: column;
+        text-align: center;
+      }
+      .joker-animado {
+        font-size: 3rem;
+        opacity: 0.4; /* mais leve em mobile */
+      }
+      .sobre-img .legenda {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CABEÇALHO -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">♠</div>
+      <div>ABALC<span>.</span><span class="verde">B</span><span class="amarelo">R</span></div>
+    </div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <i class="fas fa-bars"></i>
+    </button>
+    <nav class="nav" id="navMenu">
+      <a href="#hero">Início</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#noticias">Notícias</a>
+      <a href="#regulamentos">Regulamentos</a>
+      <a href="#filiacao">Filiação</a>
+      <a href="#eventos">Eventos</a>
+      <a href="#contato">Contato</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="container hero-content">
+      <h1>
+        ABALC<br />
+        <span class="amarelo">A Nova Fronteira</span> <span class="verde">do Esporte</span> Brasileiro
+      </h1>
+      <p>
+        Associação Brasileira de Arremesso e Lançamento de Cartas. Uma comunidade
+        apaixonada por precisão, técnica e tradição.
+      </p>
+      <div class="hero-buttons">
+        <a href="#filiacao" class="btn">Quero me filiar</a>
+        <a href="#eventos" class="btn btn-outline">Próximos eventos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOBRE – agora com o Joker percorrendo toda a tela -->
+  <section class="section bg-cinza" id="sobre">
+    <div class="container sobre-wrapper">
+      <!-- Joker animado – cruza a tela -->
+      <span class="joker-animado">🃏</span>
+
+      <div class="section-header">
+        <h2 class="section-title">Sobre a ABALC</h2>
+        <p class="section-sub">
+          Fundada em 2026, a ABALC une atletas, técnicos e entusiastas para promover
+          o arremesso e lançamento de cartas como modalidade esportiva oficial.
+        </p>
+      </div>
+
+      <div class="sobre-grid">
+        <div class="sobre-text">
+          <h3>Quem Somos</h3>
+          <p>
+            A ABALC nasceu do sonho de transformar uma prática tradicional em um
+            esporte organizado, com regras claras, competições oficiais e
+            reconhecimento nacional.
+          </p>
+          <p>
+            Nossa missão é difundir a modalidade, formar atletas e criar um
+            calendário competitivo que valorize a técnica, a concentração e a
+            precisão.
+          </p>
+          <div class="valores">
+            <div class="valores-item"><span class="emoji">🎯</span> Precisão</div>
+            <div class="valores-item"><span class="emoji">🤝</span> Comunidade</div>
+            <div class="valores-item"><span class="emoji">🏆</span> Excelência</div>
+            <div class="valores-item"><span class="emoji">♠</span> Tradição</div>
+          </div>
+        </div>
+
+        <!-- .sobre-img – sem fundo azul, com legenda -->
+        <div class="sobre-img">
+          <div class="legenda">Arremesso &amp; Lançamento</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTÍCIAS -->
+  <section class="section" id="noticias">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Últimas Notícias</h2>
+        <p class="section-sub">
+          Fique por dentro de tudo que acontece no mundo do arremesso e lançamento de cartas.
+        </p>
+      </div>
+      <div class="noticias-grid">
+        <article class="noticia-card">
+          <div class="noticia-img">♠</div>
+          <div class="content">
+            <span class="tag">Destaque</span>
+            <h4>1º Campeonato Brasileiro ABALC será em São Paulo</h4>
+            <p>As inscrições já estão abertas para o evento que promete reunir os maiores talentos do país.</p>
+            <div class="data">27 de julho de 2026</div>
+          </div>
+        </article>
+        <article class="noticia-card">
+          <div class="noticia-img">♥</div>
+          <div class="content">
+            <span class="tag">Regulamento</span>
+            <h4>Nova regra de lançamento é aprovada em assembleia</h4>
+            <p>Entenda as mudanças que vão tornar as competições ainda mais dinâmicas e justas.</p>
+            <div class="data">20 de julho de 2026</div>
+          </div>
+        </article>
+        <article class="noticia-card">
+          <div class="noticia-img">♦</div>
+          <div class="content">
+            <span class="tag">Filiação</span>
+            <h4>ABALC ultrapassa 100 atletas filiados em seu primeiro mês</h4>
+            <p>O crescimento da associação mostra a força da modalidade e o interesse do público.</p>
+            <div class="data">15 de julho de 2026</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGULAMENTOS -->
+  <section class="section bg-cinza" id="regulamentos">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Regulamentos</h2>
+        <p class="section-sub">
+          Documentos oficiais para consulta e download. Mantenha-se atualizado com as normas da ABALC.
+        </p>
+      </div>
+      <div class="regulamentos-list">
+        <div class="reg-item">
+          <i class="fas fa-file-pdf"></i>
+          <div class="info">
+            <h4>Regulamento Geral</h4>
+            <span>Versão 2.0 – 2026</span>
+          </div>
+          <a href="#" class="download">PDF</a>
+        </div>
+        <div class="reg-item">
+          <i class="fas fa-file-pdf"></i>
+          <div class="info">
+            <h4>Código de Ética</h4>
+            <span>Versão 1.0 – 2026</span>
+          </div>
+          <a href="#" class="download">PDF</a>
+        </div>
+        <div class="reg-item">
+          <i class="fas fa-file-pdf"></i>
+          <div class="info">
+            <h4>Estatuto Social</h4>
+            <span>Registro em cartório</span>
+          </div>
+          <a href="#" class="download">PDF</a>
+        </div>
+        <div class="reg-item">
+          <i class="fas fa-file-pdf"></i>
+          <div class="info">
+            <h4>Manual do Atleta</h4>
+            <span>Guia completo</span>
+          </div>
+          <a href="#" class="download">PDF</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILIAÇÃO -->
+  <section class="section" id="filiacao">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Filiação</h2>
+        <p class="section-sub">Faça parte da ABALC e ajude a construir o futuro do esporte.</p>
+      </div>
+      <div class="filia-grid">
+        <div class="filia-beneficios">
+          <h3>Vantagens de ser um membro</h3>
+          <ul>
+            <li><i class="fas fa-check-circle"></i> Participar de campeonatos oficiais</li>
+            <li><i class="fas fa-check-circle"></i> Acesso a materiais técnicos e treinamentos</li>
+            <li><i class="fas fa-check-circle"></i> Receber o boletim informativo ABALC</li>
+            <li><i class="fas fa-check-circle"></i> Descontos em eventos e workshops</li>
+            <li><i class="fas fa-check-circle"></i> Direito a voto nas assembleias</li>
+          </ul>
+          <p style="margin-top: 24px; color: #475569;">
+            <strong>Categorias:</strong> Atleta, Técnico, Clube, Membro Apoiador.
+          </p>
+        </div>
+        <div class="filia-form">
+          <h3>Pré-cadastro</h3>
+          <form id="formFiliacao">
+            <div class="form-group">
+              <label for="nome">Nome completo</label>
+              <input type="text" id="nome" placeholder="Seu nome" required />
+            </div>
+            <div class="form-group">
+              <label for="emailFiliacao">E-mail</label>
+              <input type="email" id="emailFiliacao" placeholder="seu@email.com" required />
+            </div>
+            <div class="form-group">
+              <label for="categoria">Categoria</label>
+              <select id="categoria">
+                <option>Atleta</option>
+                <option>Técnico</option>
+                <option>Clube</option>
+                <option>Membro Apoiador</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-form">Enviar interesse</button>
+          </form>
+          <p style="margin-top: 14px; font-size: 0.85rem; color: #94A3B8;">
+            Entraremos em contato com os próximos passos.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTOS -->
+  <section class="section bg-cinza" id="eventos">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Próximos Eventos</h2>
+        <p class="section-sub">Confira o calendário oficial da ABALC e marque sua presença.</p>
+      </div>
+      <div class="eventos-grid">
+        <div class="evento-card">
+          <div class="data-evento">15 – 17 ago 2026</div>
+          <h4>I Campeonato Brasileiro de Arremesso</h4>
+          <div class="local">📍 São Paulo – SP</div>
+          <a href="#" class="btn-evento">Inscrições</a>
+        </div>
+        <div class="evento-card">
+          <div class="data-evento">05 set 2026</div>
+          <h4>Workshop de Técnicas de Lançamento</h4>
+          <div class="local">📍 Rio de Janeiro – RJ</div>
+          <a href="#" class="btn-evento">Inscrever-se</a>
+        </div>
+        <div class="evento-card">
+          <div class="data-evento">28 set 2026</div>
+          <h4>Torneio Regional – Sul</h4>
+          <div class="local">📍 Curitiba – PR</div>
+          <a href="#" class="btn-evento">Ver regulamento</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section class="section" id="contato">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Fale Conosco</h2>
+        <p class="section-sub">Dúvidas, sugestões ou parcerias? Entre em contato com a ABALC.</p>
+      </div>
+      <div class="contato-wrapper">
+        <div class="contato-info">
+          <h3>Nossos canais</h3>
+          <p>Estamos prontos para atender você. Utilize os canais abaixo ou o formulário ao lado.</p>
+          <div class="contato-item">
+            <i class="fas fa-envelope"></i>
+            <span>contato@abalc.org.br</span>
+          </div>
+          <div class="contato-item">
+            <i class="fas fa-phone-alt"></i>
+            <span>(11) 99999-9999</span>
+          </div>
+          <div class="contato-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Av. Paulista, 1000 – São Paulo/SP</span>
+          </div>
+          <div class="social-links">
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="contato-form">
+          <h3>Envie uma mensagem</h3>
+          <form id="formContato">
+            <div class="form-group">
+              <label for="nomeContato">Nome</label>
+              <input type="text" id="nomeContato" placeholder="Seu nome" required />
+            </div>
+            <div class="form-group">
+              <label for="emailContato">E-mail</label>
+              <input type="email" id="emailContato" placeholder="seu@email.com" required />
+            </div>
+            <div class="form-group">
+              <label for="assunto">Assunto</label>
+              <input type="text" id="assunto" placeholder="Assunto" />
+            </div>
+            <div class="form-group">
+              <label for="mensagem">Mensagem</label>
+              <textarea id="mensagem" placeholder="Sua mensagem..." required></textarea>
+            </div>
+            <button type="submit" class="btn-form">Enviar mensagem</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RODAPÉ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="logo">
+        <div class="logo-icon">♠</div>
+        <div>ABALC<span>.</span><span class="verde">B</span><span class="amarelo">R</span></div>
+      </div>
+      <small>&copy; 2026 ABALC – Associação Brasileira de Arremesso e Lançamento de Cartas. Todos os direitos reservados.</small>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    const toggle = document.getElementById('menuToggle');
+    const nav = document.getElementById('navMenu');
+
+    toggle.addEventListener('click', () => {
+      nav.classList.toggle('open');
+      const icon = toggle.querySelector('i');
+      icon.classList.toggle('fa-bars');
+      icon.classList.toggle('fa-times');
+    });
+
+    document.querySelectorAll('.nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        nav.classList.remove('open');
+        const icon = toggle.querySelector('i');
+        icon.classList.add('fa-bars');
+        icon.classList.remove('fa-times');
+      });
+    });
+
+    document.getElementById('formFiliacao').addEventListener('submit', function (e) {
+      e.preventDefault();
+      alert('Obrigado pelo interesse! Em breve entraremos em contato.');
+      this.reset();
+    });
+
+    document.getElementById('formContato').addEventListener('submit', function (e) {
+      e.preventDefault();
+      alert('Mensagem enviada com sucesso! Responderemos em até 48h.');
+      this.reset();
+    });
+  </script>
+
+</body>
+</html>
