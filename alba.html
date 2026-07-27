@@ -146,20 +146,22 @@
       padding: 4px 8px;
     }
 
-    /* ----- HERO – COM SUA IMAGEM E OVERLAY DE 10% ----- */
+    /* ----- HERO – COM IMAGEM E OVERLAY AZUL TRANSPARENTE ----- */
     .hero {
-      background: var(--azul-brasil);
-      background-image: url('https://i.postimg.cc/ZnS673MC/IMG-20260727-WA0051.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
       position: relative;
       padding: 80px 0 100px;
       text-align: center;
       overflow: hidden;
       min-height: 500px;
+      
+      /* A imagem de fundo é aplicada aqui */
+      background-image: url('https://i.postimg.cc/ZnS673MC/IMG-20260727-WA0051.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
+    /* Overlay azul com transparência sobre a imagem */
     .hero::before {
       content: '';
       position: absolute;
@@ -167,7 +169,9 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 51, 153, 0.10);
+      /* Overlay azul com transparência - a imagem aparece por baixo */
+      background: rgba(0, 51, 153, 0.65);
+      /* Ajuste a opacidade aqui: 0.3 = mais transparente, 0.8 = mais opaco */
       z-index: 1;
     }
 
@@ -262,7 +266,7 @@
       background: var(--cinza-claro);
     }
 
-    /* ----- SOBRE – agora com fundo para o Joker percorrer toda a tela ----- */
+    /* ----- SOBRE – com Joker percorrendo toda a tela ----- */
     .sobre-wrapper {
       position: relative;
       overflow: hidden;
@@ -804,22 +808,30 @@
         color: var(--azul-brasil);
       }
 
-      /* Hero - Ajustes da imagem de fundo para mobile */
+      /* Hero - Ajustes da imagem de fundo com overlay para mobile */
       .hero {
         padding: 48px 0 64px;
         min-height: 400px;
-        /* Para mobile, a imagem vai ocupar todo o espaço com foco no centro */
         background-size: cover;
-        background-position: center 30%; /* Ajusta o foco para cima em mobile */
-        background-attachment: scroll; /* Remove o efeito parallax em mobile para melhor performance */
+        background-position: center 30%;
+        background-attachment: scroll;
       }
 
-      /* Para telas muito pequenas, ajustamos o foco da imagem */
+      /* Overlay em mobile - mantém a transparência */
+      .hero::before {
+        background: rgba(0, 51, 153, 0.70);
+        /* Um pouco mais opaco em mobile para melhor contraste do texto */
+      }
+
+      /* Para telas muito pequenas */
       @media (max-width: 480px) {
         .hero {
           background-position: center 25%;
           min-height: 350px;
           padding: 40px 0 50px;
+        }
+        .hero::before {
+          background: rgba(0, 51, 153, 0.75);
         }
       }
 
@@ -836,6 +848,9 @@
         .hero p {
           font-size: 0.9rem;
           margin-bottom: 20px;
+        }
+        .hero::before {
+          background: rgba(0, 51, 153, 0.60);
         }
       }
 
@@ -1024,10 +1039,12 @@
         opacity: 0.25;
       }
       
-      /* Ajuste extra para a imagem em telas muito pequenas */
       .hero {
         background-position: center 20%;
         min-height: 300px;
+      }
+      .hero::before {
+        background: rgba(0, 51, 153, 0.80);
       }
     }
 
@@ -1053,6 +1070,9 @@
       }
       body {
         padding-top: 56px;
+      }
+      .hero::before {
+        background: rgba(0, 51, 153, 0.60);
       }
     }
 
@@ -1114,7 +1134,7 @@
     </div>
   </section>
 
-  <!-- SOBRE – agora com o Joker percorrendo toda a tela -->
+  <!-- SOBRE – com Joker percorrendo toda a tela -->
   <section class="section bg-cinza" id="sobre">
     <div class="container sobre-wrapper">
       <!-- Joker animado – cruza a tela -->
@@ -1149,7 +1169,7 @@
           </div>
         </div>
 
-        <!-- .sobre-img – sem fundo azul, com legenda -->
+        <!-- .sobre-img -->
         <div class="sobre-img">
           <div class="legenda">Arremesso &amp; Lançamento</div>
         </div>
