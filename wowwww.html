@@ -1,12 +1,166 @@
-lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WOWNS - Registro de Nomes Wownero</title>
-  <!-- Biblioteca leve e sem dependências para gerar QR Code -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --bg-color: #121214;
       --card-bg: #1e1e24;
-      --accent-color: #
+      --accent-color: #ff6600;
+      --accent-hover: #e05500;
+      --text-color: #ffffff;
+      --text-dim: #a0a0b0;
+      --border-color: #32323d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 440px;
+      width: 100%;
+    }
+
+    h1 { font-size: 1.4rem; color: var(--accent-color); text-align: center; margin-bottom: 8px; }
+    p.subtitle { font-size: 0.85rem; color: var(--text-dim); text-align: center; margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-dim); }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .qr-container {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0;
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 12px;
+    }
+
+    .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent-color);
+      color: #fff;
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background-color: #2a2a35;
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .details {
+      margin-top: 16px;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      word-break: break-all;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>WOWNS Registrar</h1>
+    <p class="subtitle">Escaneie pelo app da carteira ou copie os dados</p>
+
+    <div class="form-group">
+      <label for="domainInput">Nome desejado (.wow):</label>
+      <input type="text" id="domainInput" value="gostosao.wow" oninput="updateDetails()">
+    </div>
+
+    <div class="qr-container">
+      <div id="qrcode"></div>
+    </div>
+
+    <div class="btn-group">
+      <!-- Botão de tentar abrir app (funciona melhor em Desktop/Feather) -->
+      <a id="walletLink" href="#" class="btn">Abrir na Carteira (Desktop)</a>
+      
+      <!-- Botão para fluxo Mobile sem Deep Link -->
+      <button class="btn btn-secondary" onclick="copyPaymentID()">Copiar Payment ID (Hex)</button>
+    </div>
+
+    <div class="details">
+      <p><strong>Destino:</strong> <span id="destAddr"></span></p>
+      <p><strong>Valor:</strong> <span>0.00000001 WOW</span></p>
+      <p style="margin-top: 4px;"><strong>Payment ID:</strong> <span id="hexPayload"></span></p>
+    </div>
+  </div>
+
+  <script>
+    const RECEIVER = "WW3gpjsmrXZWzQyygTVjUGcX8d8Q4DajCcy9LMegTAet6itQGLec1EhWGbAuBsE8FydU1NCQe8fUkfE6MvWjXuzK2U6GL9dHE";
+    const AMOUNT = "0.00000001";
+
+    document.getElementById("destAddr").innerText = RECEIVER.substring(0, 10) + "..." + RECEIVER.substring(RECEIVER.length - 8);
+
+    function stringToHexPadded(str) {
+      let hex = '';
+      for (let i = 0; i < str.length; i++) {
+        hex += str.charCodeAt(i).toString(16).padStart(2, '0');
+      }
+      return hex.padEnd(64, '0');
+    }
+
+    function updateDetails() {
+      const domain = document.getElementById("domainInput").value.trim() || "anonymous.wow";
+      const hexPayload = stringToHexPadded(`WOWNS:${domain}`);
+      const uri = `wownero:${RECEIVER}?tx_amount=${AMOUNT}&tx_payment_id=${hexPayload}&payment_id=${hexPayload}`;
+
+      document.getElementById("hexPayload").innerText = hexPayload;
+      document.getElementById("walletLink").href = uri;
+
+      const qrElement = document.getElementById("qrcode");
+      qrElement.innerHTML = "";
+      new QRCode(qrElement, { text: uri, width: 160, height: 160 });
+    }
+
+    function copyPaymentID() {
+      const hex = document.getElementById("hexPayload").innerText;
+      navigator.clipboard.writeText(hex);
+      alert("Payment ID copiado! Abra a Stack Wallet, vá em Enviar, cole o endereço e este Payment ID nas opções avançadas.");
+    }
+
+    window.onload = updateDetails;
+  </script>
+
+</body>
+</html>
