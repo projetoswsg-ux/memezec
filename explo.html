@@ -2,224 +2,122 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wownero Live Hex-to-UTF8 Tracker</title>
+    <title>Wownero Node Live Tracker</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0c0c0e;
-            color: #e2e2e6;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #2d2d35;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
-        h1 { color: #ff9900; margin: 0; font-size: 24px; }
-        .status {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            background-color: #2a1b02;
-            color: #ff9900;
-            border: 1px solid #ff9900;
-        }
-        .status.online {
-            background-color: #092416;
-            color: #00ff88;
-            border-color: #00ff88;
-        }
-        .card {
-            background-color: #16161a;
-            border: 1px solid #2d2d35;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            animation: fadeIn 0.4s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .tx-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #888894;
-            margin-bottom: 10px;
-        }
-        .tx-hash { font-family: monospace; color: #ff9900; word-break: break-all; }
-        .hex-dump {
-            background-color: #212127;
-            padding: 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 11px;
-            color: #aaaab8;
-            word-break: break-all;
-            margin: 8px 0;
-        }
-        .utf8-decoded {
-            background-color: #0d211a;
-            border-left: 4px solid #00ff88;
-            padding: 12px;
-            border-radius: 0 4px 4px 0;
-            font-size: 16px;
-            font-weight: 500;
-            color: #00ffcc;
-            word-break: break-word;
-        }
-        .no-data {
-            text-align: center;
-            color: #666673;
-            padding: 40px;
-            font-style: italic;
-        }
+        body { font-family: sans-serif; background: #0c0c0e; color: #e2e2e6; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: #ff9900; }
+        .status { padding: 8px; border-radius: 4px; background: #2a1b02; color: #ff9900; display: inline-block; margin-bottom: 20px; font-weight: bold; }
+        .status.online { background: #092416; color: #00ff88; }
+        .card { background: #16161a; border: 1px solid #2d2d35; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .hex { font-family: monospace; color: #888894; font-size: 11px; word-break: break-all; background: #212127; padding: 6px; border-radius: 4px; }
+        .text { background: #0d211a; border-left: 4px solid #00ff88; padding: 10px; font-size: 16px; color: #00ffcc; margin-top: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <div>
-            <h1>Wownero Blockchain Live Tracker</h1>
-            <small style="color: #888894;">Monitorando mensagens em formato Hexadecimal / WOWNS</small>
-        </div>
-        <div id="connectionStatus" class="status">Conectando à Rede...</div>
-    </header>
-
-    <div id="liveFeed">
-        <div class="no-data" id="emptyMessage">Aguardando novos blocos e transações serem minerados na rede...</div>
-    </div>
+    <h1>Wownero Live Tracker via Node</h1>
+    <div id="status" class="status">Conectando ao nó StackWallet...</div>
+    <div id="feed"><i>Aguardando atualizações da blockchain...</i></div>
 </div>
 
 <script>
-    // Configuração do Nó de API público do Wownero Explorer
-    const API_BASE = "https://wownero.com";
-    let lastCheckedBlock = 0;
+    // Usando o nó que está funcionando com HTTPS e CORS aberto
+    const NODE_URL = "https://stackwallet.com";
+    let lastBlockHeight = 0;
 
-    // Função utilitária para converter Hexadecimal bruto em texto UTF-8 legível
-    function decodeHexToUtf8(hex) {
-        // Limpa preenchimentos binários de zeros (00) comuns no final do script WOWNS
+    // Função para traduzir o hexadecimal limpo em UTF-8
+    function hexToUtf8(hex) {
         let cleanHex = hex.trim().replace(/(00)+$/, '');
         if (cleanHex.length < 2) return null;
-
         try {
             let bytes = new Uint8Array(cleanHex.length / 2);
             for (let i = 0; i < cleanHex.length; i += 2) {
                 bytes[i / 2] = parseInt(cleanHex.substr(i, 2), 16);
             }
-            
-            const decoder = new TextDecoder('utf-8', { fatal: true });
-            const text = decoder.decode(bytes);
-            
-            // Filtra e valida se o resultado possui caracteres de texto legíveis comuns
-            // Evita poluir a tela com chaves criptográficas normais que parecem lixo digital
-            if (/^[\x20-\x7E\sÁ-ÿ]+$/.test(text) && text.trim().length > 3) {
-                return text;
-            }
-            return null;
-        } catch (e) {
-            return null; // Ignora se os bytes violarem regras de sintaxe estrutural do UTF-8
-        }
+            const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+            // Só exibe se for um texto legível (evita mostrar chaves criptográficas normais)
+            return /^[\x20-\x7E\sÁ-ÿ]+$/.test(text) && text.trim().length > 3 ? text : null;
+        } catch (e) { return null; }
     }
 
-    // Processa uma transação individual em busca de textos escondidos
-    function processTransaction(tx) {
-        let foundTexts = [];
-
-        // 1. Vasculha chaves públicas nos outputs (saídas stealth/WOWNS)
-        if (tx.vout) {
-            tx.vout.forEach((output) => {
-                if (output.target && output.target.key) {
-                    let decoded = decodeHexToUtf8(output.target.key);
-                    if (decoded) foundTexts.push({ type: 'Chave de Saída (Output)', hex: output.target.key, text: decoded });
-                }
-            });
-        }
-
-        // 2. Vasculha metadados adicionais no campo Extra da transação
-        if (tx.extra) {
-            let decodedExtra = decodeHexToUtf8(tx.extra);
-            if (decodedExtra) foundTexts.push({ type: 'Metadado (Tx Extra)', hex: tx.extra, text: decodedExtra });
-        }
-
-        // Se encontrou dados em UTF-8 válidos, joga instantaneamente na tela
-        if (foundTexts.length > 0) {
-            document.getElementById('emptyMessage').style.display = 'none';
-            const feed = document.getElementById('liveFeed');
-
-            foundTexts.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="tx-header">
-                        <span>📡 Origem: <strong>${item.type}</strong></span>
-                        <span>Bloco: #${tx.block_height || 'MemPool'}</span>
-                    </div>
-                    <div class="tx-hash">Hash: ${tx.tx_hash || 'Pendente'}</div>
-                    <div class="hex-dump">HEX Bruto: ${item.hex}</div>
-                    <div class="utf8-decoded">📝 Texto Convertido: <strong>${item.text}</strong></div>
-                `;
-                feed.insertBefore(card, feed.firstChild);
-            });
-        }
+    // Faz requisições oficiais em formato RPC para o nó de criptomoeda
+    async function callNodeRpc(method, params = {}) {
+        const response = await fetch(NODE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jsonrpc: "2.0", id: "0", method: method, params: params })
+        });
+        const json = await response.json();
+        return json.result;
     }
 
-    // Consulta a Blockchain recursivamente em busca de dados novos
-    async function checkBlockchainUpdates() {
+    async function checkNodeUpdates() {
         try {
-            // Busca o status atual da rede para capturar a altura do último bloco
-            const response = rebellionFetch = await fetch(`${API_BASE}/network`);
-            const networkData = await response.json();
-            const currentBlock = networkData.height - 1;
+            // 1. Pega a altura do bloco atual na rede
+            const info = await callNodeRpc("get_info");
+            const currentHeight = info.height - 1;
+            
+            document.getElementById('status').innerText = `Conectado - Bloco Atual: #${currentHeight}`;
+            document.getElementById('status').className = "status online";
 
-            const statusIndicator = document.getElementById('connectionStatus');
-            statusIndicator.innerText = `Online - Bloco #${currentBlock}`;
-            statusIndicator.className = "status online";
-
-            if (lastCheckedBlock === 0) {
-                // Primeira execução: Começa checando os últimos 5 blocos minerados para popular a tela
-                lastCheckedBlock = currentBlock - 5;
+            if (lastBlockHeight === 0) {
+                lastBlockHeight = currentHeight - 2; // Começa olhando os últimos 2 blocos minerados
             }
 
-            // Varre os blocos sequencialmente à procura de transações novas
-            for (let b = lastCheckedBlock + 1; b <= currentBlock; b++) {
-                try {
-                    const blockRes = await fetch(`${API_BASE}/block/${b}`);
-                    const blockData = await blockRes.json();
+            // 2. Vasculha os blocos novos atrás de transações
+            for (let h = lastBlockHeight + 1; h <= currentHeight; h++) {
+                const blockData = await callNodeRpc("get_block", { height: h });
+                const blockJson = JSON.parse(blockData.json);
+                
+                // Varre as chaves dentro das transações do bloco
+                if (blockJson.tx_hashes) {
+                    // Pega os detalhes brutos das transações do bloco
+                    const txsDetails = await callNodeRpc("get_transactions", { txs_hashes: blockJson.tx_hashes, decode_as_json: true });
                     
-                    if (blockData.txs) {
-                        blockData.txs.forEach(tx => processTransaction(tx));
+                    if (txsDetails.txs_as_json) {
+                        txsDetails.txs_as_json.forEach((txString, index) => {
+                            const tx = JSON.parse(txString);
+                            
+                            // Procura textos legíveis nos Outputs (WOWNS)
+                            if (tx.vout) {
+                                tx.vout.forEach(output => {
+                                    if (output.target && output.target.key) {
+                                        let txt = hexToUtf8(output.target.key);
+                                        if (txt) renderMessage(txt, output.target.key, h, txsDetails.txs[index].tx_hash);
+                                    }
+                                });
+                            }
+                        });
                     }
-                } catch (e) {
-                    console.error(`Erro ao analisar bloco ${b}:`, e);
                 }
             }
-            lastCheckedBlock = currentBlock;
-
-        } catch (error) {
-            console.error("Erro ao conectar na rede Wownero:", error);
-            const statusIndicator = document.getElementById('connectionStatus');
-            statusIndicator.innerText = "Erro de Conexão";
-            statusIndicator.className = "status";
+            lastBlockHeight = currentHeight;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('status').innerText = "Erro ao conectar no nó";
+            document.getElementById('status').className = "status";
         }
     }
 
-    // Inicia o rastreamento em tempo real (atualiza a cada 15 segundos)
-    checkBlockchainUpdates();
-    setInterval(checkBlockchainUpdates, 15000);
-</script>
+    function renderMessage(text, hex, block, hash) {
+        const feed = document.getElementById('feed');
+        if(feed.innerText.includes('Aguardando')) feed.innerHTML = '';
+        
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div><strong>Bloco:</strong> #${block} | <strong>Tx:</strong> ${hash.substring(0,15)}...</div>
+            <div class="hex">HEX: ${hex}</div>
+            <div class="text">📝 Mensagem: ${text}</div>
+        `;
+        feed.insertBefore(card, feed.firstChild);
+    }
 
+    // Roda e atualiza a cada 20 segundos
+    checkNodeUpdates();
+    setInterval(checkNodeUpdates, 20000);
+</script>
 </body>
 </html>
