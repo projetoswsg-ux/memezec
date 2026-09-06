@@ -1,0 +1,93 @@
+<!-- Adicione este bloco no seu HTML onde deseja exibir o status -->
+<div class="form-group" style="margin-top: 24px;">
+  <button class="btn btn-secondary" onclick="checkRegistration()">Verificar Registros na Blockchain</button>
+  <div id="statusResult" class="details" style="display:none; margin-top: 10px;"></div>
+</div>
+
+<script>
+  // Nó RPC Público do Wownero (Porta padrão RPC)
+  const WOW_RPC_NODE = "https://node.wownero.com:34568/json_rpc";
+
+  // Converter Hexadecimal para Texto ASCII
+  function hexToAscii(hex) {
+    let str = '';
+    for (let i = 0; i < hex.length && hex.substr(i, 2) !== '00'; i += 2) {
+      str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+    return str;
+  }
+
+  async function checkRegistration() {
+    const statusDiv = document.getElementById("statusResult");
+    const domainInput = document.getElementById("domainInput").value.trim().toLowerCase();
+    
+    statusDiv.style.display = "block";
+    statusDiv.innerHTML = "Consultando nó da blockchain Wownero...";
+
+    try {
+      // Consulta os blocos / transações via RPC
+      const response = await fetch(WOW_RPC_NODE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: "0",
+          method: "get_transfers",
+          params: { in: true } // Busca transações recebidas pelo endereço mestre
+        })
+      });
+
+      const data = await response.json();
+
+      if (!data.result || !data.result.in) {
+        statusDiv.innerHTML = "Ainda nenhuma transação confirmada no endereço mestre ou nó sem histórico indexado.";
+        return;
+      }
+
+      const txList = data.result.in;
+      const registeredDomains = {};
+
+      // Ordena por altura do bloco (a transação mais antiga garante a posse do nome)
+      txList.sort((a, b) => a.height - b.height);
+
+      for (const tx of txList) {
+        // Extrai e decodifica o Payment ID / tx_extra
+        const rawHex = tx.payment_id || tx.extra;
+        if (rawHex) {
+          const decodedText = hexToAscii(rawHex);
+          
+          // Se a transação possui o prefixo do seu protocolo (ex: W: ou WOWNS:)
+          if (decodedText.startsWith("W:")) {
+            const domainName = decodedText.replace("W:", "").trim().toLowerCase();
+            
+            // Garante que apenas a primeira transação registra o nome
+            if (!registeredDomains[domainName]) {
+              registeredDomains[domainName] = {
+                txid: tx.txid,
+                blockHeight: tx.height,
+                amount: tx.amount
+              };
+            }
+          }
+        }
+      }
+
+      // Verifica se o nome pesquisado está na lista dos já gravados na blockchain
+      if (registeredDomains[domainInput]) {
+        const record = registeredDomains[domainInput];
+        statusDiv.innerHTML = `
+          <p style="color: #00ff66;"><strong>✓ Domínio Registrado e Confirmado!</strong></p>
+          <p><strong>Nome:</strong> ${domainInput}</p>
+          <p><strong>Bloco:</strong> ${record.blockHeight}</p>
+          <p><strong>TX Hash:</strong> <span style="font-size:0.65rem;">${record.txid}</span></p>
+        `;
+      } else {
+        statusDiv.innerHTML = `<p style="color: #ffcc00;"><strong>⚠ Domínio '${domainInput}' está LIVRE</strong> ou a transação ainda está na Mempool (aguardando confirmação do bloco).</p>`;
+      }
+
+    } catch (error) {
+      console.error(error);
+      statusDiv.innerHTML = "Erro ao conectar com o nó RPC. Verifique sua conexão ou tente outro nó público.";
+    }
+  }
+</script>
