@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WOWNS - Registro de Nomes Wownero</title>
+  <title>WOWNS - Copiar e Colar Integrado</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
@@ -100,7 +100,7 @@
 
   <div class="container">
     <h1>WOWNS Registrar</h1>
-    <p class="subtitle">Escaneie pelo app da carteira ou copie os dados</p>
+    <p class="subtitle">Copie a string completa e cole no campo de envio da carteira</p>
 
     <div class="form-group">
       <label for="domainInput">Nome desejado (.wow):</label>
@@ -112,51 +112,64 @@
     </div>
 
     <div class="btn-group">
-      <!-- Botão de tentar abrir app (funciona melhor em Desktop/Feather) -->
-      <a id="walletLink" href="#" class="btn">Abrir na Carteira (Desktop)</a>
+      <!-- Opção 1: Copia a String URI que a Stack Wallet lê diretamente da área de transferência -->
+      <button class="btn" onclick="copyFullURI()">Copiar Dados de Envio (URI)</button>
       
-      <!-- Botão para fluxo Mobile sem Deep Link -->
-      <button class="btn btn-secondary" onclick="copyPaymentID()">Copiar Payment ID (Hex)</button>
+      <!-- Opção 2: Copia apenas o Hex se preferir colar manualmente -->
+      <button class="btn btn-secondary" onclick="copyPaymentID()">Copiar apenas o Payment ID (Hex)</button>
     </div>
 
     <div class="details">
       <p><strong>Destino:</strong> <span id="destAddr"></span></p>
       <p><strong>Valor:</strong> <span>0.00000001 WOW</span></p>
-      <p style="margin-top: 4px;"><strong>Payment ID:</strong> <span id="hexPayload"></span></p>
+      <p style="margin-top: 4px;"><strong>Payment ID (16 Chars Hex):</strong> <span id="hexPayload"></span></p>
     </div>
   </div>
 
   <script>
     const RECEIVER = "WW3gpjsmrXZWzQyygTVjUGcX8d8Q4DajCcy9LMegTAet6itQGLec1EhWGbAuBsE8FydU1NCQe8fUkfE6MvWjXuzK2U6GL9dHE";
     const AMOUNT = "0.00000001";
+    let currentURI = "";
 
     document.getElementById("destAddr").innerText = RECEIVER.substring(0, 10) + "..." + RECEIVER.substring(RECEIVER.length - 8);
 
-    function stringToHexPadded(str) {
+    // Converte a string para exatamente 16 caracteres hexadecimais (8 bytes)
+    function stringTo8ByteHex(str) {
       let hex = '';
       for (let i = 0; i < str.length; i++) {
         hex += str.charCodeAt(i).toString(16).padStart(2, '0');
       }
-      return hex.padEnd(64, '0');
+      // Trunca em 16 chars ou preenche com '0' até dar 16 chars
+      return hex.padEnd(16, '0').substring(0, 16);
     }
 
     function updateDetails() {
       const domain = document.getElementById("domainInput").value.trim() || "anonymous.wow";
-      const hexPayload = stringToHexPadded(`WOWNS:${domain}`);
-      const uri = `wownero:${RECEIVER}?tx_amount=${AMOUNT}&tx_payment_id=${hexPayload}&payment_id=${hexPayload}`;
+      
+      // Gera o Payment ID curto de 8 bytes (compatível com carteiras)
+      const hex8Bytes = stringTo8ByteHex(`W:${domain}`);
+      
+      // String URI oficial do Wownero/Monero
+      currentURI = `wownero:${RECEIVER}?tx_amount=${AMOUNT}&tx_payment_id=${hex8Bytes}`;
 
-      document.getElementById("hexPayload").innerText = hexPayload;
-      document.getElementById("walletLink").href = uri;
+      document.getElementById("hexPayload").innerText = hex8Bytes;
 
+      // Atualiza o QR Code
       const qrElement = document.getElementById("qrcode");
       qrElement.innerHTML = "";
-      new QRCode(qrElement, { text: uri, width: 160, height: 160 });
+      new QRCode(qrElement, { text: currentURI, width: 160, height: 160 });
+    }
+
+    function copyFullURI() {
+      // Ao copiar a URI inteira, a Stack Wallet identifica todos os parâmetros na cola
+      navigator.clipboard.writeText(currentURI);
+      alert("String de Envio Copiada!\n\nAbra a Stack Wallet e cole diretamente no campo de endereço de envio.");
     }
 
     function copyPaymentID() {
       const hex = document.getElementById("hexPayload").innerText;
       navigator.clipboard.writeText(hex);
-      alert("Payment ID copiado! Abra a Stack Wallet, vá em Enviar, cole o endereço e este Payment ID nas opções avançadas.");
+      alert("Payment ID (16 caracteres Hex) copiado!");
     }
 
     window.onload = updateDetails;
