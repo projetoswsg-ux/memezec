@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WOWNS - Registro de Nomes Wownero</title>
+  <!-- Biblioteca leve e sem dependências para gerar QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #121214;
+      --card-bg: #1e1e24;
+      --accent-color: #ff6600;
+      --accent-hover: #e05500;
+      --text-color: #ffffff;
+      --text-dim: #a0a0b0;
+      --border-color: #32323d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      color: var(--accent-color);
+      text-align: center;
+    }
+
+    p.subtitle {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      color: var(--text-dim);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent-color);
+    }
+
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 24px 0;
+      padding: 16px;
+      background: #ffffff;
+      border-radius: 12px;
+    }
+
+    #qrcode img {
+      display: block;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent-color);
+      color: #fff;
+      font-weight: bold;
+      font-size: 1rem;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .details {
+      margin-top: 20px;
+      padding: 12px;
+      background-color: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      word-break: break-all;
+      color: var(--text-dim);
+    }
+
+    .details span {
+      color: var(--text-color);
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>WOWNS Registrar</h1>
+    <p class="subtitle">Registre seu nome descentralizado na blockchain Wownero</p>
+
+    <div class="form-group">
+      <label for="domainInput">Nome desejado (.wow):</label>
+      <input type="text" id="domainInput" value="gostosao.wow" placeholder="ex: meunome.wow" oninput="updatePaymentDetails()">
+    </div>
+
+    <!-- Área de Exibição do QR Code -->
+    <div class="qr-container">
+      <div id="qrcode"></div>
+    </div>
+
+    <!-- Botão Direct Link para abrir Stack Wallet / Feather Wallet -->
+    <a id="walletLink" href="#" class="btn">
+      Abrir na Carteira (Stack/Feather)
+    </a>
+
+    <!-- Detalhes de depuração/transparência -->
+    <div class="details">
+      <p><strong>Destino:</strong> <span id="destAddr"></span></p>
+      <p><strong>Valor:</strong> <span>0.00000001 WOW</span></p>
+      <p style="margin-top: 6px;"><strong>Payment ID (Hex):</strong> <span id="hexPayload"></span></p>
+    </div>
+  </div>
+
+  <script>
+    // Configurações Globais
+    const RECEIVER_ADDRESS = "WW3gpjsmrXZWzQyygTVjUGcX8d8Q4DajCcy9LMegTAet6itQGLec1EhWGbAuBsE8FydU1NCQe8fUkfE6MvWjXuzK2U6GL9dHE";
+    const AMOUNT = "0.00000001";
+    let qrcodeObj = null;
+
+    // Inicializa a exibição do endereço mascarado
+    document.getElementById("destAddr").innerText = RECEIVER_ADDRESS.substring(0, 12) + "..." + RECEIVER_ADDRESS.substring(RECEIVER_ADDRESS.length - 8);
+
+    // Converte String ASCII para Hexadecimal preenchido até 64 caracteres
+    function stringToHexPadded(str) {
+      let hex = '';
+      for (let i = 0; i < str.length; i++) {
+        hex += str.charCodeAt(i).toString(16).padStart(2, '0');
+      }
+      // O Payment ID padrão exige exatamente 64 caracteres hexadecimais (32 bytes)
+      return hex.padEnd(64, '0');
+    }
+
+    function updatePaymentDetails() {
+      const domainName = document.getElementById("domainInput").value.trim() || "anonymous.wow";
+      
+      // Payload formatado
+      const rawPayload = `WOWNS:${domainName}`;
+      const hexPayload = stringToHexPadded(rawPayload);
+
+      // Monta a URL de protocolo URI compatível com Stack Wallet e Wownero CLI/GUI
+      const uri = `wownero:${RECEIVER_ADDRESS}?tx_amount=${AMOUNT}&tx_payment_id=${hexPayload}&payment_id=${hexPayload}&note=WOWNS_${domainName}`;
+
+      // Atualiza o texto do Payload na tela
+      document.getElementById("hexPayload").innerText = hexPayload;
+
+      // Atualiza o link do Botão
+      document.getElementById("walletLink").href = uri;
+
+      // Atualiza/Gera o QR Code dinamicamente
+      const qrElement = document.getElementById("qrcode");
+      qrElement.innerHTML = ""; // Limpa anterior
+      
+      qrcodeObj = new QRCode(qrElement, {
+        text: uri,
+        width: 180,
+        height: 180,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.L
+      });
+    }
+
+    // Inicializa ao carregar a página
+    window.onload = updatePaymentDetails;
+  </script>
+
+</body>
+</html>
