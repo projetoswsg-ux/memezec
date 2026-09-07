@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>WOW Name Registrar (.wow)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: monospace; background: #0f0f12; color: #00ff66; padding: 20px; display: flex; justify-content: center; }
+    .card { background: #18181f; border: 2px solid #00ff66; padding: 25px; border-radius: 8px; width: 100%; max-width: 650px; }
+    h2 { color: #fff; margin-top: 0; text-align: center; }
+    label { color: #aaa; display: block; margin-top: 15px; font-size: 14px; }
+    
+    .input-group { display: flex; align-items: center; background: #0f0f12; border: 1px solid #333; margin-top: 5px; border-radius: 4px; overflow: hidden; }
+    .input-group input { background: transparent; border: none; color: #fff; font-size: 18px; font-family: monospace; padding: 12px; flex: 1; outline: none; }
+    .input-group .addon { background: #222; color: #00ff66; padding: 12px 15px; font-size: 18px; font-weight: bold; border-left: 1px solid #333; }
+    .input-group:focus-within { border-color: #00ff66; }
+
+    .result-box { background: #0f0f12; border: 1px dashed #00ff66; padding: 15px; margin-top: 20px; border-radius: 4px; word-break: break-all; }
+    .hex-display { color: #ff0055; font-size: 16px; font-weight: bold; }
+    .uri-display { color: #fff; font-size: 13px; background: #000; padding: 10px; border-radius: 4px; border: 1px solid #222; margin: 10px 0; }
+    
+    button { width: 100%; padding: 12px; margin-top: 10px; background: #00ff66; color: #000; font-weight: bold; font-family: monospace; font-size: 15px; cursor: pointer; border: none; border-radius: 4px; }
+    button:hover { background: #00cc52; }
+    .copied { background: #ff0055 !important; color: #fff !important; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>WOW Name Registrar (.wow)</h2>
+  <p style="color:#aaa; font-size:13px; text-align:center;">Gravações de nomes on-chain via Payment ID Hex no Wownero.</p>
+
+  <!-- CAMPO DE NOME DO USUÁRIO -->
+  <label>Digite seu Nome/Apelido (Até 8 caracteres):</label>
+  <div class="input-group">
+    <input type="text" id="username" placeholder="ex: gostosao" maxlength="8" oninput="generateRegistrationLink()" value="gostosao">
+    <span class="addon">.wow</span>
+  </div>
+
+  <!-- RESULTADOS DA GERÇÃO -->
+  <div class="result-box">
+    <p style="margin-top:0; color:#aaa;"><strong>Endereço de Destino WOW:</strong></p>
+    <p style="color:#666; font-size:11px; word-break:break-all;">WW3gpjsmrXZWzQyygTVjUGcX8d8Q4DajCcy9LMegTAet6itQGLec1EhWGbAuBsE8FydU1NCQe8fUkfE6MvWjXuzK2U6GL9dHE</p>
+
+    <p style="color:#aaa;"><strong>Payload Hex que será gravado na On-Chain:</strong></p>
+    <p id="hexPayload" class="hex-display">676f73746f73616f</p>
+
+    <p style="color:#aaa;"><strong>URI de Pagamento / Link da Carteira:</strong></p>
+    <div id="uriLink" class="uri-display">-</div>
+
+    <button id="btnCopy" onclick="copyUri()">COPIAR LINK PARA CARTEIRA / PAGAMENTO</button>
+  </div>
+</div>
+
+<script>
+const WOW_ADDRESS = "WW3gpjsmrXZWzQyygTVjUGcX8d8Q4DajCcy9LMegTAet6itQGLec1EhWGbAuBsE8FydU1NCQe8fUkfE6MvWjXuzK2U6GL9dHE";
+
+// Converte String UTF-8 para Hexadecimal de 16 caracteres (8 bytes)
+function textTo16CharHex(str) {
+  let cleanStr = str.trim().toLowerCase().slice(0, 8);
+  let hex = '';
+  
+  // Usando TextEncoder para suporte completo a caracteres UTF-8
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(cleanStr);
+  
+  bytes.forEach(b => {
+    hex += b.toString(16).padStart(2, '0');
+  });
+
+  // Preenche com zeros até fechar 16 caracteres Hex (8 bytes para o Payment ID)
+  return hex.padEnd(16, '0');
+}
+
+function generateRegistrationLink() {
+  const input = document.getElementById('username').value;
+  
+  // Se o campo estiver vazio usa fallback de zeros
+  const hex = input.trim() ? textTo16CharHex(input) : "0000000000000000";
+  
+  // Monta a URI padrão do protocolo Wownero
+  const uri = `wownero:${WOW_ADDRESS}?tx_payment_id=${hex}`;
+
+  document.getElementById('hexPayload').innerText = hex;
+  document.getElementById('uriLink').innerText = uri;
+}
+
+function copyUri() {
+  const uriText = document.getElementById('uriLink').innerText;
+  navigator.clipboard.writeText(uriText).then(() => {
+    const btn = document.getElementById('btnCopy');
+    btn.innerText = "LINK COPIADO!";
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerText = "COPIAR LINK PARA CARTEIRA / PAGAMENTO";
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// Inicializa a página gerando o link padrão
+generateRegistrationLink();
+</script>
+
+</body>
+</html>
