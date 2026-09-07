@@ -6,8 +6,9 @@
   <style>
     body { font-family: monospace; background: #0f0f12; color: #00ff66; padding: 20px; }
     .card { background: #18181f; border: 1px solid #00ff66; padding: 20px; max-width: 650px; margin: 0 auto; }
-    input, button { width: 100%; padding: 10px; margin: 8px 0; background: #0f0f12; border: 1px solid #333; color: #fff; font-family: monospace; }
+    input, button { width: 100%; padding: 10px; margin: 8px 0; background: #0f0f12; border: 1px solid #333; color: #fff; font-family: monospace; box-sizing: border-box; }
     button { background: #00ff66; color: #000; font-weight: bold; cursor: pointer; border: none; }
+    button:hover { background: #00cc52; }
     .res { background: #0f0f12; border: 1px dashed #00ff66; padding: 15px; margin-top: 15px; word-break: break-all; }
   </style>
 </head>
@@ -41,6 +42,22 @@ function hexToString(hex) {
   return str;
 }
 
+// Extrai o Payment ID diretamente do campo extra (payload em Hex)
+function extractPaymentIdFromExtra(extraHex) {
+  if (!extraHex) return "";
+  
+  // Procura tags padrão de Payment ID em transações CryptoNote
+  if (extraHex.includes("0210")) {
+    const index = extraHex.indexOf("0210");
+    return extraHex.substr(index + 4, 16);
+  }
+  if (extraHex.includes("0108")) {
+    const index = extraHex.indexOf("0108");
+    return extraHex.substr(index + 4, 16);
+  }
+  return "";
+}
+
 async function consultarTx() {
   const txid = document.getElementById('txHash').value.trim();
   if (!txid || txid.length !== 64) {
@@ -50,28 +67,41 @@ async function consultarTx() {
 
   document.getElementById('resultBox').style.display = "block";
   document.getElementById('status').innerText = "Buscando no explorador público...";
+  document.getElementById('outHex').innerText = "-";
+  document.getElementById('outName').innerText = "-";
 
   try {
-    // Exemplo usando a API pública do explorador Wownero
-    // (Caso uma caia, você pode colocar um array de fallback com outros mirrors)
     const response = await fetch(`https://explore.wownero.com/api/transaction/${txid}`);
     
     if (!response.ok) {
-      throw new Error("Transação não encontrada ou erro na API");
+      throw new Error(`Transação não encontrada (HTTP Status: ${response.status})`);
     }
 
     const data = await response.json();
-    
-    // Extrai o payment_id do JSON da transação
-    const paymentIdHex = data.tx.payment_id || data.tx.extra_payment_id || "0000000000000000";
+    console.log("Resposta da API Wownero:", data);
+
+    // Múltiplos fallbacks seguros usando optional chaining (?.)
+    let paymentIdHex = 
+      data?.tx?.payment_id || 
+      data?.tx_details?.payment_id || 
+      data?.payment_id || 
+      data?.tx?.payment_id8 || 
+      "";
+
+    // Fallback secundário: buscar no campo extra se não vier isolado no JSON
+    if (!paymentIdHex && data?.tx?.extra) {
+      paymentIdHex = extractPaymentIdFromExtra(data.tx.extra);
+    }
 
     if (paymentIdHex && paymentIdHex !== "0000000000000000") {
       const decodedName = hexToString(paymentIdHex);
       document.getElementById('status').innerText = "Sucesso!";
       document.getElementById('outHex').innerText = paymentIdHex;
-      document.getElementById('outName').innerText = decodedName || "Indefinido";
+      document.getElementById('outName').innerText = decodedName || "Não foi possível converter o Hex em texto";
     } else {
-      document.getElementById('status').innerText = "Esta transação não possui um Payment ID / Nome atrelado.";
+      document.getElementById('status').innerText = "Transação encontrada, mas não possui Payment ID / Nome gravado.";
+      document.getElementById('outHex').innerText = "N/A";
+      document.getElementById('outName').innerText = "-";
     }
 
   } catch (err) {
