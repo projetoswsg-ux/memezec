@@ -15,47 +15,41 @@
 <body>
 
 <div class="card">
-  <h2>Consultar Nome por Hash de TX (Wownero)</h2>
+  <h2>Consultar Mensagem/Nome On-Chain (Wownero)</h2>
   <label>Cole o Hash da Transação (TXID):</label>
   <input type="text" id="txHash" placeholder="ex: 888d2c... (64 caracteres hex)">
   <button onclick="consultarTx()">BUSCAR DADOS DA ON-CHAIN</button>
 
   <div class="res" id="resultBox" style="display:none">
     <p>Status: <span id="status" style="color:#fff">-</span></p>
-    <p>Payment ID (Hex): <span id="outHex" style="color:#ff0055">-</span></p>
-    <p><strong>Nome / Identity Decodificado:</strong> <span id="outName" style="color:#00ff66; font-size: 18px;">-</span></p>
+    <p>Payload Raw (Extra Hex): <span id="outHex" style="color:#ff0055">-</span></p>
+    <p><strong>Texto UTF-8 Extraído:</strong> <span id="outName" style="color:#00ff66; font-size: 18px;">-</span></p>
   </div>
 </div>
 
 <script>
-// Converte o Hex de volta para UTF-8 (Nome Original)
-function hexToString(hex) {
-  let str = '';
-  // Remove o padding de zeros
-  let cleanHex = hex.replace(/(00)+$/, '');
-  for (let i = 0; i < cleanHex.length; i += 2) {
-    let code = parseInt(cleanHex.substr(i, 2), 16);
-    if (!isNaN(code) && code > 0) {
-      str += String.fromCharCode(code);
-    }
+// Converte Hexadecimal puro para String UTF-8
+function hexToUtf8(hex) {
+  if (!hex) return '';
+  let bytes = [];
+  for (let c = 0; c < hex.length; c += 2) {
+    let byte = parseInt(hex.substr(c, 2), 16);
+    if (!isNaN(byte)) bytes.push(byte);
   }
-  return str;
+  
+  // Usa o TextDecoder nativo do JS para decodificar UTF-8 corretamente (inclui acentos e emojis)
+  try {
+    const decoder = new TextDecoder('utf-8');
+    return decoder.decode(new Uint8Array(bytes));
+  } catch (e) {
+    return '';
+  }
 }
 
-// Extrai o Payment ID diretamente do campo extra (payload em Hex)
-function extractPaymentIdFromExtra(extraHex) {
-  if (!extraHex) return "";
-  
-  // Procura tags padrão de Payment ID em transações CryptoNote
-  if (extraHex.includes("0210")) {
-    const index = extraHex.indexOf("0210");
-    return extraHex.substr(index + 4, 16);
-  }
-  if (extraHex.includes("0108")) {
-    const index = extraHex.indexOf("0108");
-    return extraHex.substr(index + 4, 16);
-  }
-  return "";
+// Extrai trechos de texto legível de um bloco de Hex
+function extractPrintableText(text) {
+  // Remove caracteres de controle irrelevantes do protocolo CryptoNote mantendo letras, números e símbolos
+  return text.replace(/[^\x20-\x7E\xA0-\xFF]/g, '').trim();
 }
 
 async function consultarTx() {
@@ -78,30 +72,35 @@ async function consultarTx() {
     }
 
     const data = await response.json();
-    console.log("Resposta da API Wownero:", data);
+    console.log("JSON Bruto da API:", data);
 
-    // Múltiplos fallbacks seguros usando optional chaining (?.)
-    let paymentIdHex = 
-      data?.tx?.payment_id || 
-      data?.tx_details?.payment_id || 
-      data?.payment_id || 
-      data?.tx?.payment_id8 || 
-      "";
-
-    // Fallback secundário: buscar no campo extra se não vier isolado no JSON
-    if (!paymentIdHex && data?.tx?.extra) {
-      paymentIdHex = extractPaymentIdFromExtra(data.tx.extra);
-    }
+    // 1. Tenta capturar o Payment ID tradicional
+    let paymentIdHex = data?.tx?.payment_id || data?.tx_details?.payment_id || "";
+    
+    // 2. Pega o campo extra (onde ficam chaves públicas e a mensagem em Hex)
+    let extraHex = data?.tx?.extra || "";
 
     if (paymentIdHex && paymentIdHex !== "0000000000000000") {
-      const decodedName = hexToString(paymentIdHex);
-      document.getElementById('status').innerText = "Sucesso!";
+      const decoded = hexToUtf8(paymentIdHex);
+      document.getElementById('status').innerText = "Sucesso (Encontrado via Payment ID)!";
       document.getElementById('outHex').innerText = paymentIdHex;
-      document.getElementById('outName').innerText = decodedName || "Não foi possível converter o Hex em texto";
+      document.getElementById('outName').innerText = decoded;
+    } else if (extraHex) {
+      // Faz a varredura completa da estrutura extra em Hex
+      const rawDecoded = hexToUtf8(extraHex);
+      const cleanText = extractPrintableText(rawDecoded);
+
+      if (cleanText.length > 0) {
+        document.getElementById('status').innerText = "Sucesso (Extraído do payload Extra)!";
+        document.getElementById('outHex').innerText = extraHex;
+        document.getElementById('outName').innerText = cleanText;
+      } else {
+        document.getElementById('status').innerText = "Payload 'extra' encontrado, mas contém apenas chaves criptográficas sem texto legível.";
+        document.getElementById('outHex').innerText = extraHex;
+        document.getElementById('outName').innerText = "Nenhum texto UTF-8 identificado";
+      }
     } else {
-      document.getElementById('status').innerText = "Transação encontrada, mas não possui Payment ID / Nome gravado.";
-      document.getElementById('outHex').innerText = "N/A";
-      document.getElementById('outName').innerText = "-";
+      document.getElementById('status').innerText = "Transação encontrada, mas o campo 'extra' veio vazio.";
     }
 
   } catch (err) {
