@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sparky - Cripto via DuckDuckGo & Voz Natural</title>
+    <title>Sparky - Leitor da Bíblia em Português</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
@@ -40,22 +40,22 @@
     <header class="w-full px-6 py-4 border-b border-slate-800/80 flex items-center justify-between glass-panel sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-                <i class="fa-solid font-bold fa-robot text-xl"></i>
+                <i class="fa-solid font-bold fa-book-bible text-xl"></i>
             </div>
             <div>
                 <h1 class="text-xl font-bold font-fredoka tracking-wide text-white flex items-center gap-2">
-                    Sparky <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">DuckDuckGo + Wiki</span>
+                    Sparky <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Bíblia em Português</span>
                 </h1>
-                <p class="text-xs text-slate-400">Preços via DDG + Resumos da Wikipedia</p>
+                <p class="text-xs text-slate-400">Fale um livro, capítulo e versículo — eu leio para você</p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
             <div class="relative">
                 <select id="personaSelect" class="bg-slate-800/90 border border-slate-700 text-xs text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-indigo-500 transition-all cursor-pointer">
-                    <option value="sparky">🪙 Sparky (Analista Téc.)</option>
-                    <option value="luna">🌟 Luna (Visão Mística)</option>
-                    <option value="blaze">🔥 Blaze (Trader Turbo)</option>
+                    <option value="sparky">🪙 Sparky (Analista)</option>
+                    <option value="luna">🌟 Luna (Serena)</option>
+                    <option value="blaze">🔥 Blaze (Entusiasmado)</option>
                 </select>
             </div>
             <button id="toggleSettingsBtn" class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/80 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Configurações de Voz">
@@ -71,22 +71,21 @@
             <div class="w-full flex items-center justify-between z-10 mb-2">
                 <div id="statusBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-semibold text-indigo-300 transition-all">
                     <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping"></span>
-                    <span id="statusText">Pronto para buscar cotação</span>
+                    <span id="statusText">Pronto para ler a Bíblia</span>
                 </div>
                 
                 <div class="flex items-center gap-2 text-xs text-slate-400">
                     <i class="fa-solid fa-bolt text-indigo-400"></i>
-                    <span id="voiceName">DuckDuckGo API</span>
+                    <span id="voiceName">João Ferreira de Almeida</span>
                 </div>
             </div>
 
             <div class="w-full flex flex-wrap gap-2 justify-center z-10 my-1">
-                <button onclick="queryCoin('bitcoin')" class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold hover:bg-amber-500/30 transition-all cursor-pointer">₿ Bitcoin</button>
-                <button onclick="queryCoin('ethereum')" class="px-3 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 rounded-xl text-xs font-bold hover:bg-blue-500/30 transition-all cursor-pointer">Ξ Ethereum</button>
-                <button onclick="queryCoin('solana')" class="px-3 py-1 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold hover:bg-purple-500/30 transition-all cursor-pointer">◎ Solana</button>
-                <button onclick="queryCoin('ripple')" class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 rounded-xl text-xs font-bold hover:bg-cyan-500/30 transition-all cursor-pointer">✕ XRP</button>
-                <button onclick="queryCoin('dogecoin')" class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-500/30 transition-all cursor-pointer">🐕 Doge</button>
-                <button onclick="queryTrend()" class="px-3 py-1 bg-orange-500/20 border border-orange-500/40 text-orange-300 rounded-xl text-xs font-bold hover:bg-orange-500/30 transition-all cursor-pointer">🔥 Top 5</button>
+                <button onclick="queryBible('João', 3, 16)" class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold hover:bg-amber-500/30 transition-all cursor-pointer">João 3:16</button>
+                <button onclick="queryBible('Gênesis', 1, 1)" class="px-3 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 rounded-xl text-xs font-bold hover:bg-blue-500/30 transition-all cursor-pointer">Gênesis 1:1</button>
+                <button onclick="queryBible('Salmos', 23, null)" class="px-3 py-1 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold hover:bg-purple-500/30 transition-all cursor-pointer">Salmo 23</button>
+                <button onclick="queryBible('Romanos', 8, 28)" class="px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all cursor-pointer">Romanos 8:28</button>
+                <button onclick="queryRandomVerse()" class="px-3 py-1 bg-orange-500/20 border border-orange-500/40 text-orange-300 rounded-xl text-xs font-bold hover:bg-orange-500/30 transition-all cursor-pointer">🎲 Aleatório</button>
             </div>
 
             <div class="relative w-full flex-1 flex items-center justify-center my-2">
@@ -111,7 +110,7 @@
                         <i class="fa-solid fa-stop"></i>
                     </button>
                 </div>
-                <p id="micHint" class="text-[11px] text-slate-500 text-center">Clique uma vez e fale. Quando você pausar, a pergunta é enviada sozinha.</p>
+                <p id="micHint" class="text-[11px] text-slate-500 text-center">Diga um livro, capítulo e versículo (ex: "João 3:16"). Quando pausar, envio sozinho.</p>
             </div>
         </section>
 
@@ -119,7 +118,7 @@
             
             <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
                 <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-indigo-400"></i> Histórico de Consultas
+                    <i class="fa-solid fa-book-open text-indigo-400"></i> Histórico de Leitura
                 </h2>
                 <button id="clearChatBtn" class="text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer">
                     <i class="fa-solid fa-trash-can mr-1"></i> Limpar
@@ -132,15 +131,15 @@
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 text-sm text-slate-200 leading-relaxed max-w-[85%]">
-                        Olá! Agora uso <strong>DuckDuckGo + Wikipedia</strong>. Fale o nome de uma cripto (ex: <em>Bitcoin</em>, <em>Ethereum</em>) ou diga <strong>"top 5"</strong> para ver as principais. Preços via DDG e resumos da Wikipedia!
+                        Olá! Eu sou o Sparky, seu leitor da Bíblia. Diga o <strong>livro</strong>, <strong>capítulo</strong> e <strong>versículo</strong> (ex: <em>"João 3:16"</em>, <em>"Salmo 23"</em>, <em>"Gênesis 1"</em>) e eu leio para você. Uso a tradução <strong>João Ferreira de Almeida</strong> em português!
                     </div>
                 </div>
             </div>
 
             <form id="textForm" class="flex items-center gap-2 mt-auto pt-2 border-t border-slate-800">
-                <input type="text" id="userInput" placeholder="Digite cripto ou 'top 5'..." class="flex-1 bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500 transition-all">
+                <input type="text" id="userInput" placeholder="Ex: João 3:16, Salmo 23..." class="flex-1 bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500 transition-all">
                 <button type="submit" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all active:scale-95 flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <i class="fa-solid fa-book"></i>
                 </button>
             </form>
 
@@ -167,7 +166,7 @@
 
                 <div>
                     <div class="flex justify-between text-xs text-slate-300 mb-1">
-                        <span>Velocidade de Fala (Ritmo humano):</span>
+                        <span>Velocidade de Fala:</span>
                         <span id="rateVal">1.0x</span>
                     </div>
                     <input type="range" id="rateRange" min="0.8" max="1.2" step="0.05" value="1.0" class="w-full accent-indigo-500 cursor-pointer">
@@ -175,7 +174,7 @@
 
                 <div>
                     <div class="flex justify-between text-xs text-slate-300 mb-1">
-                        <span>Tom da Voz (Pitch natural):</span>
+                        <span>Tom da Voz (Pitch):</span>
                         <span id="pitchVal">1.0x</span>
                     </div>
                     <input type="range" id="pitchRange" min="0.8" max="1.2" step="0.05" value="1.0" class="w-full accent-indigo-500 cursor-pointer">
@@ -187,7 +186,7 @@
                         <span id="silenceVal">1.5s</span>
                     </div>
                     <input type="range" id="silenceRange" min="0.8" max="3" step="0.1" value="1.5" class="w-full accent-indigo-500 cursor-pointer">
-                    <p class="text-[10px] text-slate-500 mt-1">Menor = mais rápido (pode cortar frases). Maior = deixa você pensar.</p>
+                    <p class="text-[10px] text-slate-500 mt-1">Menor = mais rápido. Maior = deixa você pensar.</p>
                 </div>
             </div>
         </div>
@@ -249,55 +248,46 @@
         let lastSpokenText = '';
         let lastSpokenTime = 0;
 
-        // Mapeamento de nome → símbolo para o endpoint DDG
-        const cryptoSymbols = {
-            'bitcoin': 'btc', 'ethereum': 'eth', 'solana': 'sol', 'ripple': 'xrp',
-            'dogecoin': 'doge', 'cardano': 'ada', 'polkadot': 'dot', 'litecoin': 'ltc',
-            'chainlink': 'link', 'shiba-inu': 'shib', 'tron': 'trx', 'tether': 'usdt',
-            'binancecoin': 'bnb', 'avalanche-2': 'avax', 'matic-network': 'matic',
-            'pepe': 'pepe', 'filecoin': 'fil', 'uniswap': 'uni', 'stellar': 'xlm',
-            'monero': 'xmr', 'bitcoin-cash': 'bch', 'fantom': 'ftm', 'near': 'near',
-            'algorand': 'algo', 'cosmos': 'atom', 'aave': 'aave'
+        // ============ MAPEAMENTO DE LIVROS (português) ============
+        // Variações de nomes em português → nome canônico usado pela API bible-api.com
+        const bibleBooksPT = {
+            'genesis': 'Gênesis', 'exodo': 'Êxodo', 'levitico': 'Levítico',
+            'numeros': 'Números', 'deuteronomio': 'Deuteronômio', 'josue': 'Josué',
+            'juizes': 'Juízes', 'rute': 'Rute', '1samuel': '1 Samuel', '2samuel': '2 Samuel',
+            '1reis': '1 Reis', '2reis': '2 Reis', '1cronicas': '1 Crônicas',
+            '2cronicas': '2 Crônicas', 'esdras': 'Esdras', 'neemias': 'Neemias',
+            'ester': 'Ester', 'jo': 'Jó', 'salmos': 'Salmos', 'salmo': 'Salmos',
+            'proverbios': 'Provérbios', 'eclesiastes': 'Eclesiastes',
+            'cantares': 'Cantares', 'canticos': 'Cantares',
+            'isaias': 'Isaías', 'jeremias': 'Jeremias', 'lamentacoes': 'Lamentações',
+            'ezequiel': 'Ezequiel', 'daniel': 'Daniel', 'oseias': 'Oséias',
+            'joel': 'Joel', 'amos': 'Amós', 'obadias': 'Obadias', 'jonas': 'Jonas',
+            'miqueias': 'Miquéias', 'naum': 'Naum', 'habacuque': 'Habacuque',
+            'sofonias': 'Sofonias', 'ageu': 'Ageu', 'zacarias': 'Zacarias',
+            'malaquias': 'Malaquias', 'mateus': 'Mateus', 'marcos': 'Marcos',
+            'lucas': 'Lucas', 'joao': 'João', 'atos': 'Atos', 'romanos': 'Romanos',
+            '1corintios': '1 Coríntios', '2corintios': '2 Coríntios',
+            'galatas': 'Gálatas', 'efesios': 'Efésios', 'filipenses': 'Filipenses',
+            'colossenses': 'Colossenses', '1tessalonicenses': '1 Tessalonicenses',
+            '2tessalonicenses': '2 Tessalonicenses', '1timoteo': '1 Timóteo',
+            '2timoteo': '2 Timóteo', 'tito': 'Tito', 'filemom': 'Filemom',
+            'hebreus': 'Hebreus', 'tiago': 'Tiago', '1pedro': '1 Pedro',
+            '2pedro': '2 Pedro', '1joao': '1 João', '2joao': '2 João', '3joao': '3 João',
+            'judas': 'Judas', 'apocalipse': 'Apocalipse'
         };
 
-        // Mapeamento de nome → ID da Wikipedia (para abstracts)
-        const wikiIds = {
-            'bitcoin': 'Bitcoin', 'ethereum': 'Ethereum', 'solana': 'Solana_(blockchain)',
-            'ripple': 'Ripple_(payment_protocol)', 'dogecoin': 'Dogecoin',
-            'cardano': 'Cardano_(blockchain_platform)', 'polkadot': 'Polkadot_(cryptocurrency)',
-            'litecoin': 'Litecoin', 'chainlink': 'Chainlink_(cryptocurrency)',
-            'shiba-inu': 'Shiba_Inu_(cryptocurrency)', 'tron': 'Tron_(blockchain)',
-            'tether': 'Tether_(cryptocurrency)', 'binancecoin': 'Binance_Coin',
-            'avalanche-2': 'Avalanche_(blockchain_platform)', 'matic-network': 'Polygon_(blockchain)',
-            'pepe': 'Pepe_(cryptocurrency)', 'filecoin': 'Filecoin', 'uniswap': 'Uniswap',
-            'stellar': 'Stellar_(payment_network)', 'monero': 'Monero',
-            'bitcoin-cash': 'Bitcoin_Cash', 'fantom': 'Fantom_(blockchain_platform)',
-            'near': 'Near_Protocol', 'algorand': 'Algorand', 'cosmos': 'Cosmos_(blockchain)'
-        };
-
-        // Aliases de voz
-        const cryptoAliases = {
-            'bitcoin': 'bitcoin', 'biticoin': 'bitcoin', 'ethereum': 'ethereum',
-            'eterium': 'ethereum', 'solana': 'solana', 'cardano': 'cardano',
-            'ripple': 'ripple', 'xrp': 'ripple', 'dogecoin': 'dogecoin',
-            'doge': 'dogecoin', 'shiba': 'shiba-inu', 'polygon': 'matic-network',
-            'pepe': 'pepe', 'bnb': 'binancecoin', 'binance': 'binancecoin',
-            'avalanche': 'avalanche-2', 'litecoin': 'litecoin',
-            // Aliases para top 5
-            'trend': 'trend', 'tendencia': 'trend', 'tendência': 'trend',
-            'trending': 'trend', 'alta': 'trend', 'em alta': 'trend',
-            'o que esta em alta': 'trend', 'o que está em alta': 'trend',
-            'top moedas': 'trend', 'melhores moedas': 'trend',
-            'top 5': 'trend', 'top cinco': 'trend', 'principais': 'trend'
-        };
-
-        // Lista curada das 5 principais por market cap (aproximado, para "top 5")
-        const top5Coins = [
-            { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', wiki: 'Bitcoin' },
-            { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', wiki: 'Ethereum' },
-            { id: 'tether', name: 'Tether', symbol: 'USDT', wiki: 'Tether_(cryptocurrency)' },
-            { id: 'binancecoin', name: 'BNB', symbol: 'BNB', wiki: 'BNB_(cryptocurrency)' },
-            { id: 'solana', name: 'Solana', symbol: 'SOL', wiki: 'Solana_(blockchain)' }
+        // Versículos aleatórios populares (nomes em português)
+        const randomVerses = [
+            { book: 'João', chapter: 3, verse: 16, label: 'João 3:16' },
+            { book: 'Gênesis', chapter: 1, verse: 1, label: 'Gênesis 1:1' },
+            { book: 'Salmos', chapter: 23, verse: null, label: 'Salmo 23' },
+            { book: 'Romanos', chapter: 8, verse: 28, label: 'Romanos 8:28' },
+            { book: 'Filipenses', chapter: 4, verse: 13, label: 'Filipenses 4:13' },
+            { book: 'Jeremias', chapter: 29, verse: 11, label: 'Jeremias 29:11' },
+            { book: 'Provérbios', chapter: 3, verse: 5, label: 'Provérbios 3:5' },
+            { book: 'Isaías', chapter: 41, verse: 10, label: 'Isaías 41:10' },
+            { book: 'Mateus', chapter: 11, verse: 28, label: 'Mateus 11:28' },
+            { book: 'Salmos', chapter: 91, verse: 1, label: 'Salmo 91:1' }
         ];
 
         const personas = {
@@ -456,14 +446,14 @@
                 micBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
                 micBtn.classList.add('bg-red-600', 'hover:bg-red-500', 'pulse-mic');
                 if (isSpeaking) {
-                    micBtnText.textContent = 'Falando... aguarde';
-                    micHint.textContent = 'Aguarde a resposta terminar. O microfone volta sozinho depois.';
+                    micBtnText.textContent = 'Lendo... aguarde';
+                    micHint.textContent = 'Aguarde a leitura terminar. O microfone volta sozinho depois.';
                 } else if (isProcessing) {
-                    micBtnText.textContent = 'Consultando...';
-                    micHint.textContent = 'Buscando dados no DuckDuckGo.';
+                    micBtnText.textContent = 'Buscando...';
+                    micHint.textContent = 'Buscando o texto bíblico...';
                 } else {
                     micBtnText.textContent = 'Ouvindo... (pausa envia)';
-                    micHint.textContent = 'Fale agora. Ao pausar, envio automaticamente.';
+                    micHint.textContent = 'Diga o livro, capítulo e versículo. Ao pausar, envio.';
                 }
             } else {
                 micBtn.classList.remove('bg-red-600', 'hover:bg-red-500', 'pulse-mic');
@@ -578,7 +568,7 @@
             const bubbleBg = sender === 'user' ? 'bg-purple-900/40 border-purple-700/60 rounded-tr-none' : 'bg-slate-800/80 border-slate-700/60 rounded-tl-none';
             messageDiv.innerHTML = `
                 <div class="w-8 h-8 rounded-xl ${avatarBg} border flex items-center justify-center flex-shrink-0 text-sm">
-                    <i class="fa-solid ${sender === 'user' ? 'fa-user' : 'fa-robot'}"></i>
+                    <i class="fa-solid ${sender === 'user' ? 'fa-user' : 'fa-book-bible'}"></i>
                 </div>
                 <div class="${bubbleBg} border rounded-2xl p-3.5 text-sm text-slate-200 leading-relaxed max-w-[85%] shadow-md">
                     ${isHtml ? text : escapeHtml(text)}
@@ -593,249 +583,157 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        // ============ ROTEADOR ============
-        function handleUserQuery(query) {
-            const cleaned = query.toLowerCase().trim().replace(/[?!.]/g, '');
-            const mapped = cryptoAliases[cleaned];
+        // ============ PARSER DE REFERÊNCIA BÍBLICA ============
+        function parseBibleReference(query) {
+            let normalized = query.toLowerCase()
+                .replace(/[áàâãä]/g, 'a')
+                .replace(/[éèêë]/g, 'e')
+                .replace(/[íìîï]/g, 'i')
+                .replace(/[óòôõö]/g, 'o')
+                .replace(/[úùûü]/g, 'u')
+                .replace(/[ç]/g, 'c')
+                .replace(/[?!.,;]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
 
-            if (mapped === 'trend' || cleaned === 'trend' || cleaned.includes('top 5') || cleaned.includes('top cinco')) {
-                queryTrend();
-            } else {
-                queryCoin(query);
-            }
-        }
-
-        // ============ 🌐 BUSCAR ABSTRACT NA WIKIPEDIA VIA DUCKDUCKGO ============
-        async function fetchWikiAbstract(query) {
-            try {
-                // O endpoint do DDG retorna abstract da Wikipedia
-                const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
-                const res = await fetch(url);
-                if (!res.ok) return null;
-                const data = await res.json();
-
-                // Tenta pegar o abstract mais relevante
-                if (data.AbstractText && data.AbstractText.length > 20) {
+            let match = normalized.match(/^(.+?)\s+(\d+)(?:\s*[:\s]\s*(\d+))?$/);
+            
+            if (!match) {
+                match = normalized.match(/^(.+?)\s+(\d+)\s+(\d+)$/);
+                if (!match) {
+                    match = normalized.match(/^(.+?)\s+(\d+)$/);
+                    if (!match) return null;
                     return {
-                        text: data.AbstractText,
-                        source: data.AbstractSource || 'Wikipedia'
+                        bookName: match[1].trim(),
+                        chapter: parseInt(match[2]),
+                        verse: null
                     };
                 }
-                // Fallback: primeiro resultado de RelatedTopics
-                if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-                    for (const topic of data.RelatedTopics) {
-                        if (topic.Text && topic.Text.length > 30) {
-                            return { text: topic.Text, source: 'Wikipedia' };
-                        }
-                    }
-                }
-                return null;
-            } catch (e) {
-                console.warn('Erro ao buscar abstract:', e);
-                return null;
+                return {
+                    bookName: match[1].trim(),
+                    chapter: parseInt(match[2]),
+                    verse: parseInt(match[3])
+                };
             }
+
+            return {
+                bookName: match[1].trim(),
+                chapter: parseInt(match[2]),
+                verse: match[3] ? parseInt(match[3]) : null
+            };
         }
 
-        // ============ 💰 BUSCAR PREÇO VIA DUCKDUCKGO ============
-        async function fetchCryptoPrice(symbol, fiat = 'usd') {
-            try {
-                // Endpoint interno do DDG para criptomoedas
-                const url = `https://duckduckgo.com/js/spice/cryptocurrency/${symbol}/${fiat}/1`;
-                const res = await fetch(url);
-                if (!res.ok) return null;
-                let text = await res.text();
+        // ============ ROTEADOR ============
+        function handleUserQuery(query) {
+            const parsed = parseBibleReference(query);
 
-                // Limpa a resposta (vem como ddg_spice_cryptocurrency({...});)
-                text = text.replace(/^ddg_spice_cryptocurrency\(/, '').replace(/\);?\s*$/, '');
-                const data = JSON.parse(text);
-
-                if (data && data.data && data.data.quote) {
-                    const quote = data.data.quote;
-                    const keys = Object.keys(quote);
-                    if (keys.length > 0) {
-                        const key = keys[0];
-                        return {
-                            price: quote[key].price,
-                            from: quote[key].from || symbol.toUpperCase(),
-                            to: key.toUpperCase()
-                        };
-                    }
-                }
-                return null;
-            } catch (e) {
-                console.warn('Erro ao buscar preço DDG:', e);
-                return null;
+            if (!parsed) {
+                const errorMsg = `Desculpe, não entendi "${query}". Por favor, diga o livro, capítulo e versículo. Exemplo: "João 3:16" ou "Salmo 23".`;
+                appendChatMessage('assistant', errorMsg);
+                speakResponse(errorMsg);
+                return;
             }
+
+            const bookName = parsed.bookName.replace(/\s+/g, '').toLowerCase();
+            const apiBook = bibleBooksPT[bookName];
+
+            if (!apiBook) {
+                const errorMsg = `Não reconheci o livro "${parsed.bookName}". Tente novamente com o nome em português. Exemplo: "João 3:16" ou "Gênesis 1".`;
+                appendChatMessage('assistant', errorMsg);
+                speakResponse(errorMsg);
+                return;
+            }
+
+            queryBible(apiBook, parsed.chapter, parsed.verse, parsed.bookName, parsed.chapter, parsed.verse);
         }
 
-        // ============ 🔥 CONSULTA TOP 5 ============
-        async function queryTrend() {
-            appendChatMessage('user', 'Consultar: Top 5 criptomoedas');
+        // ============ CONSULTA À API BIBLE-API.COM ============
+        async function queryBible(bookName, chapter, verse, displayBook, displayChapter, displayVerse) {
+            // Se displayBook não foi passado (chamada direta dos botões), cria um display
+            if (!displayBook) {
+                displayBook = bookName;
+                displayChapter = chapter;
+                displayVerse = verse;
+            }
+
+            const refLabel = displayVerse 
+                ? `${displayBook} ${displayChapter}:${displayVerse}` 
+                : `${displayBook} ${displayChapter}`;
+
+            appendChatMessage('user', `Ler: ${refLabel}`);
             setCharacterState('FETCHING');
-            statusText.textContent = 'Buscando top 5...';
+            statusText.textContent = `Buscando ${refLabel}...`;
             isProcessing = true;
             updateMicUI();
 
             try {
-                let spokenParts = ['As 5 principais criptomoedas por capitalização de mercado são: '];
-                let htmlBlocks = '';
-
-                for (let i = 0; i < top5Coins.length; i++) {
-                    const coin = top5Coins[i];
-                    const symbol = cryptoSymbols[coin.id] || coin.symbol.toLowerCase();
-
-                    // Busca preço USD e BRL
-                    const usdData = await fetchCryptoPrice(symbol, 'usd');
-                    const brlData = await fetchCryptoPrice(symbol, 'brl');
-
-                    const priceUSD = usdData ? usdData.price : null;
-                    const priceBRL = brlData ? brlData.price : null;
-
-                    const priceUSDStr = priceUSD ? priceUSD.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : 'N/A';
-                    const priceBRLStr = priceBRL ? priceBRL.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
-
-                    // Busca abstract da Wikipedia
-                    const wiki = await fetchWikiAbstract(coin.name);
-                    const wikiText = wiki ? wiki.text.slice(0, 150) + (wiki.text.length > 150 ? '...' : '') : '';
-
-                    spokenParts.push(`${i + 1}. ${coin.name} (${coin.symbol}). Preço: ${priceUSDStr} ou ${priceBRLStr}.`);
-
-                    htmlBlocks += `
-                        <div class="space-y-2 p-3 rounded-2xl bg-slate-900/60 border border-slate-700/50 mb-2">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-base text-white">${coin.name} (${coin.symbol})</span>
-                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">🏆 Top ${i + 1}</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
-                                <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
-                                    <div class="text-slate-400">Preço USD</div>
-                                    <div class="text-sm font-bold text-blue-300">${priceUSDStr}</div>
-                                </div>
-                                <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
-                                    <div class="text-slate-400">Preço BRL</div>
-                                    <div class="text-sm font-bold text-emerald-300">${priceBRLStr}</div>
-                                </div>
-                            </div>
-                            ${wikiText ? `<p class="text-[11px] text-slate-400 pt-1 border-t border-slate-700/50 italic">${escapeHtml(wikiText)}</p>` : ''}
-                        </div>
-                    `;
+                // Codifica o nome do livro para URL (ex: "João" → "Jo%C3%A3o")
+                const encodedBook = encodeURIComponent(bookName);
+                
+                let url;
+                if (verse) {
+                    url = `https://bible-api.com/${encodedBook}+${chapter}:${verse}?translation=almeida`;
+                } else {
+                    url = `https://bible-api.com/${encodedBook}+${chapter}?translation=almeida`;
                 }
 
-                const spokenText = spokenParts.join(' ');
-                appendChatMessage('assistant', htmlBlocks, true);
-                statusText.textContent = 'Top 5 carregado!';
-                speakResponse(spokenText);
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Texto não encontrado');
+
+                const data = await res.json();
+
+                if (!data.text) {
+                    throw new Error('Texto vazio');
+                }
+
+                // Limpa o texto
+                const cleanText = data.text.replace(/\s+/g, ' ').trim();
+
+                // Monta HTML
+                const htmlContent = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-base text-white">${refLabel}</span>
+                            <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                <i class="fa-solid fa-book mr-1"></i>Almeida
+                            </span>
+                        </div>
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+                            <p class="text-sm text-slate-200 leading-relaxed italic">"${escapeHtml(cleanText)}"</p>
+                        </div>
+                    </div>
+                `;
+
+                appendChatMessage('assistant', htmlContent, true);
+                statusText.textContent = `${refLabel} — leitura`;
+
+                // Fala o texto
+                speakResponse(cleanText);
 
             } catch (err) {
                 console.error(err);
                 isProcessing = false;
                 setCharacterState('IDLE');
                 updateMicUI();
-                statusText.textContent = 'Erro ao buscar top 5';
-                const errorMsg = `Desculpe, não consegui buscar as top 5 agora. Tente novamente.`;
+                statusText.textContent = 'Texto não encontrado';
+                const errorMsg = `Desculpe, não encontrei ${refLabel}. Verifique o livro, capítulo e versículo. Exemplo: "João 3:16".`;
                 appendChatMessage('assistant', errorMsg);
                 speakResponse(errorMsg);
             }
         }
 
-        // ============ CONSULTA INDIVIDUAL VIA DUCKDUCKGO ============
-        async function queryCoin(coinQuery) {
-            if (!coinQuery) return;
-
-            const cleaned = coinQuery.toLowerCase().trim().replace(/[?!.]/g, '');
-            const coinId = cryptoAliases[cleaned] || cleaned.replace(/\s+/g, '-');
-
-            appendChatMessage('user', `Consultar: ${coinQuery}`);
-            setCharacterState('FETCHING');
-            statusText.textContent = `Buscando ${coinQuery} no DuckDuckGo...`;
-            isProcessing = true;
-            updateMicUI();
-
-            try {
-                // Descobre o símbolo
-                let symbol = cryptoSymbols[coinId];
-                if (!symbol) {
-                    // Tenta usar as 3 primeiras letras como fallback
-                    symbol = coinId.substring(0, 3);
-                }
-
-                // Busca preços em USD e BRL
-                const usdData = await fetchCryptoPrice(symbol, 'usd');
-                const brlData = await fetchCryptoPrice(symbol, 'brl');
-
-                // Busca abstract da Wikipedia
-                const wikiQuery = wikiIds[coinId] || coinQuery;
-                const wiki = await fetchWikiAbstract(wikiQuery);
-
-                if (!usdData && !brlData && !wiki) {
-                    throw new Error('Sem dados');
-                }
-
-                const displayName = coinId.charAt(0).toUpperCase() + coinId.slice(1).replace(/-/g, ' ');
-                const symbolUpper = symbol.toUpperCase();
-
-                const priceUSDStr = usdData ? usdData.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : 'N/A';
-                const priceBRLStr = brlData ? brlData.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
-
-                // Monta HTML
-                let htmlContent = `
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-base text-white">${displayName} (${symbolUpper})</span>
-                            <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                <i class="fa-solid fa-coins mr-1"></i>DuckDuckGo
-                            </span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
-                            <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-                                <div class="text-slate-400">Preço em Dólar</div>
-                                <div class="text-sm font-bold text-indigo-300">${priceUSDStr}</div>
-                            </div>
-                            <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-                                <div class="text-slate-400">Preço em Reais</div>
-                                <div class="text-sm font-bold text-indigo-300">${priceBRLStr}</div>
-                            </div>
-                        </div>
-                `;
-
-                if (wiki && wiki.text) {
-                    htmlContent += `
-                        <div class="bg-slate-900/40 p-2 rounded-xl border border-slate-700/50 mt-2">
-                            <div class="text-[10px] text-slate-500 mb-1"><i class="fa-solid fa-book mr-1"></i>${wiki.source}</div>
-                            <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(wiki.text.slice(0, 300))}${wiki.text.length > 300 ? '...' : ''}</p>
-                        </div>
-                    `;
-                }
-
-                htmlContent += `</div>`;
-
-                appendChatMessage('assistant', htmlContent, true);
-
-                // Fala
-                let spokenText = `${displayName} está cotada a ${priceUSDStr} ou ${priceBRLStr}.`;
-                if (wiki && wiki.text) {
-                    spokenText += ` Segundo a Wikipedia: ${wiki.text.slice(0, 200)}`;
-                }
-                statusText.textContent = `${displayName}: ${priceUSDStr}`;
-                speakResponse(spokenText);
-
-            } catch (err) {
-                isProcessing = false;
-                setCharacterState('IDLE');
-                updateMicUI();
-                statusText.textContent = 'Moeda não encontrada';
-                const errorMsg = `Desculpe, não encontrei dados para "${coinQuery}" no DuckDuckGo. Tente outro nome como Bitcoin, Ethereum ou Solana.`;
-                appendChatMessage('assistant', errorMsg);
-                speakResponse(errorMsg);
-            }
+        // ============ VERSÍCULO ALEATÓRIO ============
+        function queryRandomVerse() {
+            const random = randomVerses[Math.floor(Math.random() * randomVerses.length)];
+            queryBible(random.book, random.chapter, random.verse, random.label.split(' ')[0], random.chapter, random.verse);
         }
 
         function setCharacterState(state) {
             characterState = state;
-            if (state === 'IDLE') statusText.textContent = 'Pronto para buscar cotação';
+            if (state === 'IDLE') statusText.textContent = 'Pronto para ler a Bíblia';
             else if (state === 'LISTENING') statusText.textContent = 'Ouvindo sua voz...';
-            else if (state === 'FETCHING') statusText.textContent = 'Consultando DuckDuckGo...';
-            else if (state === 'SPEAKING') statusText.textContent = 'Falando resposta...';
+            else if (state === 'FETCHING') statusText.textContent = 'Consultando a Bíblia...';
+            else if (state === 'SPEAKING') statusText.textContent = 'Lendo o texto bíblico...';
         }
 
         // ============ CANVAS ============
@@ -994,10 +892,10 @@
             chatHistory.innerHTML = `
                 <div class="flex items-start gap-3">
                     <div class="w-8 h-8 rounded-xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-300 flex-shrink-0 text-sm">
-                        <i class="fa-solid fa-robot"></i>
+                        <i class="fa-solid fa-book-bible"></i>
                     </div>
                     <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 text-sm text-slate-200 leading-relaxed max-w-[85%]">
-                        Histórico limpo! Fale ou digite outra criptomoeda ou "top 5" para consultar.
+                        Histórico limpo! Diga um livro, capítulo e versículo para ler.
                     </div>
                 </div>
             `;
