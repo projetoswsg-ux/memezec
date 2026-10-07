@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sparky - Cripto ao Vivo & Voz Natural</title>
+    <title>Sparky - Cripto via DuckDuckGo & Voz Natural</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
@@ -44,9 +44,9 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold font-fredoka tracking-wide text-white flex items-center gap-2">
-                    Sparky <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Cripto Ao Vivo</span>
+                    Sparky <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">DuckDuckGo + Wiki</span>
                 </h1>
-                <p class="text-xs text-slate-400">Consulta CoinGecko + Voz Humana Natural</p>
+                <p class="text-xs text-slate-400">Preços via DDG + Resumos da Wikipedia</p>
             </div>
         </div>
 
@@ -76,18 +76,17 @@
                 
                 <div class="flex items-center gap-2 text-xs text-slate-400">
                     <i class="fa-solid fa-bolt text-indigo-400"></i>
-                    <span id="voiceName">CoinGecko API</span>
+                    <span id="voiceName">DuckDuckGo API</span>
                 </div>
             </div>
 
-            <!-- Botões rápidos incluindo Trend -->
             <div class="w-full flex flex-wrap gap-2 justify-center z-10 my-1">
                 <button onclick="queryCoin('bitcoin')" class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold hover:bg-amber-500/30 transition-all cursor-pointer">₿ Bitcoin</button>
                 <button onclick="queryCoin('ethereum')" class="px-3 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 rounded-xl text-xs font-bold hover:bg-blue-500/30 transition-all cursor-pointer">Ξ Ethereum</button>
                 <button onclick="queryCoin('solana')" class="px-3 py-1 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold hover:bg-purple-500/30 transition-all cursor-pointer">◎ Solana</button>
                 <button onclick="queryCoin('ripple')" class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 rounded-xl text-xs font-bold hover:bg-cyan-500/30 transition-all cursor-pointer">✕ XRP</button>
                 <button onclick="queryCoin('dogecoin')" class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-500/30 transition-all cursor-pointer">🐕 Doge</button>
-                <button onclick="queryTrend()" class="px-3 py-1 bg-orange-500/20 border border-orange-500/40 text-orange-300 rounded-xl text-xs font-bold hover:bg-orange-500/30 transition-all cursor-pointer">🔥 Trend</button>
+                <button onclick="queryTrend()" class="px-3 py-1 bg-orange-500/20 border border-orange-500/40 text-orange-300 rounded-xl text-xs font-bold hover:bg-orange-500/30 transition-all cursor-pointer">🔥 Top 5</button>
             </div>
 
             <div class="relative w-full flex-1 flex items-center justify-center my-2">
@@ -120,7 +119,7 @@
             
             <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
                 <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-indigo-400"></i> Histórico de Cotações Ao Vivo
+                    <i class="fa-solid fa-chart-line text-indigo-400"></i> Histórico de Consultas
                 </h2>
                 <button id="clearChatBtn" class="text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer">
                     <i class="fa-solid fa-trash-can mr-1"></i> Limpar
@@ -133,13 +132,13 @@
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 text-sm text-slate-200 leading-relaxed max-w-[85%]">
-                        Olá! Clique em <strong>Modo Conversa</strong> e fale o nome de qualquer cripto (ex: <em>Bitcoin</em>, <em>Ethereum</em>, <em>Solana</em>) ou diga <strong>"trend"</strong> para ver as 5 moedas em alta. Quando você pausar, eu envio automaticamente!
+                        Olá! Agora uso <strong>DuckDuckGo + Wikipedia</strong>. Fale o nome de uma cripto (ex: <em>Bitcoin</em>, <em>Ethereum</em>) ou diga <strong>"top 5"</strong> para ver as principais. Preços via DDG e resumos da Wikipedia!
                     </div>
                 </div>
             </div>
 
             <form id="textForm" class="flex items-center gap-2 mt-auto pt-2 border-t border-slate-800">
-                <input type="text" id="userInput" placeholder="Digite cripto ou 'trend'..." class="flex-1 bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500 transition-all">
+                <input type="text" id="userInput" placeholder="Digite cripto ou 'top 5'..." class="flex-1 bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500 transition-all">
                 <button type="submit" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all active:scale-95 flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
@@ -250,6 +249,33 @@
         let lastSpokenText = '';
         let lastSpokenTime = 0;
 
+        // Mapeamento de nome → símbolo para o endpoint DDG
+        const cryptoSymbols = {
+            'bitcoin': 'btc', 'ethereum': 'eth', 'solana': 'sol', 'ripple': 'xrp',
+            'dogecoin': 'doge', 'cardano': 'ada', 'polkadot': 'dot', 'litecoin': 'ltc',
+            'chainlink': 'link', 'shiba-inu': 'shib', 'tron': 'trx', 'tether': 'usdt',
+            'binancecoin': 'bnb', 'avalanche-2': 'avax', 'matic-network': 'matic',
+            'pepe': 'pepe', 'filecoin': 'fil', 'uniswap': 'uni', 'stellar': 'xlm',
+            'monero': 'xmr', 'bitcoin-cash': 'bch', 'fantom': 'ftm', 'near': 'near',
+            'algorand': 'algo', 'cosmos': 'atom', 'aave': 'aave'
+        };
+
+        // Mapeamento de nome → ID da Wikipedia (para abstracts)
+        const wikiIds = {
+            'bitcoin': 'Bitcoin', 'ethereum': 'Ethereum', 'solana': 'Solana_(blockchain)',
+            'ripple': 'Ripple_(payment_protocol)', 'dogecoin': 'Dogecoin',
+            'cardano': 'Cardano_(blockchain_platform)', 'polkadot': 'Polkadot_(cryptocurrency)',
+            'litecoin': 'Litecoin', 'chainlink': 'Chainlink_(cryptocurrency)',
+            'shiba-inu': 'Shiba_Inu_(cryptocurrency)', 'tron': 'Tron_(blockchain)',
+            'tether': 'Tether_(cryptocurrency)', 'binancecoin': 'Binance_Coin',
+            'avalanche-2': 'Avalanche_(blockchain_platform)', 'matic-network': 'Polygon_(blockchain)',
+            'pepe': 'Pepe_(cryptocurrency)', 'filecoin': 'Filecoin', 'uniswap': 'Uniswap',
+            'stellar': 'Stellar_(payment_network)', 'monero': 'Monero',
+            'bitcoin-cash': 'Bitcoin_Cash', 'fantom': 'Fantom_(blockchain_platform)',
+            'near': 'Near_Protocol', 'algorand': 'Algorand', 'cosmos': 'Cosmos_(blockchain)'
+        };
+
+        // Aliases de voz
         const cryptoAliases = {
             'bitcoin': 'bitcoin', 'biticoin': 'bitcoin', 'ethereum': 'ethereum',
             'eterium': 'ethereum', 'solana': 'solana', 'cardano': 'cardano',
@@ -257,12 +283,22 @@
             'doge': 'dogecoin', 'shiba': 'shiba-inu', 'polygon': 'matic-network',
             'pepe': 'pepe', 'bnb': 'binancecoin', 'binance': 'binancecoin',
             'avalanche': 'avalanche-2', 'litecoin': 'litecoin',
-            // Aliases para trend
+            // Aliases para top 5
             'trend': 'trend', 'tendencia': 'trend', 'tendência': 'trend',
             'trending': 'trend', 'alta': 'trend', 'em alta': 'trend',
             'o que esta em alta': 'trend', 'o que está em alta': 'trend',
-            'top moedas': 'trend', 'melhores moedas': 'trend'
+            'top moedas': 'trend', 'melhores moedas': 'trend',
+            'top 5': 'trend', 'top cinco': 'trend', 'principais': 'trend'
         };
+
+        // Lista curada das 5 principais por market cap (aproximado, para "top 5")
+        const top5Coins = [
+            { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', wiki: 'Bitcoin' },
+            { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', wiki: 'Ethereum' },
+            { id: 'tether', name: 'Tether', symbol: 'USDT', wiki: 'Tether_(cryptocurrency)' },
+            { id: 'binancecoin', name: 'BNB', symbol: 'BNB', wiki: 'BNB_(cryptocurrency)' },
+            { id: 'solana', name: 'Solana', symbol: 'SOL', wiki: 'Solana_(blockchain)' }
+        ];
 
         const personas = {
             sparky: { name: 'Sparky', color: '#6366f1', eyeColor: '#38bdf8', accentColor: '#818cf8' },
@@ -424,7 +460,7 @@
                     micHint.textContent = 'Aguarde a resposta terminar. O microfone volta sozinho depois.';
                 } else if (isProcessing) {
                     micBtnText.textContent = 'Consultando...';
-                    micHint.textContent = 'Buscando dados ao vivo na CoinGecko.';
+                    micHint.textContent = 'Buscando dados no DuckDuckGo.';
                 } else {
                     micBtnText.textContent = 'Ouvindo... (pausa envia)';
                     micHint.textContent = 'Fale agora. Ao pausar, envio automaticamente.';
@@ -557,118 +593,137 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        // ============ ROTEADOR: TREND OU COIN ============
+        // ============ ROTEADOR ============
         function handleUserQuery(query) {
             const cleaned = query.toLowerCase().trim().replace(/[?!.]/g, '');
             const mapped = cryptoAliases[cleaned];
 
-            if (mapped === 'trend' || cleaned === 'trend' || cleaned.includes('trend') || cleaned.includes('tendência') || cleaned.includes('tendencia')) {
+            if (mapped === 'trend' || cleaned === 'trend' || cleaned.includes('top 5') || cleaned.includes('top cinco')) {
                 queryTrend();
             } else {
                 queryCoin(query);
             }
         }
 
-        // ============ 🔥 CONSULTA TREND (5 principais) ============
+        // ============ 🌐 BUSCAR ABSTRACT NA WIKIPEDIA VIA DUCKDUCKGO ============
+        async function fetchWikiAbstract(query) {
+            try {
+                // O endpoint do DDG retorna abstract da Wikipedia
+                const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+                const res = await fetch(url);
+                if (!res.ok) return null;
+                const data = await res.json();
+
+                // Tenta pegar o abstract mais relevante
+                if (data.AbstractText && data.AbstractText.length > 20) {
+                    return {
+                        text: data.AbstractText,
+                        source: data.AbstractSource || 'Wikipedia'
+                    };
+                }
+                // Fallback: primeiro resultado de RelatedTopics
+                if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                    for (const topic of data.RelatedTopics) {
+                        if (topic.Text && topic.Text.length > 30) {
+                            return { text: topic.Text, source: 'Wikipedia' };
+                        }
+                    }
+                }
+                return null;
+            } catch (e) {
+                console.warn('Erro ao buscar abstract:', e);
+                return null;
+            }
+        }
+
+        // ============ 💰 BUSCAR PREÇO VIA DUCKDUCKGO ============
+        async function fetchCryptoPrice(symbol, fiat = 'usd') {
+            try {
+                // Endpoint interno do DDG para criptomoedas
+                const url = `https://duckduckgo.com/js/spice/cryptocurrency/${symbol}/${fiat}/1`;
+                const res = await fetch(url);
+                if (!res.ok) return null;
+                let text = await res.text();
+
+                // Limpa a resposta (vem como ddg_spice_cryptocurrency({...});)
+                text = text.replace(/^ddg_spice_cryptocurrency\(/, '').replace(/\);?\s*$/, '');
+                const data = JSON.parse(text);
+
+                if (data && data.data && data.data.quote) {
+                    const quote = data.data.quote;
+                    const keys = Object.keys(quote);
+                    if (keys.length > 0) {
+                        const key = keys[0];
+                        return {
+                            price: quote[key].price,
+                            from: quote[key].from || symbol.toUpperCase(),
+                            to: key.toUpperCase()
+                        };
+                    }
+                }
+                return null;
+            } catch (e) {
+                console.warn('Erro ao buscar preço DDG:', e);
+                return null;
+            }
+        }
+
+        // ============ 🔥 CONSULTA TOP 5 ============
         async function queryTrend() {
-            appendChatMessage('user', 'Consultar: Trend (5 principais)');
+            appendChatMessage('user', 'Consultar: Top 5 criptomoedas');
             setCharacterState('FETCHING');
-            statusText.textContent = 'Buscando trend da CoinGecko...';
+            statusText.textContent = 'Buscando top 5...';
             isProcessing = true;
             updateMicUI();
 
             try {
-                // 1) Buscar as moedas em trend
-                const trendRes = await fetch('https://api.coingecko.com/api/v3/search/trending');
-                if (!trendRes.ok) throw new Error('Falha ao buscar trend');
-                const trendData = await trendRes.json();
-
-                const trendingCoins = (trendData.coins || []).slice(0, 5);
-
-                if (trendingCoins.length === 0) {
-                    throw new Error('Nenhuma moeda em trend no momento');
-                }
-
-                // 2) Para cada moeda, buscar detalhes (market cap, volume, blockchain)
-                const details = await Promise.all(
-                    trendingCoins.map(async (item) => {
-                        const coinId = item.item.id;
-                        try {
-                            const coinRes = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`);
-                            if (!coinRes.ok) return null;
-                            const coinData = await coinRes.json();
-                            return { item, coinData };
-                        } catch (e) {
-                            return null;
-                        }
-                    })
-                );
-
-                const valid = details.filter(d => d !== null);
-
-                // 3) Formatar resposta
-                let spokenParts = ['As 5 principais moedas em trend na CoinGecko hoje são: '];
+                let spokenParts = ['As 5 principais criptomoedas por capitalização de mercado são: '];
                 let htmlBlocks = '';
 
-                valid.forEach((d, index) => {
-                    const { item, coinData } = d;
-                    const name = coinData.name || item.item.name;
-                    const symbol = (coinData.symbol || item.item.symbol || '').toUpperCase();
+                for (let i = 0; i < top5Coins.length; i++) {
+                    const coin = top5Coins[i];
+                    const symbol = cryptoSymbols[coin.id] || coin.symbol.toLowerCase();
 
-                    const marketData = coinData.market_data || {};
-                    const priceBRL = marketData.current_price?.brl;
-                    const priceUSD = marketData.current_price?.usd;
-                    const marketCap = marketData.market_cap?.brl || marketData.market_cap?.usd;
-                    const volume = marketData.total_volume?.brl || marketData.total_volume?.usd;
+                    // Busca preço USD e BRL
+                    const usdData = await fetchCryptoPrice(symbol, 'usd');
+                    const brlData = await fetchCryptoPrice(symbol, 'brl');
 
-                    // Blockchain / plataforma
-                    let blockchain = coinData.asset_platform_id;
-                    if (!blockchain && coinData.platforms && Object.keys(coinData.platforms).length > 0) {
-                        blockchain = Object.keys(coinData.platforms)[0];
-                    }
-                    if (!blockchain) blockchain = 'Própria';
+                    const priceUSD = usdData ? usdData.price : null;
+                    const priceBRL = brlData ? brlData.price : null;
 
-                    const priceBRLStr = priceBRL ? priceBRL.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
                     const priceUSDStr = priceUSD ? priceUSD.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : 'N/A';
-                    const marketCapStr = marketCap ? marketCap.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
-                    const volumeStr = volume ? volume.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
+                    const priceBRLStr = priceBRL ? priceBRL.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
 
-                    spokenParts.push(`${index + 1}. ${name} (${symbol}). Preço em reais: ${priceBRLStr}, em dólares: ${priceUSDStr}. Market cap: ${marketCapStr}. Liquidez em 24 horas: ${volumeStr}. Blockchain: ${blockchain}.`);
+                    // Busca abstract da Wikipedia
+                    const wiki = await fetchWikiAbstract(coin.name);
+                    const wikiText = wiki ? wiki.text.slice(0, 150) + (wiki.text.length > 150 ? '...' : '') : '';
+
+                    spokenParts.push(`${i + 1}. ${coin.name} (${coin.symbol}). Preço: ${priceUSDStr} ou ${priceBRLStr}.`);
 
                     htmlBlocks += `
                         <div class="space-y-2 p-3 rounded-2xl bg-slate-900/60 border border-slate-700/50 mb-2">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-base text-white">${name} (${symbol})</span>
-                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">🔥 Trend #${index + 1}</span>
+                                <span class="font-bold text-base text-white">${coin.name} (${coin.symbol})</span>
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">🏆 Top ${i + 1}</span>
                             </div>
                             <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
-                                <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
-                                    <div class="text-slate-400">Preço BRL</div>
-                                    <div class="text-sm font-bold text-emerald-300">${priceBRLStr}</div>
-                                </div>
                                 <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
                                     <div class="text-slate-400">Preço USD</div>
                                     <div class="text-sm font-bold text-blue-300">${priceUSDStr}</div>
                                 </div>
                                 <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
-                                    <div class="text-slate-400">Market Cap</div>
-                                    <div class="text-sm font-bold text-indigo-300">${marketCapStr}</div>
-                                </div>
-                                <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
-                                    <div class="text-slate-400">Liquidez (24h)</div>
-                                    <div class="text-sm font-bold text-amber-300">${volumeStr}</div>
+                                    <div class="text-slate-400">Preço BRL</div>
+                                    <div class="text-sm font-bold text-emerald-300">${priceBRLStr}</div>
                                 </div>
                             </div>
-                            <div class="text-xs text-slate-400 pt-1 border-t border-slate-700/50">
-                                <i class="fa-solid fa-link mr-1"></i> Blockchain: <span class="text-slate-200 font-semibold">${blockchain}</span>
-                            </div>
+                            ${wikiText ? `<p class="text-[11px] text-slate-400 pt-1 border-t border-slate-700/50 italic">${escapeHtml(wikiText)}</p>` : ''}
                         </div>
                     `;
-                });
+                }
 
                 const spokenText = spokenParts.join(' ');
                 appendChatMessage('assistant', htmlBlocks, true);
-                statusText.textContent = 'Trend carregado!';
+                statusText.textContent = 'Top 5 carregado!';
                 speakResponse(spokenText);
 
             } catch (err) {
@@ -676,14 +731,14 @@
                 isProcessing = false;
                 setCharacterState('IDLE');
                 updateMicUI();
-                statusText.textContent = 'Erro ao buscar trend';
-                const errorMsg = `Desculpe, não consegui buscar as moedas em trend agora. Tente novamente em alguns segundos.`;
+                statusText.textContent = 'Erro ao buscar top 5';
+                const errorMsg = `Desculpe, não consegui buscar as top 5 agora. Tente novamente.`;
                 appendChatMessage('assistant', errorMsg);
                 speakResponse(errorMsg);
             }
         }
 
-        // ============ CONSULTA COINGECKO (individual) ============
+        // ============ CONSULTA INDIVIDUAL VIA DUCKDUCKGO ============
         async function queryCoin(coinQuery) {
             if (!coinQuery) return;
 
@@ -692,93 +747,95 @@
 
             appendChatMessage('user', `Consultar: ${coinQuery}`);
             setCharacterState('FETCHING');
-            statusText.textContent = `Buscando ${coinQuery} na CoinGecko...`;
+            statusText.textContent = `Buscando ${coinQuery} no DuckDuckGo...`;
             isProcessing = true;
             updateMicUI();
 
             try {
-                const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(coinId)}&vs_currencies=brl,usd&include_24hr_change=true&include_market_cap=true`);
-                if (!response.ok) throw new Error('Moeda não encontrada');
+                // Descobre o símbolo
+                let symbol = cryptoSymbols[coinId];
+                if (!symbol) {
+                    // Tenta usar as 3 primeiras letras como fallback
+                    symbol = coinId.substring(0, 3);
+                }
 
-                const data = await response.json();
-                
-                if (!data[coinId]) {
-                    const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(coinQuery)}`);
-                    const searchData = await searchRes.json();
-                    
-                    if (searchData.coins && searchData.coins.length > 0) {
-                        const bestMatchId = searchData.coins[0].id;
-                        const retryRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${bestMatchId}&vs_currencies=brl,usd&include_24hr_change=true&include_market_cap=true`);
-                        const retryData = await retryRes.json();
-                        if (retryData[bestMatchId]) {
-                            formatAndDisplayCoinData(searchData.coins[0].name, retryData[bestMatchId]);
-                            return;
-                        }
-                    }
-                    throw new Error('Moeda não encontrada');
+                // Busca preços em USD e BRL
+                const usdData = await fetchCryptoPrice(symbol, 'usd');
+                const brlData = await fetchCryptoPrice(symbol, 'brl');
+
+                // Busca abstract da Wikipedia
+                const wikiQuery = wikiIds[coinId] || coinQuery;
+                const wiki = await fetchWikiAbstract(wikiQuery);
+
+                if (!usdData && !brlData && !wiki) {
+                    throw new Error('Sem dados');
                 }
 
                 const displayName = coinId.charAt(0).toUpperCase() + coinId.slice(1).replace(/-/g, ' ');
-                formatAndDisplayCoinData(displayName, data[coinId]);
+                const symbolUpper = symbol.toUpperCase();
+
+                const priceUSDStr = usdData ? usdData.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : 'N/A';
+                const priceBRLStr = brlData ? brlData.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
+
+                // Monta HTML
+                let htmlContent = `
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-base text-white">${displayName} (${symbolUpper})</span>
+                            <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                <i class="fa-solid fa-coins mr-1"></i>DuckDuckGo
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+                            <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
+                                <div class="text-slate-400">Preço em Dólar</div>
+                                <div class="text-sm font-bold text-indigo-300">${priceUSDStr}</div>
+                            </div>
+                            <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
+                                <div class="text-slate-400">Preço em Reais</div>
+                                <div class="text-sm font-bold text-indigo-300">${priceBRLStr}</div>
+                            </div>
+                        </div>
+                `;
+
+                if (wiki && wiki.text) {
+                    htmlContent += `
+                        <div class="bg-slate-900/40 p-2 rounded-xl border border-slate-700/50 mt-2">
+                            <div class="text-[10px] text-slate-500 mb-1"><i class="fa-solid fa-book mr-1"></i>${wiki.source}</div>
+                            <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(wiki.text.slice(0, 300))}${wiki.text.length > 300 ? '...' : ''}</p>
+                        </div>
+                    `;
+                }
+
+                htmlContent += `</div>`;
+
+                appendChatMessage('assistant', htmlContent, true);
+
+                // Fala
+                let spokenText = `${displayName} está cotada a ${priceUSDStr} ou ${priceBRLStr}.`;
+                if (wiki && wiki.text) {
+                    spokenText += ` Segundo a Wikipedia: ${wiki.text.slice(0, 200)}`;
+                }
+                statusText.textContent = `${displayName}: ${priceUSDStr}`;
+                speakResponse(spokenText);
 
             } catch (err) {
                 isProcessing = false;
                 setCharacterState('IDLE');
                 updateMicUI();
                 statusText.textContent = 'Moeda não encontrada';
-                const errorMsg = `Desculpe, não encontrei dados ao vivo para "${coinQuery}". Tente outro nome como Bitcoin, Ethereum ou Solana.`;
+                const errorMsg = `Desculpe, não encontrei dados para "${coinQuery}" no DuckDuckGo. Tente outro nome como Bitcoin, Ethereum ou Solana.`;
                 appendChatMessage('assistant', errorMsg);
                 speakResponse(errorMsg);
             }
-        }
-
-        function formatAndDisplayCoinData(name, info) {
-            const priceBRL = info.brl ? info.brl.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
-            const priceUSD = info.usd ? info.usd.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : 'N/A';
-            const change24h = info.brl_24h_change !== undefined ? info.brl_24h_change : (info.usd_24h_change !== undefined ? info.usd_24h_change : 0);
-            const isPositive = change24h >= 0;
-            const changeFormatted = `${isPositive ? '+' : ''}${change24h.toFixed(2)}%`;
-            
-            let commentary = '';
-            if (change24h > 5) commentary = `Uau! ${name} está em forte alta nas últimas 24 horas! Momento de otimismo no mercado.`;
-            else if (change24h > 0) commentary = `${name} registra leve alta hoje. O mercado segue estável com viés positivo.`;
-            else if (change24h > -5) commentary = `${name} apresenta leve queda hoje. É uma oportunidade de monitorar suporte.`;
-            else commentary = `Atenção! ${name} está em queda acentuada hoje. Cautela redobrada nas negociações.`;
-
-            const htmlContent = `
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-base text-white">${name}</span>
-                        <span class="px-2 py-0.5 rounded-lg text-xs font-bold ${isPositive ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}">
-                            <i class="fa-solid fa-arrow-${isPositive ? 'trend-up' : 'trend-down'} mr-1"></i>${changeFormatted}
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
-                        <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-                            <div class="text-slate-400">Preço em Reais</div>
-                            <div class="text-sm font-bold text-indigo-300">${priceBRL}</div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-                            <div class="text-slate-400">Preço em Dólar</div>
-                            <div class="text-sm font-bold text-indigo-300">${priceUSD}</div>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-300 pt-1 border-t border-slate-700/50 italic">${commentary}</p>
-                </div>
-            `;
-
-            appendChatMessage('assistant', htmlContent, true);
-            const spokenText = `${name} está cotada a ${priceBRL}, com variação de ${changeFormatted} nas últimas 24 horas. ${commentary}`;
-            statusText.textContent = `${name}: ${priceBRL} (${changeFormatted})`;
-            speakResponse(spokenText);
         }
 
         function setCharacterState(state) {
             characterState = state;
             if (state === 'IDLE') statusText.textContent = 'Pronto para buscar cotação';
             else if (state === 'LISTENING') statusText.textContent = 'Ouvindo sua voz...';
-            else if (state === 'FETCHING') statusText.textContent = 'Consultando CoinGecko...';
-            else if (state === 'SPEAKING') statusText.textContent = 'Falando cotação ao vivo...';
+            else if (state === 'FETCHING') statusText.textContent = 'Consultando DuckDuckGo...';
+            else if (state === 'SPEAKING') statusText.textContent = 'Falando resposta...';
         }
 
         // ============ CANVAS ============
@@ -940,7 +997,7 @@
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 text-sm text-slate-200 leading-relaxed max-w-[85%]">
-                        Histórico limpo! Fale ou digite outra criptomoeda ou "trend" para consultar.
+                        Histórico limpo! Fale ou digite outra criptomoeda ou "top 5" para consultar.
                     </div>
                 </div>
             `;
