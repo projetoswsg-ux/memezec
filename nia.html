@@ -80,12 +80,14 @@
                 </div>
             </div>
 
+            <!-- Botões rápidos incluindo Trend -->
             <div class="w-full flex flex-wrap gap-2 justify-center z-10 my-1">
                 <button onclick="queryCoin('bitcoin')" class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold hover:bg-amber-500/30 transition-all cursor-pointer">₿ Bitcoin</button>
                 <button onclick="queryCoin('ethereum')" class="px-3 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 rounded-xl text-xs font-bold hover:bg-blue-500/30 transition-all cursor-pointer">Ξ Ethereum</button>
                 <button onclick="queryCoin('solana')" class="px-3 py-1 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold hover:bg-purple-500/30 transition-all cursor-pointer">◎ Solana</button>
                 <button onclick="queryCoin('ripple')" class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 rounded-xl text-xs font-bold hover:bg-cyan-500/30 transition-all cursor-pointer">✕ XRP</button>
                 <button onclick="queryCoin('dogecoin')" class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-500/30 transition-all cursor-pointer">🐕 Doge</button>
+                <button onclick="queryTrend()" class="px-3 py-1 bg-orange-500/20 border border-orange-500/40 text-orange-300 rounded-xl text-xs font-bold hover:bg-orange-500/30 transition-all cursor-pointer">🔥 Trend</button>
             </div>
 
             <div class="relative w-full flex-1 flex items-center justify-center my-2">
@@ -131,13 +133,13 @@
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 text-sm text-slate-200 leading-relaxed max-w-[85%]">
-                        Olá! Clique em <strong>Modo Conversa</strong> e fale o nome de qualquer cripto (ex: <em>Bitcoin</em>, <em>Ethereum</em>, <em>Solana</em>). Quando você pausar, eu envio automaticamente e já te respondo com a cotação ao vivo. Pode continuar falando depois — o microfone religa sozinho!
+                        Olá! Clique em <strong>Modo Conversa</strong> e fale o nome de qualquer cripto (ex: <em>Bitcoin</em>, <em>Ethereum</em>, <em>Solana</em>) ou diga <strong>"trend"</strong> para ver as 5 moedas em alta. Quando você pausar, eu envio automaticamente!
                     </div>
                 </div>
             </div>
 
             <form id="textForm" class="flex items-center gap-2 mt-auto pt-2 border-t border-slate-800">
-                <input type="text" id="userInput" placeholder="Digite cripto (ex: bitcoin, cardano)..." class="flex-1 bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500 transition-all">
+                <input type="text" id="userInput" placeholder="Digite cripto ou 'trend'..." class="flex-1 bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500 transition-all">
                 <button type="submit" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all active:scale-95 flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
@@ -237,16 +239,14 @@
         let currentUtterance = null;
         let speechVoices = [];
 
-        // 🎤 Estado de conversa natural
-        let micEnabled = false;       // usuário quer ficar ouvindo?
-        let isSpeaking = false;       // assistente está falando?
-        let isProcessing = false;     // fetch/processando?
-        let silenceTimer = null;      // timer de silêncio
-        let SILENCE_TIMEOUT = 1500;   // ms (ajustável no modal)
-        let finalTranscript = '';     // acumula texto final
-        let interimTranscript = '';   // texto provisório
+        let micEnabled = false;
+        let isSpeaking = false;
+        let isProcessing = false;
+        let silenceTimer = null;
+        let SILENCE_TIMEOUT = 1500;
+        let finalTranscript = '';
+        let interimTranscript = '';
 
-        // 🛡️ Anti-eco: guarda o que o robô acabou de falar
         let lastSpokenText = '';
         let lastSpokenTime = 0;
 
@@ -256,7 +256,12 @@
             'ripple': 'ripple', 'xrp': 'ripple', 'dogecoin': 'dogecoin',
             'doge': 'dogecoin', 'shiba': 'shiba-inu', 'polygon': 'matic-network',
             'pepe': 'pepe', 'bnb': 'binancecoin', 'binance': 'binancecoin',
-            'avalanche': 'avalanche-2', 'litecoin': 'litecoin'
+            'avalanche': 'avalanche-2', 'litecoin': 'litecoin',
+            // Aliases para trend
+            'trend': 'trend', 'tendencia': 'trend', 'tendência': 'trend',
+            'trending': 'trend', 'alta': 'trend', 'em alta': 'trend',
+            'o que esta em alta': 'trend', 'o que está em alta': 'trend',
+            'top moedas': 'trend', 'melhores moedas': 'trend'
         };
 
         const personas = {
@@ -265,26 +270,22 @@
             blaze:  { name: 'Blaze',  color: '#f97316', eyeColor: '#facc15', accentColor: '#fb923c' }
         };
 
-        // ============ 🛡️ ANTI-ECO: SIMILARIDADE DE TEXTO ============
+        // ============ ANTI-ECO ============
         function normalizeText(t) {
             return t.toLowerCase().replace(/[^\wáàâãéèêíïóôõöúçñ\s]/gi, '').replace(/\s+/g, ' ').trim();
         }
 
-        // Retorna true se o texto reconhecido parece ser eco do que o robô acabou de falar
         function looksLikeEcho(recognized) {
             if (!lastSpokenText) return false;
-            // Só considera eco nos primeiros 8 segundos após a fala do robô
             if (Date.now() - lastSpokenTime > 8000) return false;
 
             const a = normalizeText(recognized);
             const b = normalizeText(lastSpokenText);
             if (!a || !b) return false;
 
-            // Se o reconhecido estiver contido no texto falado (ou vice-versa), é eco
             if (b.includes(a) && a.length >= 3) return true;
             if (a.includes(b.slice(0, 20)) && b.length >= 8) return true;
 
-            // Checa similaridade por palavras compartilhadas
             const wordsA = a.split(' ').filter(w => w.length > 2);
             const wordsB = new Set(b.split(' ').filter(w => w.length > 2));
             if (wordsA.length === 0) return false;
@@ -292,19 +293,17 @@
             let match = 0;
             wordsA.forEach(w => { if (wordsB.has(w)) match++; });
             const ratio = match / wordsA.length;
-
-            // Se 60%+ das palavras do reconhecido estão no texto falado → eco
             return ratio >= 0.6;
         }
 
-        // ============ SPEECH RECOGNITION (CONVERSA NATURAL) ============
+        // ============ SPEECH RECOGNITION ============
         function initSpeech() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
                 recognition = new SpeechRecognition();
                 recognition.lang = 'pt-BR';
-                recognition.continuous = true;       // continua ouvindo
-                recognition.interimResults = true;   // resultado em tempo real
+                recognition.continuous = true;
+                recognition.interimResults = true;
                 recognition.maxAlternatives = 1;
 
                 recognition.onstart = () => {
@@ -313,7 +312,6 @@
                 };
 
                 recognition.onresult = (event) => {
-                    // 🛡️ CAMADA 1: ignora completamente enquanto o robô está falando
                     if (isSpeaking) return;
 
                     let combinedText = '';
@@ -321,7 +319,6 @@
                         combinedText += event.results[i][0].transcript;
                     }
 
-                    // 🛡️ CAMADA 2: filtro de similaridade (detecta eco residual)
                     if (looksLikeEcho(combinedText)) {
                         console.log('🛡️ Eco detectado e bloqueado:', combinedText);
                         return;
@@ -354,9 +351,7 @@
 
                 recognition.onend = () => {
                     isListening = false;
-                    // 🛡️ CAMADA 3: só religa se realmente não estiver falando nem processando
                     if (micEnabled && !isSpeaking && !isProcessing) {
-                        // delay curto para evitar loops de restart
                         setTimeout(() => {
                             if (micEnabled && !isSpeaking && !isProcessing && !isListening) {
                                 try { recognition.start(); } catch (e) {}
@@ -392,7 +387,7 @@
             if (bestVoice) voiceSelect.value = bestVoice.name;
         }
 
-        // ============ TIMER DE SILÊNCIO → ENVIO AUTOMÁTICO ============
+        // ============ TIMER DE SILÊNCIO ============
         function resetSilenceTimer() {
             clearTimeout(silenceTimer);
             silenceTimer = setTimeout(() => {
@@ -404,11 +399,9 @@
             const val = userInput.value.trim();
             if (!val) return;
 
-            // 🛡️ Marca como processando ANTES de abortar (bloqueia onend de religar)
             isProcessing = true;
             clearTimeout(silenceTimer);
 
-            // 🛡️ abort() descarta buffers pendentes (diferente de stop())
             if (recognition) {
                 try { recognition.abort(); } catch (e) {}
             }
@@ -418,7 +411,7 @@
             finalTranscript = '';
             interimTranscript = '';
 
-            queryCoin(val);
+            handleUserQuery(val);
         }
 
         // ============ UI DO MIC ============
@@ -431,7 +424,7 @@
                     micHint.textContent = 'Aguarde a resposta terminar. O microfone volta sozinho depois.';
                 } else if (isProcessing) {
                     micBtnText.textContent = 'Consultando...';
-                    micHint.textContent = 'Buscando cotação ao vivo na CoinGecko.';
+                    micHint.textContent = 'Buscando dados ao vivo na CoinGecko.';
                 } else {
                     micBtnText.textContent = 'Ouvindo... (pausa envia)';
                     micHint.textContent = 'Fale agora. Ao pausar, envio automaticamente.';
@@ -474,7 +467,6 @@
         function speakResponse(text) {
             if (!synth) return;
 
-            // 🛡️ CAMADA 4: aborta mic ANTES de qualquer coisa (descarta buffers)
             clearTimeout(silenceTimer);
             if (recognition) {
                 try { recognition.abort(); } catch (e) {}
@@ -483,7 +475,6 @@
 
             if (synth.speaking) synth.cancel();
 
-            // Marca estado DEPOIS de cortar o mic
             isSpeaking = true;
             isProcessing = false;
             setCharacterState('SPEAKING');
@@ -491,7 +482,6 @@
 
             const cleanText = text.replace(/[*_#`]/g, '');
 
-            // 🛡️ Guarda o que está sendo falado para o filtro anti-eco
             lastSpokenText = cleanText;
             lastSpokenTime = Date.now();
 
@@ -525,7 +515,6 @@
                 setCharacterState('IDLE');
                 updateMicUI();
 
-                // 🛡️ CAMADA 5: delay maior (600ms) para áudio residual + eco desaparecerem
                 if (micEnabled && recognition) {
                     finalTranscript = '';
                     interimTranscript = '';
@@ -568,7 +557,133 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        // ============ CONSULTA COINGECKO ============
+        // ============ ROTEADOR: TREND OU COIN ============
+        function handleUserQuery(query) {
+            const cleaned = query.toLowerCase().trim().replace(/[?!.]/g, '');
+            const mapped = cryptoAliases[cleaned];
+
+            if (mapped === 'trend' || cleaned === 'trend' || cleaned.includes('trend') || cleaned.includes('tendência') || cleaned.includes('tendencia')) {
+                queryTrend();
+            } else {
+                queryCoin(query);
+            }
+        }
+
+        // ============ 🔥 CONSULTA TREND (5 principais) ============
+        async function queryTrend() {
+            appendChatMessage('user', 'Consultar: Trend (5 principais)');
+            setCharacterState('FETCHING');
+            statusText.textContent = 'Buscando trend da CoinGecko...';
+            isProcessing = true;
+            updateMicUI();
+
+            try {
+                // 1) Buscar as moedas em trend
+                const trendRes = await fetch('https://api.coingecko.com/api/v3/search/trending');
+                if (!trendRes.ok) throw new Error('Falha ao buscar trend');
+                const trendData = await trendRes.json();
+
+                const trendingCoins = (trendData.coins || []).slice(0, 5);
+
+                if (trendingCoins.length === 0) {
+                    throw new Error('Nenhuma moeda em trend no momento');
+                }
+
+                // 2) Para cada moeda, buscar detalhes (market cap, volume, blockchain)
+                const details = await Promise.all(
+                    trendingCoins.map(async (item) => {
+                        const coinId = item.item.id;
+                        try {
+                            const coinRes = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`);
+                            if (!coinRes.ok) return null;
+                            const coinData = await coinRes.json();
+                            return { item, coinData };
+                        } catch (e) {
+                            return null;
+                        }
+                    })
+                );
+
+                const valid = details.filter(d => d !== null);
+
+                // 3) Formatar resposta
+                let spokenParts = ['As 5 principais moedas em trend na CoinGecko hoje são: '];
+                let htmlBlocks = '';
+
+                valid.forEach((d, index) => {
+                    const { item, coinData } = d;
+                    const name = coinData.name || item.item.name;
+                    const symbol = (coinData.symbol || item.item.symbol || '').toUpperCase();
+
+                    const marketData = coinData.market_data || {};
+                    const priceBRL = marketData.current_price?.brl;
+                    const priceUSD = marketData.current_price?.usd;
+                    const marketCap = marketData.market_cap?.brl || marketData.market_cap?.usd;
+                    const volume = marketData.total_volume?.brl || marketData.total_volume?.usd;
+
+                    // Blockchain / plataforma
+                    let blockchain = coinData.asset_platform_id;
+                    if (!blockchain && coinData.platforms && Object.keys(coinData.platforms).length > 0) {
+                        blockchain = Object.keys(coinData.platforms)[0];
+                    }
+                    if (!blockchain) blockchain = 'Própria';
+
+                    const priceBRLStr = priceBRL ? priceBRL.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
+                    const priceUSDStr = priceUSD ? priceUSD.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : 'N/A';
+                    const marketCapStr = marketCap ? marketCap.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
+                    const volumeStr = volume ? volume.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
+
+                    spokenParts.push(`${index + 1}. ${name} (${symbol}). Preço em reais: ${priceBRLStr}, em dólares: ${priceUSDStr}. Market cap: ${marketCapStr}. Liquidez em 24 horas: ${volumeStr}. Blockchain: ${blockchain}.`);
+
+                    htmlBlocks += `
+                        <div class="space-y-2 p-3 rounded-2xl bg-slate-900/60 border border-slate-700/50 mb-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-base text-white">${name} (${symbol})</span>
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">🔥 Trend #${index + 1}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+                                <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
+                                    <div class="text-slate-400">Preço BRL</div>
+                                    <div class="text-sm font-bold text-emerald-300">${priceBRLStr}</div>
+                                </div>
+                                <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
+                                    <div class="text-slate-400">Preço USD</div>
+                                    <div class="text-sm font-bold text-blue-300">${priceUSDStr}</div>
+                                </div>
+                                <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
+                                    <div class="text-slate-400">Market Cap</div>
+                                    <div class="text-sm font-bold text-indigo-300">${marketCapStr}</div>
+                                </div>
+                                <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
+                                    <div class="text-slate-400">Liquidez (24h)</div>
+                                    <div class="text-sm font-bold text-amber-300">${volumeStr}</div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-slate-400 pt-1 border-t border-slate-700/50">
+                                <i class="fa-solid fa-link mr-1"></i> Blockchain: <span class="text-slate-200 font-semibold">${blockchain}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const spokenText = spokenParts.join(' ');
+                appendChatMessage('assistant', htmlBlocks, true);
+                statusText.textContent = 'Trend carregado!';
+                speakResponse(spokenText);
+
+            } catch (err) {
+                console.error(err);
+                isProcessing = false;
+                setCharacterState('IDLE');
+                updateMicUI();
+                statusText.textContent = 'Erro ao buscar trend';
+                const errorMsg = `Desculpe, não consegui buscar as moedas em trend agora. Tente novamente em alguns segundos.`;
+                appendChatMessage('assistant', errorMsg);
+                speakResponse(errorMsg);
+            }
+        }
+
+        // ============ CONSULTA COINGECKO (individual) ============
         async function queryCoin(coinQuery) {
             if (!coinQuery) return;
 
@@ -805,7 +920,6 @@
             e.preventDefault();
             const val = userInput.value.trim();
             if (val) {
-                // 🛡️ Se estiver em modo conversa, aborta o mic
                 if (micEnabled && recognition) {
                     try { recognition.abort(); } catch (e) {}
                 }
@@ -813,7 +927,7 @@
                 userInput.value = '';
                 finalTranscript = '';
                 interimTranscript = '';
-                queryCoin(val);
+                handleUserQuery(val);
             }
         });
 
@@ -826,7 +940,7 @@
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 text-sm text-slate-200 leading-relaxed max-w-[85%]">
-                        Histórico limpo! Fale ou digite outra criptomoeda para consultar.
+                        Histórico limpo! Fale ou digite outra criptomoeda ou "trend" para consultar.
                     </div>
                 </div>
             `;
