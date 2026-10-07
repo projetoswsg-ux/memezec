@@ -246,6 +246,10 @@
         let finalTranscript = '';     // acumula texto final
         let interimTranscript = '';   // texto provisório
 
+        // 🛡️ Anti-eco: guarda o que o robô acabou de falar
+        let lastSpokenText = '';
+        let lastSpokenTime = 0;
+
         const cryptoAliases = {
             'bitcoin': 'bitcoin', 'biticoin': 'bitcoin', 'ethereum': 'ethereum',
             'eterium': 'ethereum', 'solana': 'solana', 'cardano': 'cardano',
@@ -261,14 +265,46 @@
             blaze:  { name: 'Blaze',  color: '#f97316', eyeColor: '#facc15', accentColor: '#fb923c' }
         };
 
+        // ============ 🛡️ ANTI-ECO: SIMILARIDADE DE TEXTO ============
+        function normalizeText(t) {
+            return t.toLowerCase().replace(/[^\wáàâãéèêíïóôõöúçñ\s]/gi, '').replace(/\s+/g, ' ').trim();
+        }
+
+        // Retorna true se o texto reconhecido parece ser eco do que o robô acabou de falar
+        function looksLikeEcho(recognized) {
+            if (!lastSpokenText) return false;
+            // Só considera eco nos primeiros 8 segundos após a fala do robô
+            if (Date.now() - lastSpokenTime > 8000) return false;
+
+            const a = normalizeText(recognized);
+            const b = normalizeText(lastSpokenText);
+            if (!a || !b) return false;
+
+            // Se o reconhecido estiver contido no texto falado (ou vice-versa), é eco
+            if (b.includes(a) && a.length >= 3) return true;
+            if (a.includes(b.slice(0, 20)) && b.length >= 8) return true;
+
+            // Checa similaridade por palavras compartilhadas
+            const wordsA = a.split(' ').filter(w => w.length > 2);
+            const wordsB = new Set(b.split(' ').filter(w => w.length > 2));
+            if (wordsA.length === 0) return false;
+
+            let match = 0;
+            wordsA.forEach(w => { if (wordsB.has(w)) match++; });
+            const ratio = match / wordsA.length;
+
+            // Se 60%+ das palavras do reconhecido estão no texto falado → eco
+            return ratio >= 0.6;
+        }
+
         // ============ SPEECH RECOGNITION (CONVERSA NATURAL) ============
         function initSpeech() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
                 recognition = new SpeechRecognition();
                 recognition.lang = 'pt-BR';
-                recognition.continuous = true;       // 🔑 continua ouvindo
-                recognition.interimResults = true;   // 🔑 resultado em tempo real
+                recognition.continuous = true;       // continua ouvindo
+                recognition.interimResults = true;   // resultado em tempo real
                 recognition.maxAlternatives = 1;
 
                 recognition.onstart = () => {
@@ -277,6 +313,20 @@
                 };
 
                 recognition.onresult = (event) => {
+                    // 🛡️ CAMADA 1: ignora completamente enquanto o robô está falando
+                    if (isSpeaking) return;
+
+                    let combinedText = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        combinedText += event.results[i][0].transcript;
+                    }
+
+                    // 🛡️ CAMADA 2: filtro de similaridade (detecta eco residual)
+                    if (looksLikeEcho(combinedText)) {
+                        console.log('🛡️ Eco detectado e bloqueado:', combinedText);
+                        return;
+                    }
+
                     interimTranscript = '';
                     for (let i = event.resultIndex; i < event.results.length; i++) {
                         const transcript = event.results[i][0].transcript;
@@ -289,7 +339,6 @@
                     const display = (finalTranscript + interimTranscript).trim();
                     if (display) {
                         userInput.value = display;
-                        // 🔑 resetar timer de silêncio a cada palavra nova
                         resetSilenceTimer();
                     }
                 };
@@ -305,9 +354,14 @@
 
                 recognition.onend = () => {
                     isListening = false;
-                    // 🔑 Chrome para sozinho às vezes — religa se ainda estiver em modo conversa
+                    // 🛡️ CAMADA 3: só religa se realmente não estiver falando nem processando
                     if (micEnabled && !isSpeaking && !isProcessing) {
-                        try { recognition.start(); } catch (e) {}
+                        // delay curto para evitar loops de restart
+                        setTimeout(() => {
+                            if (micEnabled && !isSpeaking && !isProcessing && !isListening) {
+                                try { recognition.start(); } catch (e) {}
+                            }
+                        }, 400);
                     } else {
                         updateMicUI();
                     }
@@ -350,18 +404,20 @@
             const val = userInput.value.trim();
             if (!val) return;
 
-            // Pausa o mic enquanto processa e responde
+            // 🛡️ Marca como processando ANTES de abortar (bloqueia onend de religar)
             isProcessing = true;
             clearTimeout(silenceTimer);
-            if (recognition && isListening) {
-                try { recognition.stop(); } catch (e) {}
+
+            // 🛡️ abort() descarta buffers pendentes (diferente de stop())
+            if (recognition) {
+                try { recognition.abort(); } catch (e) {}
             }
+            isListening = false;
 
             userInput.value = '';
             finalTranscript = '';
             interimTranscript = '';
 
-            // Chama a mesma lógica do formulário
             queryCoin(val);
         }
 
@@ -397,8 +453,9 @@
             micEnabled = !micEnabled;
 
             if (micEnabled) {
-                // Cancela fala atual para não ouvir a si mesmo
                 if (synth.speaking) synth.cancel();
+                isSpeaking = false;
+                isProcessing = false;
                 finalTranscript = '';
                 interimTranscript = '';
                 userInput.value = '';
@@ -407,7 +464,7 @@
                 updateMicUI();
             } else {
                 clearTimeout(silenceTimer);
-                try { recognition.stop(); } catch (e) {}
+                try { recognition.abort(); } catch (e) {}
                 isListening = false;
                 updateMicUI();
             }
@@ -416,14 +473,28 @@
         // ============ SPEAK (TTS) ============
         function speakResponse(text) {
             if (!synth) return;
+
+            // 🛡️ CAMADA 4: aborta mic ANTES de qualquer coisa (descarta buffers)
+            clearTimeout(silenceTimer);
+            if (recognition) {
+                try { recognition.abort(); } catch (e) {}
+            }
+            isListening = false;
+
             if (synth.speaking) synth.cancel();
 
+            // Marca estado DEPOIS de cortar o mic
             isSpeaking = true;
             isProcessing = false;
             setCharacterState('SPEAKING');
             updateMicUI();
 
             const cleanText = text.replace(/[*_#`]/g, '');
+
+            // 🛡️ Guarda o que está sendo falado para o filtro anti-eco
+            lastSpokenText = cleanText;
+            lastSpokenTime = Date.now();
+
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'pt-BR';
             utterance.rate = parseFloat(rateRange.value);
@@ -454,16 +525,16 @@
                 setCharacterState('IDLE');
                 updateMicUI();
 
-                // 🔑 RELIGA O MIC AUTOMATICAMENTE APÓS FALAR
+                // 🛡️ CAMADA 5: delay maior (600ms) para áudio residual + eco desaparecerem
                 if (micEnabled && recognition) {
                     finalTranscript = '';
                     interimTranscript = '';
                     userInput.value = '';
                     setTimeout(() => {
-                        if (micEnabled && !isSpeaking && !isProcessing) {
+                        if (micEnabled && !isSpeaking && !isProcessing && !isListening) {
                             try { recognition.start(); } catch (e) {}
                         }
-                    }, 250);
+                    }, 600);
                 }
             };
 
@@ -734,9 +805,9 @@
             e.preventDefault();
             const val = userInput.value.trim();
             if (val) {
-                // Se estiver em modo conversa, pausa momentaneamente
+                // 🛡️ Se estiver em modo conversa, aborta o mic
                 if (micEnabled && recognition) {
-                    try { recognition.stop(); } catch (e) {}
+                    try { recognition.abort(); } catch (e) {}
                 }
                 isProcessing = true;
                 userInput.value = '';
