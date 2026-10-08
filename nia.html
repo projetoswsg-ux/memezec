@@ -81,10 +81,10 @@
             </div>
 
             <div class="w-full flex flex-wrap gap-2 justify-center z-10 my-1">
-                <button onclick="queryBible('João', 3, 16)" class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold hover:bg-amber-500/30 transition-all cursor-pointer">João 3:16</button>
-                <button onclick="queryBible('Gênesis', 1, 1)" class="px-3 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 rounded-xl text-xs font-bold hover:bg-blue-500/30 transition-all cursor-pointer">Gênesis 1:1</button>
-                <button onclick="queryBible('Salmos', 23, null)" class="px-3 py-1 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold hover:bg-purple-500/30 transition-all cursor-pointer">Salmo 23</button>
-                <button onclick="queryBible('Romanos', 8, 28)" class="px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all cursor-pointer">Romanos 8:28</button>
+                <button onclick="queryBible('john', 3, 16, 'João', 3, 16)" class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold hover:bg-amber-500/30 transition-all cursor-pointer">João 3:16</button>
+                <button onclick="queryBible('genesis', 1, 1, 'Gênesis', 1, 1)" class="px-3 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 rounded-xl text-xs font-bold hover:bg-blue-500/30 transition-all cursor-pointer">Gênesis 1:1</button>
+                <button onclick="queryBible('psalms', 23, null, 'Salmos', 23, null)" class="px-3 py-1 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold hover:bg-purple-500/30 transition-all cursor-pointer">Salmo 23</button>
+                <button onclick="queryBible('romans', 8, 28, 'Romanos', 8, 28)" class="px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all cursor-pointer">Romanos 8:28</button>
                 <button onclick="queryRandomVerse()" class="px-3 py-1 bg-orange-500/20 border border-orange-500/40 text-orange-300 rounded-xl text-xs font-bold hover:bg-orange-500/30 transition-all cursor-pointer">🎲 Aleatório</button>
             </div>
 
@@ -248,46 +248,71 @@
         let lastSpokenText = '';
         let lastSpokenTime = 0;
 
-        // ============ MAPEAMENTO DE LIVROS (português) ============
-        // Variações de nomes em português → nome canônico usado pela API bible-api.com
-        const bibleBooksPT = {
-            'genesis': 'Gênesis', 'exodo': 'Êxodo', 'levitico': 'Levítico',
-            'numeros': 'Números', 'deuteronomio': 'Deuteronômio', 'josue': 'Josué',
-            'juizes': 'Juízes', 'rute': 'Rute', '1samuel': '1 Samuel', '2samuel': '2 Samuel',
-            '1reis': '1 Reis', '2reis': '2 Reis', '1cronicas': '1 Crônicas',
-            '2cronicas': '2 Crônicas', 'esdras': 'Esdras', 'neemias': 'Neemias',
-            'ester': 'Ester', 'jo': 'Jó', 'salmos': 'Salmos', 'salmo': 'Salmos',
-            'proverbios': 'Provérbios', 'eclesiastes': 'Eclesiastes',
-            'cantares': 'Cantares', 'canticos': 'Cantares',
-            'isaias': 'Isaías', 'jeremias': 'Jeremias', 'lamentacoes': 'Lamentações',
-            'ezequiel': 'Ezequiel', 'daniel': 'Daniel', 'oseias': 'Oséias',
-            'joel': 'Joel', 'amos': 'Amós', 'obadias': 'Obadias', 'jonas': 'Jonas',
-            'miqueias': 'Miquéias', 'naum': 'Naum', 'habacuque': 'Habacuque',
-            'sofonias': 'Sofonias', 'ageu': 'Ageu', 'zacarias': 'Zacarias',
-            'malaquias': 'Malaquias', 'mateus': 'Mateus', 'marcos': 'Marcos',
-            'lucas': 'Lucas', 'joao': 'João', 'atos': 'Atos', 'romanos': 'Romanos',
-            '1corintios': '1 Coríntios', '2corintios': '2 Coríntios',
-            'galatas': 'Gálatas', 'efesios': 'Efésios', 'filipenses': 'Filipenses',
-            'colossenses': 'Colossenses', '1tessalonicenses': '1 Tessalonicenses',
-            '2tessalonicenses': '2 Tessalonicenses', '1timoteo': '1 Timóteo',
-            '2timoteo': '2 Timóteo', 'tito': 'Tito', 'filemom': 'Filemom',
-            'hebreus': 'Hebreus', 'tiago': 'Tiago', '1pedro': '1 Pedro',
-            '2pedro': '2 Pedro', '1joao': '1 João', '2joao': '2 João', '3joao': '3 João',
-            'judas': 'Judas', 'apocalipse': 'Apocalipse'
+        // ============ MAPEAMENTO DE LIVROS (PT → EN) para bible-api.com ============
+        const bibleBooks = {
+            'genesis': 'genesis', 'exodo': 'exodus', 'levitico': 'leviticus',
+            'numeros': 'numbers', 'deuteronomio': 'deuteronomy', 'josue': 'joshua',
+            'juizes': 'judges', 'rute': 'ruth', '1samuel': '1samuel', '2samuel': '2samuel',
+            '1reis': '1kings', '2reis': '2kings', '1cronicas': '1chronicles',
+            '2cronicas': '2chronicles', 'esdras': 'ezra', 'neemias': 'nehemiah',
+            'ester': 'esther', 'jo': 'job', 'salmos': 'psalms', 'salmo': 'psalms',
+            'proverbios': 'proverbs', 'eclesiastes': 'ecclesiastes',
+            'cantares': 'songofsolomon', 'canticos': 'songofsolomon',
+            'isaias': 'isaiah', 'jeremias': 'jeremiah', 'lamentacoes': 'lamentations',
+            'ezequiel': 'ezekiel', 'daniel': 'daniel', 'oseias': 'hosea',
+            'joel': 'joel', 'amos': 'amos', 'obadias': 'obadiah', 'jonas': 'jonah',
+            'miqueias': 'micah', 'naum': 'nahum', 'habacuque': 'habakkuk',
+            'sofonias': 'zephaniah', 'ageu': 'haggai', 'zacarias': 'zechariah',
+            'malaquias': 'malachi', 'mateus': 'matthew', 'marcos': 'mark',
+            'lucas': 'luke', 'joao': 'john', 'atos': 'acts', 'romanos': 'romans',
+            '1corintios': '1corinthians', '2corintios': '2corinthians',
+            'galatas': 'galatians', 'efesios': 'ephesians', 'filipenses': 'philippians',
+            'colossenses': 'colossians', '1tessalonicenses': '1thessalonians',
+            '2tessalonicenses': '2thessalonians', '1timoteo': '1timothy',
+            '2timoteo': '2timothy', 'tito': 'titus', 'filemom': 'philemon',
+            'hebreus': 'hebrews', 'tiago': 'james', '1pedro': '1peter',
+            '2pedro': '2peter', '1joao': '1john', '2joao': '2john', '3joao': '3john',
+            'judas': 'jude', 'apocalipse': 'revelation'
         };
 
-        // Versículos aleatórios populares (nomes em português)
+        // Nome bonito em português para exibição
+        const bibleBooksDisplay = {
+            'genesis': 'Gênesis', 'exodus': 'Êxodo', 'leviticus': 'Levítico',
+            'numbers': 'Números', 'deuteronomy': 'Deuteronômio', 'joshua': 'Josué',
+            'judges': 'Juízes', 'ruth': 'Rute', '1samuel': '1 Samuel', '2samuel': '2 Samuel',
+            '1kings': '1 Reis', '2kings': '2 Reis', '1chronicles': '1 Crônicas',
+            '2chronicles': '2 Crônicas', 'ezra': 'Esdras', 'nehemiah': 'Neemias',
+            'esther': 'Ester', 'job': 'Jó', 'psalms': 'Salmos',
+            'proverbs': 'Provérbios', 'ecclesiastes': 'Eclesiastes',
+            'songofsolomon': 'Cantares', 'isaiah': 'Isaías', 'jeremiah': 'Jeremias',
+            'lamentations': 'Lamentações', 'ezekiel': 'Ezequiel', 'daniel': 'Daniel',
+            'hosea': 'Oséias', 'joel': 'Joel', 'amos': 'Amós', 'obadiah': 'Obadias',
+            'jonah': 'Jonas', 'micah': 'Miquéias', 'nahum': 'Naum',
+            'habakkuk': 'Habacuque', 'zephaniah': 'Sofonias', 'haggai': 'Ageu',
+            'zechariah': 'Zacarias', 'malachi': 'Malaquias', 'matthew': 'Mateus',
+            'mark': 'Marcos', 'luke': 'Lucas', 'john': 'João', 'acts': 'Atos',
+            'romans': 'Romanos', '1corinthians': '1 Coríntios', '2corinthians': '2 Coríntios',
+            'galatians': 'Gálatas', 'ephesians': 'Efésios', 'philippians': 'Filipenses',
+            'colossians': 'Colossenses', '1thessalonians': '1 Tessalonicenses',
+            '2thessalonians': '2 Tessalonicenses', '1timothy': '1 Timóteo',
+            '2timothy': '2 Timóteo', 'titus': 'Tito', 'philemon': 'Filemom',
+            'hebrews': 'Hebreus', 'james': 'Tiago', '1peter': '1 Pedro',
+            '2peter': '2 Pedro', '1john': '1 João', '2john': '2 João', '3john': '3 João',
+            'jude': 'Judas', 'revelation': 'Apocalipse'
+        };
+
+        // Versículos aleatórios populares
         const randomVerses = [
-            { book: 'João', chapter: 3, verse: 16, label: 'João 3:16' },
-            { book: 'Gênesis', chapter: 1, verse: 1, label: 'Gênesis 1:1' },
-            { book: 'Salmos', chapter: 23, verse: null, label: 'Salmo 23' },
-            { book: 'Romanos', chapter: 8, verse: 28, label: 'Romanos 8:28' },
-            { book: 'Filipenses', chapter: 4, verse: 13, label: 'Filipenses 4:13' },
-            { book: 'Jeremias', chapter: 29, verse: 11, label: 'Jeremias 29:11' },
-            { book: 'Provérbios', chapter: 3, verse: 5, label: 'Provérbios 3:5' },
-            { book: 'Isaías', chapter: 41, verse: 10, label: 'Isaías 41:10' },
-            { book: 'Mateus', chapter: 11, verse: 28, label: 'Mateus 11:28' },
-            { book: 'Salmos', chapter: 91, verse: 1, label: 'Salmo 91:1' }
+            { book: 'john', chapter: 3, verse: 16 },
+            { book: 'genesis', chapter: 1, verse: 1 },
+            { book: 'psalms', chapter: 23, verse: null },
+            { book: 'romans', chapter: 8, verse: 28 },
+            { book: 'philippians', chapter: 4, verse: 13 },
+            { book: 'jeremiah', chapter: 29, verse: 11 },
+            { book: 'proverbs', chapter: 3, verse: 5 },
+            { book: 'isaiah', chapter: 41, verse: 10 },
+            { book: 'matthew', chapter: 11, verse: 28 },
+            { book: 'psalms', chapter: 91, verse: 1 }
         ];
 
         const personas = {
@@ -303,15 +328,20 @@
 
         function looksLikeEcho(recognized) {
             if (!lastSpokenText) return false;
-            if (Date.now() - lastSpokenTime > 8000) return false;
+            if (Date.now() - lastSpokenTime > 10000) return false;
 
             const a = normalizeText(recognized);
             const b = normalizeText(lastSpokenText);
             if (!a || !b) return false;
 
+            // 🛡️ CAMADA 1: match exato
+            if (a === b) return true;
+
+            // 🛡️ CAMADA 2: substring
             if (b.includes(a) && a.length >= 3) return true;
             if (a.includes(b.slice(0, 20)) && b.length >= 8) return true;
 
+            // 🛡️ CAMADA 3: similaridade por palavras
             const wordsA = a.split(' ').filter(w => w.length > 2);
             const wordsB = new Set(b.split(' ').filter(w => w.length > 2));
             if (wordsA.length === 0) return false;
@@ -319,7 +349,7 @@
             let match = 0;
             wordsA.forEach(w => { if (wordsB.has(w)) match++; });
             const ratio = match / wordsA.length;
-            return ratio >= 0.6;
+            return ratio >= 0.5;
         }
 
         // ============ SPEECH RECOGNITION ============
@@ -338,7 +368,8 @@
                 };
 
                 recognition.onresult = (event) => {
-                    if (isSpeaking) return;
+                    // 🛡️ BLOQUEIO TOTAL durante fala ou processamento
+                    if (isSpeaking || isProcessing) return;
 
                     let combinedText = '';
                     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -346,7 +377,7 @@
                     }
 
                     if (looksLikeEcho(combinedText)) {
-                        console.log('🛡️ Eco detectado e bloqueado:', combinedText);
+                        console.log('🛡️ Eco bloqueado:', combinedText);
                         return;
                     }
 
@@ -425,6 +456,9 @@
             const val = userInput.value.trim();
             if (!val) return;
 
+            console.log('📤 Enviando automaticamente:', val);
+
+            // 🛡️ Bloqueia ANTES de qualquer coisa
             isProcessing = true;
             clearTimeout(silenceTimer);
 
@@ -549,7 +583,7 @@
                         if (micEnabled && !isSpeaking && !isProcessing && !isListening) {
                             try { recognition.start(); } catch (e) {}
                         }
-                    }, 600);
+                    }, 800);
                 }
             };
 
@@ -596,6 +630,7 @@
                 .replace(/\s+/g, ' ')
                 .trim();
 
+            // Tenta: "livro cap:vers" ou "livro cap vers" ou "livro cap"
             let match = normalized.match(/^(.+?)\s+(\d+)(?:\s*[:\s]\s*(\d+))?$/);
             
             if (!match) {
@@ -628,30 +663,30 @@
             const parsed = parseBibleReference(query);
 
             if (!parsed) {
-                const errorMsg = `Desculpe, não entendi "${query}". Por favor, diga o livro, capítulo e versículo. Exemplo: "João 3:16" ou "Salmo 23".`;
+                const errorMsg = `Desculpe, não entendi "${query}". Diga o livro, capítulo e versículo. Exemplo: "João 3:16" ou "Salmo 23".`;
                 appendChatMessage('assistant', errorMsg);
                 speakResponse(errorMsg);
                 return;
             }
 
-            const bookName = parsed.bookName.replace(/\s+/g, '').toLowerCase();
-            const apiBook = bibleBooksPT[bookName];
+            const bookKey = parsed.bookName.replace(/\s+/g, '').toLowerCase();
+            const apiBook = bibleBooks[bookKey];
 
             if (!apiBook) {
-                const errorMsg = `Não reconheci o livro "${parsed.bookName}". Tente novamente com o nome em português. Exemplo: "João 3:16" ou "Gênesis 1".`;
+                const errorMsg = `Não reconheci o livro "${parsed.bookName}". Tente o nome em português. Exemplo: "João 3:16" ou "Gênesis 1".`;
                 appendChatMessage('assistant', errorMsg);
                 speakResponse(errorMsg);
                 return;
             }
 
-            queryBible(apiBook, parsed.chapter, parsed.verse, parsed.bookName, parsed.chapter, parsed.verse);
+            const displayBook = bibleBooksDisplay[apiBook] || parsed.bookName;
+            queryBible(apiBook, parsed.chapter, parsed.verse, displayBook, parsed.chapter, parsed.verse);
         }
 
         // ============ CONSULTA À API BIBLE-API.COM ============
-        async function queryBible(bookName, chapter, verse, displayBook, displayChapter, displayVerse) {
-            // Se displayBook não foi passado (chamada direta dos botões), cria um display
+        async function queryBible(apiBook, chapter, verse, displayBook, displayChapter, displayVerse) {
             if (!displayBook) {
-                displayBook = bookName;
+                displayBook = bibleBooksDisplay[apiBook] || apiBook;
                 displayChapter = chapter;
                 displayVerse = verse;
             }
@@ -667,29 +702,26 @@
             updateMicUI();
 
             try {
-                // Codifica o nome do livro para URL (ex: "João" → "Jo%C3%A3o")
-                const encodedBook = encodeURIComponent(bookName);
-                
-                let url;
-                if (verse) {
-                    url = `https://bible-api.com/${encodedBook}+${chapter}:${verse}?translation=almeida`;
-                } else {
-                    url = `https://bible-api.com/${encodedBook}+${chapter}?translation=almeida`;
-                }
+                // 📖 URL para bible-api.com (nomes em INGLÊS obrigatoriamente)
+                const ref = verse 
+                    ? `${apiBook}+${chapter}:${verse}` 
+                    : `${apiBook}+${chapter}`;
+                const url = `https://bible-api.com/${ref}?translation=almeida`;
+
+                console.log('🌐 Buscando:', url);
 
                 const res = await fetch(url);
-                if (!res.ok) throw new Error('Texto não encontrado');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
                 const data = await res.json();
 
-                if (!data.text) {
+                if (!data.text || data.text.trim().length === 0) {
                     throw new Error('Texto vazio');
                 }
 
-                // Limpa o texto
                 const cleanText = data.text.replace(/\s+/g, ' ').trim();
+                console.log('✅ Texto recebido, tamanho:', cleanText.length);
 
-                // Monta HTML
                 const htmlContent = `
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
@@ -706,17 +738,15 @@
 
                 appendChatMessage('assistant', htmlContent, true);
                 statusText.textContent = `${refLabel} — leitura`;
-
-                // Fala o texto
                 speakResponse(cleanText);
 
             } catch (err) {
-                console.error(err);
+                console.error('❌ Erro:', err);
                 isProcessing = false;
                 setCharacterState('IDLE');
                 updateMicUI();
                 statusText.textContent = 'Texto não encontrado';
-                const errorMsg = `Desculpe, não encontrei ${refLabel}. Verifique o livro, capítulo e versículo. Exemplo: "João 3:16".`;
+                const errorMsg = `Desculpe, não encontrei ${refLabel}. Verifique o livro, capítulo e versículo.`;
                 appendChatMessage('assistant', errorMsg);
                 speakResponse(errorMsg);
             }
@@ -725,7 +755,8 @@
         // ============ VERSÍCULO ALEATÓRIO ============
         function queryRandomVerse() {
             const random = randomVerses[Math.floor(Math.random() * randomVerses.length)];
-            queryBible(random.book, random.chapter, random.verse, random.label.split(' ')[0], random.chapter, random.verse);
+            const displayBook = bibleBooksDisplay[random.book];
+            queryBible(random.book, random.chapter, random.verse, displayBook, random.chapter, random.verse);
         }
 
         function setCharacterState(state) {
