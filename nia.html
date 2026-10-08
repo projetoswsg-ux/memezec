@@ -242,11 +242,12 @@
         let isProcessing = false;
         let silenceTimer = null;
         let SILENCE_TIMEOUT = 1500;
-        let finalTranscript = '';
-        let interimTranscript = '';
 
         let lastSpokenText = '';
         let lastSpokenTime = 0;
+
+        // 🆕 Rastreia a última transcrição para evitar duplicação do Chrome
+        let lastInputValue = '';
 
         // ============ MAPEAMENTO DE LIVROS (PT → EN) para bible-api.com ============
         const bibleBooks = {
@@ -334,14 +335,14 @@
             const b = normalizeText(lastSpokenText);
             if (!a || !b) return false;
 
-            // 🛡️ CAMADA 1: match exato
+            // CAMADA 1: match exato
             if (a === b) return true;
 
-            // 🛡️ CAMADA 2: substring
+            // CAMADA 2: substring
             if (b.includes(a) && a.length >= 3) return true;
             if (a.includes(b.slice(0, 20)) && b.length >= 8) return true;
 
-            // 🛡️ CAMADA 3: similaridade por palavras
+            // CAMADA 3: similaridade por palavras
             const wordsA = a.split(' ').filter(w => w.length > 2);
             const wordsB = new Set(b.split(' ').filter(w => w.length > 2));
             if (wordsA.length === 0) return false;
@@ -367,34 +368,34 @@
                     updateMicUI();
                 };
 
+                // 🆕 CORREÇÃO DO BUG DE REPETIÇÃO
                 recognition.onresult = (event) => {
-                    // 🛡️ BLOQUEIO TOTAL durante fala ou processamento
+                    // Bloqueia durante fala ou processamento
                     if (isSpeaking || isProcessing) return;
 
-                    let combinedText = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        combinedText += event.results[i][0].transcript;
+                    // 🔑 USA O TEXTO TOTAL (não acumula!) — evita duplicação do Chrome
+                    let fullText = '';
+                    for (let i = 0; i < event.results.length; i++) {
+                        fullText += event.results[i][0].transcript;
                     }
+                    fullText = fullText.trim();
 
-                    if (looksLikeEcho(combinedText)) {
-                        console.log('🛡️ Eco bloqueado:', combinedText);
+                    if (!fullText) return;
+
+                    // Anti-eco
+                    if (looksLikeEcho(fullText)) {
+                        console.log('🛡️ Eco bloqueado:', fullText);
                         return;
                     }
 
-                    interimTranscript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        const transcript = event.results[i][0].transcript;
-                        if (event.results[i].isFinal) {
-                            finalTranscript += transcript + ' ';
-                        } else {
-                            interimTranscript += transcript;
-                        }
-                    }
-                    const display = (finalTranscript + interimTranscript).trim();
-                    if (display) {
-                        userInput.value = display;
-                        resetSilenceTimer();
-                    }
+                    // 🔑 Só processa se o texto MUDOU de verdade
+                    if (fullText === lastInputValue) return;
+                    lastInputValue = fullText;
+
+                    console.log('🎤 Reconhecido:', fullText);
+
+                    userInput.value = fullText;
+                    resetSilenceTimer();
                 };
 
                 recognition.onerror = (event) => {
@@ -458,7 +459,6 @@
 
             console.log('📤 Enviando automaticamente:', val);
 
-            // 🛡️ Bloqueia ANTES de qualquer coisa
             isProcessing = true;
             clearTimeout(silenceTimer);
 
@@ -467,9 +467,9 @@
             }
             isListening = false;
 
+            // 🆕 Limpa tudo, incluindo lastInputValue
             userInput.value = '';
-            finalTranscript = '';
-            interimTranscript = '';
+            lastInputValue = '';
 
             handleUserQuery(val);
         }
@@ -509,8 +509,8 @@
                 if (synth.speaking) synth.cancel();
                 isSpeaking = false;
                 isProcessing = false;
-                finalTranscript = '';
-                interimTranscript = '';
+                // 🆕 Limpa tudo
+                lastInputValue = '';
                 userInput.value = '';
 
                 try { recognition.start(); } catch (e) {}
@@ -576,8 +576,8 @@
                 updateMicUI();
 
                 if (micEnabled && recognition) {
-                    finalTranscript = '';
-                    interimTranscript = '';
+                    // 🆕 Limpa tudo
+                    lastInputValue = '';
                     userInput.value = '';
                     setTimeout(() => {
                         if (micEnabled && !isSpeaking && !isProcessing && !isListening) {
@@ -630,7 +630,6 @@
                 .replace(/\s+/g, ' ')
                 .trim();
 
-            // Tenta: "livro cap:vers" ou "livro cap vers" ou "livro cap"
             let match = normalized.match(/^(.+?)\s+(\d+)(?:\s*[:\s]\s*(\d+))?$/);
             
             if (!match) {
@@ -702,7 +701,6 @@
             updateMicUI();
 
             try {
-                // 📖 URL para bible-api.com (nomes em INGLÊS obrigatoriamente)
                 const ref = verse 
                     ? `${apiBook}+${chapter}:${verse}` 
                     : `${apiBook}+${chapter}`;
@@ -911,8 +909,7 @@
                 }
                 isProcessing = true;
                 userInput.value = '';
-                finalTranscript = '';
-                interimTranscript = '';
+                lastInputValue = ''; // 🆕
                 handleUserQuery(val);
             }
         });
