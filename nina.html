@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Aura AI - Inteligência Local</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts: Inter para um visual premium -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FIX: Define uma base URL falsa para evitar erros de resolução de URL no WebLLM em ambientes de Preview -->
+  <base href="https://localhost/">
+
+  <!-- Configuração do Tailwind -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            background: '#0a0a0a', // Ultra dark
+            surface: '#171717',
+            border: '#262626',
+            primary: '#f5f5f5', // Quase branco
+            secondary: '#a3a3a3',
+            accent: '#ffffff',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0a0a0a;
+      color: #f5f5f5;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      /* Textura sutil de ruído para dar profundidade premium */
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+    }
+
+    /* Scrollbar invisível / minimalista */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #262626;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #404040;
+    }
+
+    /* Utilitários de Design */
+    .glass-input {
+      background: rgba(23, 23, 23, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Animações de entrada */
+    .message-enter {
+      animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Formatação Markdown da IA */
+    .ai-content {
+      line-height: 1.7;
+      word-wrap: break-word;
+      white-space: pre-wrap; /* Mantém as quebras de linha da IA */
+    }
+    .ai-content p { margin-bottom: 0.8rem; }
+    .ai-content p:last-child { margin-bottom: 0; }
+    .ai-content code {
+      background-color: #171717;
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.3rem;
+      font-family: monospace;
+      font-size: 0.85em;
+      border: 1px solid #262626;
+      color: #e5e5e5;
+    }
+    
+    /* Ponto pulsante de status */
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #eab308; /* yellow */
+      animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    .status-dot.ready {
+      background-color: #22c55e; /* green */
+      animation: none;
+    }
+    .status-dot.error { background-color: #ef4444; animation: none; }
+
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+
+<body class="antialiased selection:bg-white/20 selection:text-white">
+
+  <header class="h-16 flex items-center justify-between px-6 absolute top-0 w-full z-20 bg-gradient-to-b from-background to-transparent pointer-events-none">
+    <div class="flex items-center gap-2 select-none">
+      <div class="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white shadow-sm backdrop-blur-md">
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+      </div>
+      <h1 class="text-sm font-semibold tracking-wide text-primary">Aura</h1>
+    </div>
+
+    <!-- Status Engine -->
+    <div class="flex items-center gap-2 bg-surface/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5 pointer-events-auto transition-all" id="status-container">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="text-[11px] font-medium tracking-wide text-secondary uppercase" id="status-text">Inicializando Motor</span>
+    </div>
+  </header>
+
+  <main class="flex-1 overflow-y-auto pt-24 pb-36 px-4 sm:px-6 scroll-smooth" id="chat-container">
+    <div class="max-w-2xl mx-auto flex flex-col gap-10" id="chat-feed">
+      
+      <!-- Tela Inicial de Boas Vindas -->
+      <div class="flex flex-col items-center justify-center text-center mt-20 mb-10 message-enter" id="welcome-screen">
+        <div class="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white shadow-lg mb-6">
+          <i data-lucide="zap" class="w-6 h-6"></i>
+        </div>
+        <h2 class="text-2xl font-semibold text-primary mb-2 tracking-tight">Como posso ajudar hoje?</h2>
+        <p class="text-secondary text-sm max-w-md font-light leading-relaxed mb-8">
+          Aura é uma IA genérica que roda 100% no seu navegador usando WebGPU. Nenhuma API externa é utilizada, garantindo privacidade absoluta.
+        </p>
+
+        <!-- Container da barra de progresso do Download -->
+        <div id="progress-container" class="w-full max-w-sm bg-surface/30 border border-white/10 p-4 rounded-xl flex flex-col gap-3 transition-opacity duration-500">
+          <div class="flex justify-between text-xs text-secondary font-medium tracking-wide">
+            <span id="progress-status">Preparando IA Local...</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="w-full bg-black/50 rounded-full h-1.5 overflow-hidden">
+            <div id="progress-bar" class="bg-white h-full rounded-full transition-all duration-300 w-0"></div>
+          </div>
+          <p class="text-[10px] text-secondary/50 font-light text-left">
+            * O primeiro acesso requer o download do modelo (aprox. 350MB). Nos próximos acessos ele será carregado instantaneamente do cache.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Área de Input de Texto (Fixa na base) -->
+  <div class="fixed bottom-0 left-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent pt-12 pb-6 px-4 sm:px-6 z-10">
+    <div class="max-w-2xl mx-auto relative">
+      <form id="chat-form" class="relative flex items-end gap-2 glass-input rounded-2xl p-2 transition-all focus-within:border-white/20 focus-within:ring-4 focus-within:ring-white/5">
+        <textarea 
+          id="user-input" 
+          rows="1"
+          placeholder="Envie uma mensagem para a Aura..." 
+          class="w-full bg-transparent text-sm sm:text-base text-primary placeholder-secondary/50 resize-none outline-none py-3 px-4 max-h-40 font-light disabled:opacity-50"
+          disabled
+        ></textarea>
+        
+        <button type="submit" id="send-btn" class="p-3 mb-0.5 mr-0.5 rounded-xl bg-white text-black hover:bg-gray-200 transition-colors flex shrink-0 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" disabled>
+          <i data-lucide="arrow-up" class="w-5 h-5"></i>
+        </button>
+      </form>
+      <div class="text-center mt-3 flex justify-center">
+        <span class="text-[10px] text-secondary/40 font-medium tracking-wide">IA gerada localmente. Ocasionalmente pode cometer erros.</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Ícones do Lucide
+    lucide.createIcons();
+
+    // Estado global da aplicação
+    const appState = {
+      engine: null,
+      isReady: false,
+      isGenerating: false,
+      chatHistory: [
+        { role: "system", content: "Você é a Aura, uma IA assistente útil, inteligente, concisa e altamente profissional. Responda sempre em português do Brasil de forma clara e elegante." }
+      ]
+    };
+
+    // Referências do DOM
+    const DOM = {
+      feed: document.getElementById('chat-feed'),
+      container: document.getElementById('chat-container'),
+      form: document.getElementById('chat-form'),
+      input: document.getElementById('user-input'),
+      btn: document.getElementById('send-btn'),
+      welcomeScreen: document.getElementById('welcome-screen'),
+      
+      progContainer: document.getElementById('progress-container'),
+      progStatus: document.getElementById('progress-status'),
+      progPercent: document.getElementById('progress-percent'),
+      progBar: document.getElementById('progress-bar'),
+      
+      statusDot: document.getElementById('status-dot'),
+      statusText: document.getElementById('status-text'),
+    };
+
+    async function initializeLocalAI() {
+      try {
+        DOM.progStatus.innerText = "Preparando dependências...";
+        
+        const { CreateMLCEngine } = await import("https://esm.run/@mlc-ai/web-llm");
+
+        // Usamos um modelo leve e extremamente rápido (Qwen2.5 0.5B Instruct) ~350MB
+        // Se a internet for lenta, pode levar alguns minutos. Depois fica no cache.
+        const selectedModel = "Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
+        
+        DOM.progStatus.innerText = "Baixando Motor de IA...";
+
+        appState.engine = await CreateMLCEngine(selectedModel, {
+          initProgressCallback: (progress) => {
+            // progress.progress é um valor de 0 a 1
+            const pct = Math.round(progress.progress * 100);
+            DOM.progBar.style.width = `${pct}%`;
+            DOM.progPercent.innerText = `${pct}%`;
+            DOM.progStatus.innerText = progress.text.includes("Fetching") ? "Baixando arquivos na memória..." : "Carregando na Placa de Vídeo...";
+          }
+        });
+
+        // Configuração Concluída
+        appState.isReady = true;
+        
+        // Atualiza UI para estado pronto
+        DOM.progContainer.style.opacity = '0';
+        setTimeout(() => DOM.progContainer.remove(), 500);
+
+        DOM.statusDot.classList.add('ready');
+        DOM.statusText.innerText = "Motor Online";
+        
+        DOM.input.disabled = false;
+        DOM.btn.disabled = false;
+        DOM.input.placeholder = "Mensagem Aura...";
+        DOM.input.focus();
+
+      } catch (error) {
+        console.error("Erro ao inicializar IA:", error);
+        DOM.statusDot.classList.add('error');
+        DOM.statusText.innerText = "Erro WebGPU";
+        DOM.progStatus.innerText = "Falha ao iniciar. Navegador incompatível.";
+        DOM.progStatus.classList.add('text-red-400');
+        alert("Parece que seu navegador não suporta WebGPU ou falta memória para carregar o modelo. Tente no Google Chrome no Desktop.");
+      }
+    }
+
+    // Inicia o download assim que a página carrega
+    window.addEventListener('DOMContentLoaded', initializeLocalAI);
+
+    // Ajuste automático de altura da caixa de texto
+    DOM.input.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight < 160 ? this.scrollHeight : 160) + 'px';
+      if(this.value.trim().length > 0 && appState.isReady && !appState.isGenerating) {
+        DOM.btn.removeAttribute('disabled');
+      } else {
+        DOM.btn.setAttribute('disabled', 'true');
+      }
+    });
+
+    // Envio pelo Enter (sem Shift)
+    DOM.input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        DOM.form.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    DOM.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!appState.isReady || appState.isGenerating) return;
+      
+      const userText = DOM.input.value.trim();
+      if (!userText) return;
+
+      // Se a tela de boas vindas ainda existe, remova suavemente
+      if (DOM.welcomeScreen) {
+        DOM.welcomeScreen.style.display = 'none';
+      }
+
+      // Adiciona mensagem do usuário na tela
+      appendMessage('user', userText);
+      appState.chatHistory.push({ role: "user", content: userText });
+
+      // Reseta Input
+      DOM.input.value = '';
+      DOM.input.style.height = 'auto';
+      DOM.btn.setAttribute('disabled', 'true');
+      DOM.input.setAttribute('disabled', 'true');
+
+      // Prepara a bolha de resposta da IA
+      appState.isGenerating = true;
+      const aiMessageId = appendMessage('assistant', '');
+      const aiContentDiv = document.getElementById(aiMessageId);
+      
+      try {
+        // Chama o modelo WebLLM localmente com streaming
+        const chunks = await appState.engine.chat.completions.create({
+          messages: appState.chatHistory,
+          stream: true,
+          temperature: 0.7,
+        });
+
+        let fullAiResponse = "";
+
+        // Processa os pedaços de texto em tempo real conforme a GPU gera
+        for await (const chunk of chunks) {
+          const delta = chunk.choices[0]?.delta?.content || "";
+          fullAiResponse += delta;
+          
+          // Escapa HTML básico por segurança
+          let safeText = fullAiResponse.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          aiContentDiv.innerHTML = safeText;
+          
+          scrollToBottom();
+        }
+
+        // Adiciona a resposta completa ao histórico para manter o contexto
+        appState.chatHistory.push({ role: "assistant", content: fullAiResponse });
+
+      } catch (err) {
+        console.error("Erro na geração:", err);
+        aiContentDiv.innerHTML = "<span class='text-red-400'>Ocorreu um erro interno na geração da resposta.</span>";
+      } finally {
+        appState.isGenerating = false;
+        DOM.input.removeAttribute('disabled');
+        DOM.input.focus();
+        lucide.createIcons(); // Recria icones caso haja
+      }
+    });
+
+    function appendMessage(role, content) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'flex gap-5 message-enter';
+      
+      const uniqueId = 'ai-msg-' + Date.now();
+
+      if (role === 'user') {
+        // Escapa texto do usuário
+        const safeContent = content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        msgDiv.innerHTML = `
+          <div class="flex-1 text-base text-primary font-light leading-relaxed whitespace-pre-wrap flex justify-end">
+            <div class="bg-white/10 px-5 py-3 rounded-2xl rounded-tr-sm max-w-[85%]">
+              ${safeContent}
+            </div>
+          </div>
+        `;
+      } else {
+        msgDiv.innerHTML = `
+          <div class="w-8 h-8 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center shrink-0 mt-1 shadow-sm">
+            <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+          </div>
+          <div class="flex-1 text-base text-primary font-light leading-relaxed ai-content max-w-[90%] pt-1" id="${uniqueId}">
+            <div class="flex items-center gap-2 text-secondary/50 text-sm">
+               <div class="w-1.5 h-1.5 rounded-full bg-secondary/50 animate-pulse"></div> Pensando...
+            </div>
+          </div>
+        `;
+      }
+
+      DOM.feed.appendChild(msgDiv);
+      scrollToBottom();
+      lucide.createIcons();
+      return uniqueId;
+    }
+
+    function scrollToBottom() {
+      DOM.container.scrollTo({ top: DOM.container.scrollHeight, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
